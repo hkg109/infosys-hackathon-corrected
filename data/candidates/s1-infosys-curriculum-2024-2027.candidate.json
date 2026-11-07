@@ -14,11 +14,12 @@
     "actualRows": 59,
     "pageRowCounts": { "1": 5, "2": 11, "3": 14, "4": 13, "5": 11, "6": 5 },
     "visuallyComparedPages": [1, 2, 3, 4, 5, 6],
-    "fullFieldReviewComplete": false,
+    "fullFieldReviewComplete": true,
     "notes": [
       "DB-1 검토 전 추출본이다. fixture 게시본이 아니다.",
       "HYR0004와 ITE4088의 이수학기는 원문 공란이므로 null로 보존했다.",
-      "교육과정 수록은 미래 학기의 실제 개설을 보장하지 않는다."
+      "교육과정 수록은 미래 학기의 실제 개설을 보장하지 않는다.",
+      "DB-2에서 59행의 과목·학점·이수구분·학년/학기·개설/종료 표기를 fixture와 대조했다."
     ]
   },
   "courses": [
