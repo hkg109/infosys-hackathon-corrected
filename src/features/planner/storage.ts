@@ -2,6 +2,7 @@ import type { PlanInput, SavedPlan } from "@/contracts/types";
 
 const INPUT_KEY = "infosys:planner:input:v1";
 const PLAN_A_KEY = "infosys:planner:plan-a:v1";
+const CHECKED_KEY = "infosys:planner:checked:v1";
 
 /** 브라우저 시작 후(useEffect 안)에서만 호출한다. */
 function read<T>(key: string): T | null {
@@ -30,3 +31,6 @@ export function loadPlanA(): SavedPlan | null {
   return plan?.schemaVersion === 1 ? plan : null;
 }
 export const savePlanA = (plan: SavedPlan | null) => write(PLAN_A_KEY, plan);
+
+export const loadChecked = () => read<Record<string, boolean>>(CHECKED_KEY);
+export const saveChecked = (checked: Record<string, boolean>) => write(CHECKED_KEY, checked);

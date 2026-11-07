@@ -27,6 +27,8 @@ export function CompareView({
     );
 
   const delta = diff.completionDeltaTerms;
+  const names = courseNames(planA.result, result);
+  const label = (codes: string[]) => (codes.length ? codes.map((c) => names.get(c) ?? c).join(", ") : "없음");
   return (
     <>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -36,8 +38,8 @@ export function CompareView({
       <Panel className="mt-4 text-xs">
         <h2 className="mb-2.5 text-base font-medium">이번 선택으로 달라진 점</h2>
         <Row k="계획 완료 시점" v={delta === null ? "비교할 수 없음" : delta === 0 ? "변화 없음" : `${Math.abs(delta)}학기 ${delta > 0 ? "뒤로 이동" : "앞당김"}`} />
-        <Row k="추가된 과목" v={diff.addedCourses.length ? diff.addedCourses.join(", ") : "없음"} />
-        <Row k="빠진 과목" v={diff.removedCourses.length ? diff.removedCourses.join(", ") : "없음"} />
+        <Row k="추가된 과목" v={label(diff.addedCourses)} />
+        <Row k="빠진 과목" v={label(diff.removedCourses)} />
         <Row k="학점이 달라진 학기" v={`${diff.creditDiffByTerm.length}개`} />
         <Row k="새 경고" v={`${diff.newWarnings.length}개`} />
         <Row k="자료 버전" v={`A ${planA.catalogVersion} / B ${result.catalogVersion}`} />
@@ -47,6 +49,16 @@ export function CompareView({
       </div>
     </>
   );
+}
+
+/** 두 결과에 나온 과목의 학수번호 → 이름. 화면 표시용이며 계산에 쓰지 않는다. */
+function courseNames(...results: PlanResult[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const r of results) {
+    r.terms.forEach((t) => t.courses.forEach((c) => map.set(c.code, c.name)));
+    r.unplaced.forEach((u) => map.set(u.code, u.name));
+  }
+  return map;
 }
 
 function PlanCard({

@@ -14,7 +14,7 @@ import { RoadmapView } from "./components/RoadmapView";
 import { Sidebar, type View } from "./components/Sidebar";
 import { SourcesView } from "./components/SourcesView";
 import { Badge, Button } from "./components/ui";
-import { loadInput, loadPlanA, saveInput, savePlanA } from "./storage";
+import { loadChecked, loadInput, loadPlanA, saveChecked, saveInput, savePlanA } from "./storage";
 
 const TITLES: Record<View, [string, string]> = {
   roadmap: ["나의 대학생활 로드맵", "내 진로와 일정이 연결되는 학기별 계획"],
@@ -40,6 +40,7 @@ export function PlannerApp() {
     const saved = loadInput();
     if (saved) setInput(saved);
     setPlanA(loadPlanA());
+    setChecked(loadChecked() ?? {});
     reload();
   }, [reload]);
 
@@ -68,6 +69,12 @@ export function PlannerApp() {
     };
     setPlanA(snapshot);
     savePlanA(snapshot);
+  };
+
+  const toggleChecked = (id: string) => {
+    const next = { ...checked, [id]: !checked[id] };
+    setChecked(next);
+    saveChecked(next);
   };
 
   const toggleCompleted = (code: string) => {
@@ -124,7 +131,7 @@ export function PlannerApp() {
                   result={result}
                   guidance={guidance}
                   checked={checked}
-                  onToggle={(id) => setChecked((c) => ({ ...c, [id]: !c[id] }))}
+                  onToggle={toggleChecked}
                 />
               )}
               {view === "courses" && <CoursesView input={input} dataset={dataset} onToggleCompleted={toggleCompleted} />}

@@ -53,9 +53,12 @@ export function RoadmapView({
         </Panel>
       )}
 
-      <Sub className="mt-3 mb-6">
-        미배정 학점은 실제 과목이 아닌 학점 슬롯입니다. 미래 개설 유지 가정을 포함하며, 졸업요건·복학 승인은 별도로 확인해야 합니다.
-      </Sub>
+      {!result.error && (
+        <Sub className="mt-3 mb-6">
+          미배정 학점은 실제 과목이 아닌 학점 슬롯입니다. 미래 개설 유지 가정을 포함하며, 졸업요건·복학 승인은 별도로 확인해야 합니다.
+        </Sub>
+      )}
+      {result.error && <div className="mb-6" />}
 
       <Panel>
         <SectionHeader title="지금 준비할 일" aside={<span className="text-xs text-muted">선택과 일정에 맞춰 갱신</span>} />
