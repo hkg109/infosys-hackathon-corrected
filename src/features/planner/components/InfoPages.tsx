@@ -2,12 +2,12 @@
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { findCertificate, formatTerm, KATUSA_STATUS_LABEL, matchCertificates } from "@/engine";
 import { usePlanner } from "../PlannerApp";
 import type { Track } from "../tracks";
-import { formatTerm } from "@/engine";
 import { TrackThumb } from "./TrackGallery";
-import { Hand, LinkButton, Tag } from "./ui";
+import { Button, Choice, Hand, LinkButton, Tag } from "./ui";
 
 /*
  * 군대·교환학생 안내. 학교 자료(S1·S2)로 확인된 것은 쪽수를 달고,
@@ -91,93 +91,202 @@ function MyTracks({ tracks, empty }: { tracks: Track[]; empty: string }) {
   );
 }
 
-const SERVICE_ROWS: Array<[string, string, string]> = [
-  ["육군", "18개월", "가장 많은 인원이 가는 형태"],
-  ["해병대", "18개월", "모집병으로 지원"],
-  ["해군", "20개월", "모집병으로 지원"],
-  ["공군", "21개월", "모집병으로 지원"],
-  ["사회복무요원", "21개월", "병역판정 결과에 따라 배정"],
-];
-
 export function MilitaryInfo() {
-  const { tracks, draft } = usePlanner();
+  const { tracks, draft, dataset, updateDraft } = usePlanner();
+  const [query, setQuery] = useState("");
+  const catalog = dataset?.military;
   const top = tracks?.tracks[0]?.career;
-  const mine = tracks?.tracks.filter((t) => t.career === top && t.militaryStart && !t.exchangeTerm) ?? [];
+  const mine = tracks?.tracks.filter((t) => t.career === top && (t.militaryStart || t.militaryLabel) && !t.exchangeTerm) ?? [];
+  const certIds = draft?.military.certificateIds ?? [];
+  const picked = draft?.military.trackIds ?? [];
+  const found = query.trim() ? findCertificate(query, catalog) : [];
+
+  const toggleTrack = (id: string) =>
+    updateDraft((d) => ({
+      ...d,
+      military: {
+        ...d.military,
+        status: d.military.status === "planned" || d.military.status === "undecided" ? d.military.status : "undecided",
+        trackIds: d.military.trackIds.includes(id) ? d.military.trackIds.filter((x) => x !== id) : [...d.military.trackIds, id],
+      },
+    }));
+  const toggleCert = (id: string) =>
+    updateDraft((d) => ({
+      ...d,
+      military: {
+        ...d.military,
+        certificateIds: d.military.certificateIds.includes(id) ? d.military.certificateIds.filter((x) => x !== id) : [...d.military.certificateIds, id],
+      },
+    }));
 
   return (
     <InfoShell
       kicker="알아두면 좋은 · 군대"
-      title="군대, 언제 어떻게 다녀올까"
-      lead="대학생활과 군 복무를 같이 계획할 때 알아야 할 것만 모았어요. 기간·제도는 바뀔 수 있으니 결정 전에는 병무청 공지를 꼭 확인하세요."
-      back={{ href: "/input/military", label: "군대 질문으로 돌아가기" }}
+      title="군대 트랙, 어떻게 고를까"
+      lead="병무청 원문을 직접 열어 확인한 내용만 담았어요. 원문에 없는 복무기간·점수는 비워 두고 ‘확인 필요’로 표시해요. 이 화면은 합격 가능성 예측이 아니에요."
+      back={{ href: "/input/military-track", label: "군 복무 트랙 질문으로 돌아가기" }}
       mine={
         <>
-          <p className="font-hand text-[26px] leading-none text-ink">내 상황에 맞춘 입대 트랙</p>
-          <p className="mt-2 mb-5 text-[13px] text-ink-soft">
-            {draft?.military.mode === "recommend"
-              ? "01에서 적은 답으로 입대 시기마다 트랙을 계산했어요."
-              : "‘다녀와야 해요(시기 추천)’를 고르면 입대 시기별 트랙을 비교해 드려요."}
+          <p className="font-hand text-[26px] leading-none text-ink">내 계획에 넣은 군대 트랙</p>
+          <p className="mt-2 mb-4 text-[13px] text-ink-soft">
+            {picked.length > 0 ? picked.map((id) => catalog?.tracks.find((t) => t.id === id)?.officialName ?? id).join(", ") : "아직 고른 트랙이 없어요. 왼쪽에서 ‘내 계획에 넣기’를 눌러 보세요."}
           </p>
-          <MyTracks tracks={mine} empty="아직 비교할 입대 트랙이 없어요." />
+          {draft && (draft.military.status === "planned" || draft.military.status === "undecided") && (
+            <p className="mb-4 text-[13px] text-ink-soft">
+              카투사 우선: <b>{draft.katusa.priority ? `예 · ${KATUSA_STATUS_LABEL[draft.katusa.status]}` : "아니요"}</b>{" "}
+              <Link href="/input/katusa" className="text-pen underline underline-offset-4">
+                바꾸기
+              </Link>
+            </p>
+          )}
+          <MyTracks tracks={mine} empty="입력을 마치면 군대 트랙별 계획이 여기 나타나요." />
           {mine.length > 0 && (
-            <LinkButton href="/match#military" kind="ink" className="mt-5 w-full">
-              입대 시기별 트랙 전체 보기 <ArrowRight size={15} aria-hidden />
+            <LinkButton href="/match#katusa" kind="ink" className="mt-5 w-full">
+              군대 트랙 비교 보기 <ArrowRight size={15} aria-hidden />
             </LinkButton>
           )}
         </>
       }
     >
-      <Part no="01" title="복무 형태별 기간" tag={<Check />}>
-        <table className="w-full max-w-[560px] border-y-[1.5px] border-ink text-[14px]">
-          <tbody>
-            {SERVICE_ROWS.map(([kind, len, note]) => (
-              <tr key={kind} className="border-b border-rule last:border-0">
-                <th scope="row" className="py-2 pr-4 text-left font-semibold text-ink">
-                  {kind}
-                </th>
-                <td className="py-2 pr-4 font-serif font-bold tabular-nums text-ink">{len}</td>
-                <td className="py-2 text-[13px] text-muted">{note}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="mt-2 text-[12px] text-muted">공개된 현행 기준을 옮긴 것이에요. 이 플래너는 여기서 고른 기간을 계획용 가정으로만 써요.</p>
+      <Part no="01" title="군대 트랙 비교" tag={<Tag tone="sage">병무청 원문 {catalog?.reviewedAt ?? ""} 확인</Tag>}>
+        {!catalog && <p>군대 트랙 자료를 불러오지 못했어요.</p>}
+        <div className="grid gap-5">
+          {catalog?.tracks.map((t) => {
+            const matches = matchCertificates(t.id, certIds, catalog);
+            const rules = catalog.scoringRules.filter((r) => r.militaryTrackId === t.id);
+            const on = picked.includes(t.id);
+            return (
+              <article key={t.id} className={`rounded-[10px] border-2 p-5 ${on ? "border-pen bg-pen/[0.04]" : "border-line bg-paper"}`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-serif text-[21px] font-bold text-ink">{t.officialName}</h3>
+                    <p className="mt-1 text-[14px]">{t.description}</p>
+                  </div>
+                  <Button kind={on ? "ink" : "line"} onClick={() => toggleTrack(t.id)} className="shrink-0" aria-pressed={on}>
+                    {on ? "내 계획에 넣음 ✓" : "내 계획에 넣기"}
+                  </Button>
+                </div>
+                <dl className="mt-4 grid grid-cols-2 gap-x-8 gap-y-3 text-[13px]">
+                  <InfoRow label="이런 사람에게(서비스 안내)">{t.fitsFor.join(" / ")}</InfoRow>
+                  <InfoRow label="복무기간">
+                    {t.serviceMonths !== null && t.serviceMonthsStatus === "verified" ? (
+                      <>
+                        <b className="text-ink">{t.serviceMonths}개월</b> <Tag tone="sage">공식 확인</Tag>
+                      </>
+                    ) : (
+                      <Tag tone="red">확인 필요</Tag>
+                    )}{" "}
+                    <span className="text-muted">{t.serviceMonthsNote}</span>
+                  </InfoRow>
+                  <InfoRow label="지원자격(원문 요약)">
+                    <ul>{t.eligibility.map((x) => <li key={x}>· {x}</li>)}</ul>
+                  </InfoRow>
+                  <InfoRow label="선발 방식(원문 요약)">
+                    <ul>{t.selection.map((x) => <li key={x}>· {x}</li>)}</ul>
+                  </InfoRow>
+                  <InfoRow label="자격증 반영">
+                    {t.certificatesConsidered === "yes" ? "반영함(원문)" : t.certificatesConsidered === "no" ? "원문에서 반영을 확인하지 못함" : "확인 필요"}
+                    {rules.map((r) => (
+                      <span key={r.id} className="mt-1 block text-muted">
+                        {r.title}: {r.rows.map((x) => `${x.label} ${x.value}`).join(" · ")}
+                      </span>
+                    ))}
+                  </InfoRow>
+                  <InfoRow label="보유 자격증과의 관계">
+                    {matches.length === 0
+                      ? "아래에서 보유 자격증을 고르면 공식 관련성을 확인해 드려요."
+                      : matches.map((m) => (
+                          <span key={m.certificate.id} className="block">
+                            {m.certificate.officialName}: <span className={m.officialRelations.length ? "text-sage-ink" : "text-red"}>{m.note}</span>
+                          </span>
+                        ))}
+                  </InfoRow>
+                  <InfoRow label="준비할 것">
+                    <ul>{t.prepare.map((x) => <li key={x}>· {x}</li>)}</ul>
+                  </InfoRow>
+                  <InfoRow label="주의할 점">
+                    <ul>{t.cautions.map((x) => <li key={x}>· {x}</li>)}</ul>
+                  </InfoRow>
+                </dl>
+                <p className="mt-4 border-t border-dashed border-line pt-3 text-[12px] text-muted">
+                  적용: {t.appliesTo ?? "확인 필요"} · 출처:{" "}
+                  {t.sources.map((src, i) => (
+                    <span key={src.url}>
+                      {i > 0 && ", "}
+                      <a href={src.url} target="_blank" rel="noreferrer" className="text-pen underline-offset-4 hover:underline">
+                        {src.title}
+                      </a>{" "}
+                      ({src.checkedAt} 확인)
+                    </span>
+                  ))}
+                </p>
+              </article>
+            );
+          })}
+        </div>
+        <p className="mt-3 text-[12px] text-muted">
+          해·공군·해병대 정보통신 분야 등은 공식 명칭과 모집 여부를 아직 확인하지 못해 넣지 않았어요. 이 결과는 합격 가능성 예측이 아니에요.
+        </p>
       </Part>
 
-      <Part no="02" title="입대하는 방법" tag={<Check />}>
-        <ul className="grid gap-2">
-          <li>
-            <b className="text-ink">현역병 입영 신청</b> — 병무청 누리집에서 원하는 입영 시기를 골라 신청하는 방식이 있어요. 원하는 날짜가 마감될 수 있어 일찍 알아보는 게 좋아요.
-          </li>
-          <li>
-            <b className="text-ink">모집병 지원</b> — 해군·공군·해병대나 육군 특기병처럼 분야를 골라 지원하고 선발되면 입영해요. 지원부터 입영까지 시간이 걸려요.
-          </li>
-          <li>
-            <b className="text-ink">그 밖의 길</b> — 카투사, 학군단(ROTC), 학사장교 등은 자격과 선발 일정이 따로 있어요.
-          </li>
-        </ul>
-        <p className="mt-2 text-[12px] text-muted">자격·선발 일정은 병무청과 각 군 모집 공고에서 확인하세요.</p>
+      <Part no="02" title="보유 자격증" tag={<Tag tone="red">공식 관련성은 트랙별로 확인</Tag>}>
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="자격증 이름이나 예전 이름으로 찾기" aria-label="자격증 찾기" className="w-[360px]" />
+        {found.length > 0 && (
+          <ul className="mt-2 grid gap-1 text-[13px]">
+            {found.map(({ certificate, matchedAlias }) => (
+              <li key={certificate.id}>
+                <button type="button" onClick={() => toggleCert(certificate.id)} className="cursor-pointer text-pen underline-offset-4 hover:underline">
+                  {certificate.officialName}
+                </button>
+                {matchedAlias && (
+                  <span className="text-muted">
+                    {" "}
+                    — ‘{matchedAlias}’로 찾음{certificate.aliases.find((a) => a.name === matchedAlias)?.status !== "verified" ? " (이름 연결 공식 확인 전 · 같은 자격으로 보지 않음)" : ""}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {catalog?.certificates.map((c) => (
+            <Choice key={c.id} selected={certIds.includes(c.id)} onClick={() => toggleCert(c.id)} className="min-h-[40px] text-[13px]">
+              {c.officialName}
+              {c.status !== "verified" && <span className="ml-1 text-[11px] text-muted">정보 확인 필요</span>}
+            </Choice>
+          ))}
+        </div>
+        <p className="mt-2 text-[12px] text-muted">
+          여러 자격증을 가지고 있어도 점수를 더하지 않아요. 진로 준비에 도움이 되는 자격증(서비스 추천)과 군 모집 분야의 공식 인정은 서로 다른 정보예요.
+        </p>
       </Part>
 
       <Part no="03" title="입대 시기 고르는 요령" tag={<Tip />}>
         <ul className="grid gap-2">
           <li>· <b className="text-ink">학년을 마친 직후</b>에 가면 학기 중간에 끊기지 않아요. 이 플래너의 입대 트랙도 이 시점들로 만들어요.</li>
-          <li>· 전역 날짜가 학기 시작 전이면 그 학기에 복학을 계획할 수 있어요. 전역일과 학교 복학 신청 기간을 함께 보세요.</li>
-          <li>· 진로 핵심 과목을 입대 <b className="text-ink">전에</b> 몇 개 들어 두면 복학 후 감을 되찾기 쉬워요. 트랙 정보에서 “입대 전 핵심 과목 수”를 확인하세요.</li>
-          <li>· 교환학생도 생각한다면 군 복무와 겹치지 않는 학기를 골라야 해요. 교환 트랙은 자동으로 피해서 만들어요.</li>
+          <li>· 카투사처럼 선발 결과를 기다리는 트랙은 ‘선발 시’와 ‘선발되지 않을 경우’를 함께 계획해 두세요.</li>
+          <li>· 진로 핵심 과목을 입대 <b className="text-ink">전에</b> 몇 개 들어 두면 복학 후 감을 되찾기 쉬워요.</li>
         </ul>
       </Part>
 
       <Part no="04" title="학교에서 챙길 것" tag={<Verified src="S2 16쪽" />}>
         <ul className="grid gap-2">
           <li>· 입영이 정해지면 학교에 군입대 휴학을 신청해요. 필요한 서류와 기간은 학사 공지에서 확인하세요.</li>
-          <li>· 복학 신청 기간을 놓치지 않게 전역 전에 미리 확인하세요.</li>
           <li>
             · <b className="text-ink">휴·복학 후 적용 교육과정이 달라질 수 있어요</b> (2026-2 수강신청 안내문 16쪽). 복학 전에 내 교육과정을 다시 확인하세요.
           </li>
         </ul>
       </Part>
     </InfoShell>
+  );
+}
+
+function InfoRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <dt className="text-[11px] font-medium text-muted">{label}</dt>
+      <dd className="mt-0.5 leading-relaxed text-ink-soft">{children}</dd>
+    </div>
   );
 }
 
@@ -194,7 +303,7 @@ export function ExchangeInfo() {
         <>
           <p className="font-hand text-[26px] leading-none text-ink">내 상황에 맞춘 교환 트랙</p>
           <p className="mt-2 mb-5 text-[13px] text-ink-soft">
-            {draft && draft.exchange.mode !== "none"
+            {draft && draft.exchange.mode && draft.exchange.mode !== "none"
               ? "군 복무 시기와 겹치지 않게 교환 학기를 넣어 계산했어요."
               : "‘관심 있어요’를 고르면 교환 학기를 넣은 트랙을 만들어 드려요."}
           </p>

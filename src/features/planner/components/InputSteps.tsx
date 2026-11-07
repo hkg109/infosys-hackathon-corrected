@@ -1,21 +1,24 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, BookOpen, Check, ClipboardPaste } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, ClipboardPaste, CornerDownLeft, PencilLine } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
-import type { Dataset, PriorityKey, Season } from "@/contracts/types";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { CAREER_LABEL, CAREER_TRACKS } from "@/contracts/careers";
+import type { CareerTrack, DatasetV2, KatusaStatus, PriorityKey, Term } from "@/contracts/types";
+import { formatTerm, KATUSA_STATUS_LABEL, LATE_LIGHT_CONFIG, paceBandsFor } from "@/engine";
 import { usePlanner } from "../PlannerApp";
+import { parseGraduationCheck, type GraduationCheckParse } from "../graduationCheck";
+import { INPUT_STEPS, type StepId, stepPath } from "../inputSteps";
 import { findCoursesInText } from "../parseTranscript";
-import { blankDraft, type Draft, draftProblem, MIN_ANSWERS, stepProblem } from "../plan";
+import { blankDraft, type Draft, draftProblem, needsMilitary } from "../plan";
 import { completedTermsLabel, curriculumCovers } from "../profile";
-import { answeredCount, QUIZ } from "../recommend";
-import { INPUT_STEPS, type StepId } from "../inputSteps";
-import { Button, Choice, Field, Hand } from "./ui";
+import { stepAnswered, stepProblem, visibleSteps } from "../questions";
+import { QUIZ } from "../recommend";
+import { SAMPLE_GRADUATION_CHECK } from "../testProfiles";
+import { Button, Choice, Tag } from "./ui";
 
-
-
-/** 01 아 — 질문 한 묶음씩 여러 페이지로 나눠 받는다. 입력은 바로 이 브라우저에 저장된다. */
+/** 01 아 — 한 화면에 질문 하나. 입력은 바로 이 브라우저에 저장된다. */
 export function InputStep({ step }: { step: StepId }) {
   const { mounted, today, draft, setDraft, dataset } = usePlanner();
 
@@ -24,95 +27,155 @@ export function InputStep({ step }: { step: StepId }) {
   }, [mounted, today, draft, setDraft]);
 
   if (!mounted || !draft) return <div className="h-96 animate-pulse rounded bg-paper-2" aria-busy="true" />;
-  return <StepFrame step={step} draft={draft} dataset={dataset} />;
+  return <StepFrame key={step} step={step} draft={draft} dataset={dataset} />;
 }
 
-function StepFrame({ step, draft, dataset }: { step: StepId; draft: Draft; dataset: Dataset | null }) {
-  const router = useRouter();
-  const [tried, setTried] = useState(false);
-  const i = INPUT_STEPS.findIndex((s) => s.id === step);
-  const cur = INPUT_STEPS[i];
-  const prev = INPUT_STEPS[i - 1];
-  const next = INPUT_STEPS[i + 1];
-  const problem = next ? stepProblem(step, draft) : draftProblem(draft, dataset);
+/** 단일 선택 질문: 고르면 짧게 표시한 뒤 다음 질문으로 넘어간다 */
+const AUTO_ADVANCE: StepId[] = ["admission", "completed", "start", "career", "pace", "military", "katusa", "katusa-status", "priority"];
+const ADVANCE_MS = 220;
 
-  const go = () => {
+interface StepCtx {
+  d: Draft;
+  set: (patch: Partial<Draft>) => void;
+  update: (fn: (d: Draft) => Draft) => void;
+  dataset: DatasetV2 | null;
+  today: string;
+  /** 단일 선택 후 자동 진행 */
+  picked: () => void;
+  /** 숫자키로 고를 선택지 등록 */
+  registerKeys: (handlers: Array<() => void>) => void;
+}
+
+function StepFrame({ step, draft, dataset }: { step: StepId; draft: Draft; dataset: DatasetV2 | null }) {
+  const router = useRouter();
+  const { updateDraft, today } = usePlanner();
+  const [tried, setTried] = useState(false);
+  const [flash, setFlash] = useState(false);
+  const keys = useRef<Array<() => void>>([]);
+  const steps = visibleSteps(draft);
+  const pos = Math.max(0, steps.indexOf(step));
+  const prev = steps[pos - 1];
+  const next = steps[pos + 1];
+  const cur = INPUT_STEPS.find((s) => s.id === step)!;
+  const isReview = step === "review";
+  const problem = isReview ? null : stepProblem(step, draft);
+  const finalProblem = isReview ? draftProblem(draft, dataset, today) : null;
+
+  const go = useCallback(() => {
     setTried(true);
     if (problem) return;
-    router.push(next ? next.path : "/match");
+    if (isReview) {
+      if (finalProblem) return;
+      router.push("/match");
+      return;
+    }
+    if (next) router.push(stepPath(next));
+  }, [problem, isReview, finalProblem, next, router]);
+
+  const goRef = useRef(go);
+  goRef.current = go;
+  const picked = useCallback(() => {
+    if (!AUTO_ADVANCE.includes(step)) return;
+    setFlash(true);
+    window.setTimeout(() => goRef.current(), ADVANCE_MS);
+  }, [step]);
+
+  // 키보드: Enter = 다음, 숫자키 = 선택지 고르기(입력칸에 쓰는 중이면 무시)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement;
+      const typing = el.tagName === "TEXTAREA" || (el.tagName === "INPUT" && (el as HTMLInputElement).type !== "checkbox");
+      if (e.key === "Enter" && !e.isComposing && el.tagName !== "TEXTAREA" && el.tagName !== "BUTTON" && el.tagName !== "A") {
+        e.preventDefault();
+        goRef.current();
+        return;
+      }
+      if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+      const n = Number(e.key);
+      if (Number.isInteger(n) && n >= 1 && n <= keys.current.length) {
+        e.preventDefault();
+        keys.current[n - 1]();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const ctx: StepCtx = {
+    d: draft,
+    set: (patch) => updateDraft((x) => ({ ...x, ...patch })),
+    update: updateDraft,
+    dataset,
+    today,
+    picked,
+    registerKeys: (h) => {
+      keys.current = h;
+    },
   };
 
+  const answered = steps.filter((s) => s !== "review" && stepAnswered(s, draft)).length;
+  const percent = Math.round(((pos + (flash ? 1 : 0)) / Math.max(1, steps.length - 1)) * 100);
+
   return (
-    <div className="grid grid-cols-[230px_minmax(0,1fr)] gap-14">
-      {/* 왼쪽: 질문 목차 */}
-      <nav aria-label="입력 단계" className="border-r border-line pr-8">
-        <p className="font-hand text-[22px] leading-none text-pen">01 · 아</p>
-        <p className="mt-1 font-serif text-[20px] font-bold">내 정보</p>
-        <ol className="mt-6 grid gap-1">
-          {INPUT_STEPS.map((s, n) => {
-            const done = n < i || (n !== i && !stepProblem(s.id, draft) && stepTouched(s.id, draft));
-            return (
-              <li key={s.id}>
-                <Link
-                  href={s.path}
-                  aria-current={s.id === step ? "step" : undefined}
-                  className={`flex items-center gap-3 rounded-[6px] px-2.5 py-2 text-[14px] ${
-                    s.id === step ? "bg-paper-2 font-semibold text-ink" : "text-ink-soft hover:bg-paper-2/60"
-                  }`}
-                >
-                  <span
-                    className={`grid size-[22px] place-items-center rounded-full border text-[11px] tabular-nums ${
-                      done ? "border-pen bg-pen text-paper" : s.id === step ? "border-ink" : "border-ink/30"
-                    }`}
-                  >
-                    {done ? <Check size={12} strokeWidth={3} aria-hidden /> : n + 1}
-                  </span>
-                  {s.title}
-                </Link>
-              </li>
-            );
-          })}
-        </ol>
-        <Hand className="mt-8 block text-[18px]">적는 대로 바로 저장돼요. 언제든 돌아와서 고칠 수 있어요.</Hand>
-      </nav>
-
-      {/* 오른쪽: 질문 */}
-      <section className="max-w-[880px]">
-        <p className="font-serif text-[14px] text-muted tabular-nums">
-          질문 {i + 1} / {INPUT_STEPS.length}
+    <div className="flex min-h-[calc(100dvh-210px)] flex-col">
+      {/* 진행률 */}
+      <div className="flex items-center gap-4">
+        <p className="font-hand text-[22px] leading-none text-pen">01 · 아 — 내 정보</p>
+        <div
+          className="h-2 flex-1 overflow-hidden rounded-full bg-paper-2"
+          role="progressbar"
+          aria-valuenow={pos + 1}
+          aria-valuemin={1}
+          aria-valuemax={steps.length}
+          aria-label="질문 진행률"
+        >
+          <div className="h-full rounded-full bg-pen transition-[width] duration-200 motion-reduce:transition-none" style={{ width: `${percent}%` }} />
+        </div>
+        <p className="font-serif text-[15px] text-ink-soft tabular-nums">
+          {pos + 1} / {steps.length}
         </p>
-        <h1 className="mt-1 mb-8 font-serif text-[34px] leading-tight font-bold tracking-tight">{cur.q}</h1>
+      </div>
+      {draft.demo && (
+        <p className="mt-2 text-[12px] text-muted">
+          <Tag tone="marker">테스트 정보</Tag> {draft.demo.label} — 모든 값은 가상 데이터예요.
+        </p>
+      )}
 
-        {step === "basic" && <Basic dataset={dataset} />}
-        {step === "record" && <Record dataset={dataset} />}
-        {step === "interest" && <Interest />}
-        {step === "military" && <Military />}
-        {step === "exchange" && <Exchange />}
-        {step === "goals" && <Goals />}
+      <section key={step} className="step-in flex flex-1 flex-col pt-10" aria-labelledby="q-title">
+        <p className="text-[14px] text-muted">{cur.title}</p>
+        <h1 id="q-title" className="mt-1 max-w-[980px] font-serif text-[44px] leading-[1.2] font-bold tracking-tight">
+          {cur.q}
+        </h1>
+        <div className="mt-10 max-w-[1080px] flex-1">
+          <StepBody step={step} ctx={ctx} />
+        </div>
 
-        {tried && problem && (
-          <p role="alert" className="mt-8 border-l-[3px] border-red pl-3 text-[13px] text-red">
-            {problem}
+        {tried && (problem || finalProblem) && (
+          <p role="alert" className="mt-6 border-l-[3px] border-red pl-3 text-[15px] text-red">
+            {problem ?? finalProblem?.message}
+            {finalProblem?.step && finalProblem.step !== "review" && (
+              <Link href={stepPath(finalProblem.step)} className="ml-3 font-semibold underline underline-offset-4">
+                그 질문으로 가기
+              </Link>
+            )}
           </p>
         )}
+
         <div className="mt-10 flex items-center justify-between border-t border-line pt-6">
           {prev ? (
-            <Link href={prev.path} className="inline-flex items-center gap-2 text-[14px] text-ink-soft hover:text-ink">
-              <ArrowLeft size={15} aria-hidden /> {prev.title}
+            <Link href={stepPath(prev)} className="inline-flex min-h-[48px] items-center gap-2 rounded-[6px] px-3 text-[16px] text-ink-soft hover:bg-paper-2 hover:text-ink">
+              <ArrowLeft size={18} aria-hidden /> 이전
             </Link>
           ) : (
-            <span />
+            <Link href="/" className="inline-flex min-h-[48px] items-center gap-2 rounded-[6px] px-3 text-[16px] text-ink-soft hover:bg-paper-2 hover:text-ink">
+              <ArrowLeft size={18} aria-hidden /> 표지
+            </Link>
           )}
-          <Button kind="ink" onClick={go} className="px-6">
-            {next ? (
-              <>
-                다음 · {next.title} <ArrowRight size={16} aria-hidden />
-              </>
-            ) : (
-              <>
-                내 트랙 보러 가기 <ArrowRight size={16} aria-hidden />
-              </>
-            )}
+          <p className="hidden items-center gap-1.5 text-[12px] text-muted lg:flex">
+            <CornerDownLeft size={13} aria-hidden /> Enter로 다음 · 숫자키로 선택 · 답한 질문 {answered}개
+          </p>
+          <Button kind="ink" onClick={go} className="min-h-[56px] px-8 text-[17px]">
+            {isReview ? "내 트랙 보러 가기" : flash ? "좋아요!" : "다음"} <ArrowRight size={18} aria-hidden />
           </Button>
         </div>
       </section>
@@ -120,225 +183,678 @@ function StepFrame({ step, draft, dataset }: { step: StepId; draft: Draft; datas
   );
 }
 
-/** 목차 체크 표시용: 이 단계에서 뭔가 적었는지 */
-function stepTouched(step: StepId, d: Draft): boolean {
+function StepBody({ step, ctx }: { step: StepId; ctx: StepCtx }) {
   switch (step) {
-    case "basic":
-      return d.name !== "" || d.admissionYear !== null;
-    case "record":
-      return d.completedTerms > 0 || d.earnedCredits > 0 || d.completedCourseCodes.length > 0;
-    case "interest":
-      return answeredCount(d.answers) >= MIN_ANSWERS;
+    case "name":
+      return <NameStep ctx={ctx} />;
+    case "admission":
+      return <AdmissionStep ctx={ctx} />;
+    case "completed":
+      return <CompletedStep ctx={ctx} />;
+    case "start":
+      return <StartStep ctx={ctx} />;
+    case "credits":
+      return <NumberStep ctx={ctx} field="earnedCredits" unit="학점" hint="성적표의 ‘취득학점’ 합계예요. 신입생이면 0을 적어 주세요." />;
+    case "major":
+      return <NumberStep ctx={ctx} field="earnedMajorCredits" unit="학점" hint="총 이수학점 안에 포함된 전공 학점이에요(총학점에 더하지 않아요)." />;
+    case "courses":
+      return <CoursesStep ctx={ctx} />;
+    case "target":
+      return <TargetStep ctx={ctx} />;
+    case "career":
+      return <CareerStep ctx={ctx} />;
+    case "quiz":
+      return <QuizStep ctx={ctx} />;
+    case "pace":
+      return <PaceStep ctx={ctx} />;
+    case "late":
+      return <LateStep ctx={ctx} />;
     case "military":
-      return d.military.mode !== "none";
+      return <MilitaryStep ctx={ctx} />;
+    case "military-track":
+      return <MilitaryTrackStep ctx={ctx} />;
+    case "military-timing":
+      return <MilitaryTimingStep ctx={ctx} />;
+    case "katusa":
+      return <KatusaStep ctx={ctx} />;
+    case "katusa-status":
+      return <KatusaStatusStep ctx={ctx} />;
+    case "leave":
+      return <LeaveStep ctx={ctx} />;
     case "exchange":
-      return d.exchange.mode !== "none";
-    case "goals":
-      return d.targetCredits !== null;
+      return <ExchangeStep ctx={ctx} />;
+    case "priority":
+      return <PriorityStep ctx={ctx} />;
+    case "review":
+      return <ReviewStep ctx={ctx} />;
   }
 }
 
-function useDraft() {
-  const { draft, updateDraft } = usePlanner();
-  const set = (patch: Partial<Draft>) => updateDraft((d) => ({ ...d, ...patch }));
-  return { d: draft!, set, updateDraft };
+// ── 공통 부품 ────────────────────────────────────────────
+
+interface Opt<T> {
+  value: T;
+  label: ReactNode;
+  desc?: ReactNode;
 }
 
-const num = (v: string) => (v === "" ? 0 : Number(v));
-
-function Basic({ dataset }: { dataset: Dataset | null }) {
-  const { d, set } = useDraft();
-  const { today } = usePlanner();
-  const thisYear = Number(today.slice(0, 4));
-  const years = Array.from({ length: 8 }, (_, i) => thisYear - i);
-  const covers = dataset ? curriculumCovers(dataset.curriculum, d.admissionYear) : null;
+/** 큰 선택 버튼 묶음. 숫자키 1~9로도 고른다. */
+function BigChoices<T>({
+  ctx,
+  options,
+  selected,
+  onPick,
+  cols = 3,
+  label,
+  autoAdvance = true,
+}: {
+  ctx: StepCtx;
+  options: Opt<T>[];
+  selected: (v: T) => boolean;
+  onPick: (v: T) => void;
+  cols?: 2 | 3 | 4;
+  label: string;
+  autoAdvance?: boolean;
+}) {
+  const pick = (v: T) => {
+    onPick(v);
+    if (autoAdvance) ctx.picked();
+  };
+  useEffect(() => {
+    ctx.registerKeys(options.map((o) => () => pick(o.value)));
+  });
+  const grid = { 2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4" }[cols];
   return (
-    <div className="grid gap-9">
-      <div className="grid grid-cols-2 gap-10">
-        <Field label="이름 또는 닉네임 (선택)">
-          <input value={d.name} maxLength={20} placeholder="트랙 이름에만 쓰여요" onChange={(e) => set({ name: e.target.value })} />
-        </Field>
-        <Field label="입학연도">
-          <select value={d.admissionYear ?? ""} onChange={(e) => set({ admissionYear: e.target.value === "" ? null : Number(e.target.value) })}>
-            <option value="">선택 안 함</option>
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}년 ({String(y).slice(2)}학번)
-              </option>
-            ))}
-          </select>
-        </Field>
-      </div>
-      {covers === false && dataset && (
-        <p className="-mt-5 text-[12px] text-red">
-          지금 자료는 {dataset.curriculum} 교육과정이에요. {d.admissionYear}년 입학생 교육과정은 학사안내에서 확인해 주세요.
-        </p>
-      )}
-      <div className="grid grid-cols-2 gap-10">
-        <Field label="몇 년도부터 계획할까요?">
-          <input type="number" min={2024} max={2040} value={d.startTerm.year} onChange={(e) => set({ startTerm: { ...d.startTerm, year: num(e.target.value) } })} />
-        </Field>
-        <Field label="몇 학기부터?">
-          <select value={d.startTerm.season} onChange={(e) => set({ startTerm: { ...d.startTerm, season: Number(e.target.value) as Season } })}>
-            <option value={1}>1학기</option>
-            <option value={2}>2학기</option>
-          </select>
-        </Field>
-      </div>
+    <div role="radiogroup" aria-label={label} className={`grid ${grid} gap-3`}>
+      {options.map((o, i) => (
+        <BigChoice key={i} n={i + 1} selected={selected(o.value)} onClick={() => pick(o.value)}>
+          <span className="block text-[18px] font-semibold text-ink">{o.label}</span>
+          {o.desc && <span className="mt-0.5 block text-[13px] text-ink-soft">{o.desc}</span>}
+        </BigChoice>
+      ))}
     </div>
   );
 }
 
-function Record({ dataset }: { dataset: Dataset | null }) {
-  const { d, set, updateDraft } = useDraft();
+function BigChoice({ n, selected, onClick, children, role = "radio" }: { n?: number; selected: boolean; onClick: () => void; children: ReactNode; role?: "radio" | "checkbox" }) {
+  return (
+    <button
+      type="button"
+      role={role}
+      aria-checked={selected}
+      onClick={onClick}
+      className={`relative flex min-h-[80px] cursor-pointer items-center gap-4 rounded-[10px] border-2 px-5 py-4 text-left transition-[border-color,background-color,transform] duration-150 active:scale-[0.99] motion-reduce:transition-none ${
+        selected ? "border-pen bg-pen/[0.08] shadow-[0_0_0_3px_rgba(45,74,133,0.12)]" : "border-line bg-paper hover:border-ink/40"
+      }`}
+    >
+      {n !== undefined && (
+        <span
+          aria-hidden
+          className={`grid size-8 shrink-0 place-items-center rounded-[6px] border font-serif text-[15px] font-bold tabular-nums ${
+            selected ? "border-pen bg-pen text-paper" : "border-ink/25 text-ink-soft"
+          }`}
+        >
+          {selected ? <Check size={16} strokeWidth={3} /> : n}
+        </span>
+      )}
+      <span className="min-w-0">{children}</span>
+    </button>
+  );
+}
+
+function BigNumber({ value, onChange, unit, label, min = 0, max = 250 }: { value: number | null; onChange: (v: number | null) => void; unit: string; label: string; min?: number; max?: number }) {
+  return (
+    <label className="inline-flex items-baseline gap-3 border-b-[3px] border-ink pb-1">
+      <span className="sr-only">{label}</span>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={min}
+        max={max}
+        autoFocus
+        value={value ?? ""}
+        placeholder="0"
+        onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+        className="!w-[200px] !border-0 !bg-transparent !p-0 font-serif !text-[64px] font-bold tabular-nums !shadow-none"
+      />
+      <span className="font-serif text-[28px] text-ink-soft">{unit}</span>
+    </label>
+  );
+}
+
+function Help({ children }: { children: ReactNode }) {
+  return <p className="mt-6 max-w-[760px] text-[15px] leading-relaxed text-ink-soft">{children}</p>;
+}
+
+function InfoLink({ href, title, desc }: { href: string; title: string; desc: string }) {
+  return (
+    <Link href={href} className="group mt-8 flex max-w-[760px] items-center gap-4 rounded-[10px] border-[1.5px] border-dashed border-pen/50 bg-pen/[0.04] px-5 py-4 hover:border-pen">
+      <BookOpen size={22} className="shrink-0 text-pen" aria-hidden />
+      <span className="min-w-0">
+        <span className="block text-[16px] font-semibold text-pen">{title}</span>
+        <span className="block text-[13px] text-ink-soft">{desc}</span>
+      </span>
+      <ArrowRight size={18} className="ml-auto shrink-0 text-pen transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+    </Link>
+  );
+}
+
+// ── 질문별 화면 ──────────────────────────────────────────
+
+function NameStep({ ctx }: { ctx: StepCtx }) {
+  return (
+    <div>
+      <input
+        autoFocus
+        value={ctx.d.name}
+        maxLength={20}
+        placeholder="이름 또는 닉네임"
+        aria-label="이름 또는 닉네임"
+        onChange={(e) => ctx.set({ name: e.target.value })}
+        className="!w-[520px] !border-0 !border-b-[3px] !border-ink !bg-transparent !px-0 font-serif !text-[40px] font-bold"
+      />
+      <Help>화면 인사말에만 쓰고 계산에는 쓰지 않아요. 비워 두고 넘어가도 돼요.</Help>
+    </div>
+  );
+}
+
+function AdmissionStep({ ctx }: { ctx: StepCtx }) {
+  const thisYear = Number((ctx.today || "2026").slice(0, 4));
+  const years = Array.from({ length: 7 }, (_, i) => thisYear - i);
+  const covers = ctx.dataset ? curriculumCovers(ctx.dataset.curriculum, ctx.d.admissionYear) : null;
+  return (
+    <div>
+      <BigChoices
+        ctx={ctx}
+        label="입학연도"
+        cols={4}
+        options={[...years.map((y) => ({ value: y as number | null, label: `${y}년`, desc: `${String(y).slice(2)}학번` })), { value: null, label: "말하지 않을래요", desc: "학교 상한 적용·교육과정 범위를 확인 필요로 둬요" }]}
+        selected={(v) => v !== null && ctx.d.admissionYear === v}
+        onPick={(v) => ctx.set({ admissionYear: v })}
+      />
+      {covers === false && ctx.dataset && (
+        <p className="mt-5 text-[15px] text-red">
+          자료 범위 확인 필요 — 지금 과목 자료는 {ctx.dataset.curriculum} 교육과정이에요. {ctx.d.admissionYear}년 입학생에게 공식 적용된다고 볼 수 없어요.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function CompletedStep({ ctx }: { ctx: StepCtx }) {
+  return (
+    <div>
+      <BigChoices
+        ctx={ctx}
+        label="마친 학기"
+        cols={3}
+        options={Array.from({ length: 9 }, (_, i) => ({ value: i, label: completedTermsLabel(i), desc: `유효학기 ${i}개` }))}
+        selected={(v) => ctx.d.completedTerms === v}
+        onPick={(v) => ctx.set({ completedTerms: v })}
+      />
+      <Help>휴학이나 군 복무로 쉰 학기는 빼고, 실제로 다닌 학기만 세어 주세요. 입학 후 지난 해 수로 학년을 짐작하지 않아요.</Help>
+    </div>
+  );
+}
+
+function StartStep({ ctx }: { ctx: StepCtx }) {
+  const y = Number((ctx.today || "2026").slice(0, 4));
+  const terms: Term[] = [y, y + 1, y + 2].flatMap((year) => [1, 2].map((season) => ({ year, season: season as 1 | 2 })));
+  const past = (t: Term) => !!ctx.today && (t.season === 1 ? `${t.year}-07-01` : `${t.year + 1}-01-01`) <= ctx.today;
+  return (
+    <div>
+      <BigChoices
+        ctx={ctx}
+        label="계획 시작 학기"
+        cols={3}
+        options={terms.filter((t) => !past(t)).map((t) => ({ value: t, label: formatTerm(t), desc: t.season === 1 ? "3월 – 6월" : "9월 – 12월" }))}
+        selected={(t) => ctx.d.startTerm?.year === t.year && ctx.d.startTerm?.season === t.season}
+        onPick={(t) => ctx.set({ startTerm: t })}
+      />
+      <Help>
+        이 학기부터 로드맵을 배치해요. 마친 학기가 {ctx.d.completedTerms ?? "?"}개이면 {ctx.d.completedTerms !== null ? `${ctx.d.completedTerms + 1}번째` : "다음"} 유효학기부터 이어져요. 이미 지난 학기는 고를 수 없어요.
+      </Help>
+    </div>
+  );
+}
+
+function NumberStep({ ctx, field, unit, hint }: { ctx: StepCtx; field: "earnedCredits" | "earnedMajorCredits"; unit: string; hint: string }) {
+  return (
+    <div>
+      <BigNumber value={ctx.d[field]} onChange={(v) => ctx.set({ [field]: v } as Partial<Draft>)} unit={unit} label={unit} />
+      <Help>{hint}</Help>
+      {field === "earnedMajorCredits" && ctx.d.earnedCredits !== null && (
+        <p className="mt-2 text-[14px] text-muted">총 이수학점: {ctx.d.earnedCredits}학점</p>
+      )}
+    </div>
+  );
+}
+
+function CoursesStep({ ctx }: { ctx: StepCtx }) {
+  const { d, update } = ctx;
   const [paste, setPaste] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
-  const courses = dataset ? [...dataset.courses].sort((a, b) => (a.recommendedYear ?? 9) - (b.recommendedYear ?? 9)) : [];
+  const courses = ctx.dataset ? [...ctx.dataset.courses].sort((a, b) => (a.recommendedYear ?? 9) - (b.recommendedYear ?? 9)) : [];
   const toggle = (code: string) =>
-    updateDraft((x) => ({
+    update((x) => ({
       ...x,
+      coursesConfirmed: true,
       completedCourseCodes: x.completedCourseCodes.includes(code) ? x.completedCourseCodes.filter((c) => c !== code) : [...x.completedCourseCodes, code],
     }));
   const applyPaste = () => {
     const found = findCoursesInText(paste, courses);
-    updateDraft((x) => ({ ...x, completedCourseCodes: [...new Set([...x.completedCourseCodes, ...found])] }));
+    update((x) => ({ ...x, coursesConfirmed: true, completedCourseCodes: [...new Set([...x.completedCourseCodes, ...found])] }));
     setMsg(found.length === 0 ? "학과 과목을 찾지 못했어요. 학수번호나 과목명이 들어가게 복사해 주세요." : `과목 ${found.length}개를 찾아 체크했어요.`);
   };
   return (
-    <div className="grid gap-8">
-      <div className="grid grid-cols-3 gap-10">
-        <Field label="마친 학기 (휴학 학기는 빼고)">
-          <select value={d.completedTerms} onChange={(e) => set({ completedTerms: Number(e.target.value) })}>
-            {Array.from({ length: 9 }, (_, i) => (
-              <option key={i} value={i}>
-                {completedTermsLabel(i)}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="총 이수학점">
-          <input type="number" min={0} max={250} value={d.earnedCredits} onChange={(e) => set({ earnedCredits: num(e.target.value) })} />
-        </Field>
-        <Field label="그중 전공학점">
-          <input type="number" min={0} max={250} value={d.earnedMajorCredits} onChange={(e) => set({ earnedMajorCredits: num(e.target.value) })} />
-        </Field>
-      </div>
-
-      {courses.length > 0 && (
-        <div className="rounded-[6px] border border-line bg-paper/80 p-5">
-          <p className="flex items-center gap-2 text-[14px] font-semibold">
-            <ClipboardPaste size={15} aria-hidden /> 성적표 붙여넣기로 들은 과목 채우기
-          </p>
-          <p className="mt-0.5 mb-3 text-[12px] text-muted">한양인 성적 조회 표를 복사해 붙여넣으면 학과 과목만 골라 체크해요. 성적은 읽지 않아요.</p>
-          <textarea
-            value={paste}
-            onChange={(e) => setPaste(e.target.value)}
-            rows={3}
-            placeholder={"예)  CSE1002  전산학개론  3  A+\n      ITE1012  정보시스템개론  3  A0"}
-            className="w-full resize-y"
-            aria-label="성적표 붙여넣기"
-          />
-          <div className="mt-2 flex items-center gap-3">
-            <Button onClick={applyPaste} disabled={!paste.trim()} className="min-h-[34px] px-3 text-[13px]">
-              과목 찾기
-            </Button>
-            {msg && (
-              <span role="status" className="text-[12px] text-ink-soft">
-                {msg}
-              </span>
-            )}
-          </div>
-          <details className="mt-4 border-t border-dashed border-line pt-3" open={d.completedCourseCodes.length > 0}>
-            <summary className="cursor-pointer text-[13px] text-pen">직접 체크하기 · {d.completedCourseCodes.length}과목 체크됨</summary>
-            <div className="mt-2 grid grid-cols-3 gap-x-4">
-              {courses.map((c) => (
-                <label key={c.code} className="flex items-center gap-2 border-b border-rule py-1.5 text-[13px]">
-                  <input type="checkbox" checked={d.completedCourseCodes.includes(c.code)} onChange={() => toggle(c.code)} />
-                  <span className="min-w-0 truncate">{c.name}</span>
-                  <span className="ml-auto text-[11px] text-muted tabular-nums">{c.recommendedYear ? `${c.recommendedYear}학년` : ""}</span>
-                </label>
-              ))}
-            </div>
-          </details>
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-10">
+      <div>
+        <p className="flex items-center gap-2 text-[16px] font-semibold">
+          <ClipboardPaste size={17} aria-hidden /> 성적표 붙여넣기
+        </p>
+        <p className="mt-1 mb-3 text-[13px] text-muted">성적 조회 표를 복사해 붙여넣으면 학과 과목만 골라 체크해요. 성적은 읽지 않고 이 브라우저 밖으로 보내지 않아요.</p>
+        <textarea value={paste} onChange={(e) => setPaste(e.target.value)} rows={6} placeholder={"예)  CSE1002  전산학개론  3  A+"} className="w-full resize-y" aria-label="성적표 붙여넣기" />
+        <div className="mt-3 flex items-center gap-3">
+          <Button onClick={applyPaste} disabled={!paste.trim()}>
+            과목 찾기
+          </Button>
+          {msg && (
+            <span role="status" className="text-[13px] text-ink-soft">
+              {msg}
+            </span>
+          )}
         </div>
+        <Button
+          kind="ghost"
+          className="mt-6"
+          onClick={() => update((x) => ({ ...x, coursesConfirmed: true, completedCourseCodes: [] }))}
+        >
+          아직 들은 학과 과목이 없어요
+        </Button>
+        {d.coursesConfirmed && d.completedCourseCodes.length === 0 && <p className="mt-1 text-[13px] text-sage-ink">‘들은 과목 없음’으로 확인했어요.</p>}
+      </div>
+      <div>
+        <p className="text-[16px] font-semibold">직접 선택 · {d.completedCourseCodes.length}과목 체크됨</p>
+        <div className="mt-3 grid max-h-[380px] grid-cols-2 gap-x-4 overflow-y-auto rounded-[8px] border border-line bg-paper px-4 py-2">
+          {courses.map((c) => (
+            <label key={c.code} className="flex min-h-[36px] items-center gap-2 border-b border-rule text-[14px]">
+              <input type="checkbox" checked={d.completedCourseCodes.includes(c.code)} onChange={() => toggle(c.code)} />
+              <span className="min-w-0 truncate">{c.name}</span>
+              <span className="ml-auto text-[11px] text-muted tabular-nums">{c.recommendedYear ? `${c.recommendedYear}학년` : ""}</span>
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-[12px] text-muted">이미 들은 과목은 앞으로의 로드맵에 다시 넣지 않아요.</p>
+      </div>
+    </div>
+  );
+}
+
+function TargetStep({ ctx }: { ctx: StepCtx }) {
+  const { d, set } = ctx;
+  const [paste, setPaste] = useState(d.demo?.profileId === "D" ? SAMPLE_GRADUATION_CHECK : "");
+  const [parsed, setParsed] = useState<GraduationCheckParse | null>(null);
+  return (
+    <div className="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-12">
+      <div>
+        <BigNumber
+          value={d.targetCredits}
+          onChange={(v) => set({ targetCredits: v, targetSource: v === null ? null : d.targetSource ?? "user_goal" })}
+          unit="학점"
+          label="목표 총학점"
+          min={1}
+        />
+        <Help>
+          학교 공통 졸업학점이 아니라 <b className="text-ink">내 졸업사정 조회에서 확인한 값</b>을 적어 주세요. 모르면 비워 두세요 — 그러면 예상 완료 학기는 ‘확인 필요’로 보여 드려요.
+        </Help>
+        {d.targetCredits !== null && (
+          <p className="mt-3 text-[14px]">
+            출처: <Tag tone={d.targetSource === "graduation_check" ? "sage" : "plain"}>{d.targetSource === "graduation_check" ? "개인 졸업사정 조회(이 학생만)" : "내가 정한 목표"}</Tag>
+            <button type="button" className="ml-3 cursor-pointer text-[13px] text-pen underline underline-offset-4" onClick={() => set({ targetCredits: null, targetSource: null })}>
+              비우기
+            </button>
+          </p>
+        )}
+      </div>
+      <div className="rounded-[10px] border border-line bg-paper p-5">
+        <p className="flex items-center gap-2 text-[16px] font-semibold">
+          <ClipboardPaste size={17} aria-hidden /> 졸업사정 조회 결과 붙여넣기
+        </p>
+        <p className="mt-1 mb-3 text-[13px] text-muted">열이 분명한 값만 읽고, 어느 열인지 모호한 줄은 직접 확인하도록 남겨요.</p>
+        <textarea value={paste} onChange={(e) => setPaste(e.target.value)} rows={6} className="w-full resize-y font-mono text-[12px]" aria-label="졸업사정 조회 결과" />
+        <Button className="mt-2" disabled={!paste.trim()} onClick={() => setParsed(parseGraduationCheck(paste))}>
+          읽어 보기
+        </Button>
+        {parsed && (
+          <div className="mt-4 text-[14px]">
+            <ul className="grid gap-1">
+              {parsed.rows.map((r) => (
+                <li key={r.raw} className="flex items-baseline gap-2">
+                  <Tag tone={r.status === "clear" ? "sage" : "red"}>{r.status === "clear" ? "읽음" : r.status === "ambiguous" ? "확인 필요" : "숫자 없음"}</Tag>
+                  <b className="font-medium">{r.label}</b>
+                  <span className="text-ink-soft">
+                    {r.status === "clear" ? Object.entries(r.values).map(([k, v]) => `${k} ${v}`).join(" · ") : r.note}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {parsed.target.status === "clear" ? (
+              <Button
+                kind="ink"
+                className="mt-4"
+                onClick={() =>
+                  set({
+                    targetCredits: parsed.target.value,
+                    targetSource: "graduation_check",
+                    ...(parsed.earned.status === "clear" ? { earnedCredits: parsed.earned.value } : {}),
+                    ...(parsed.majorEarned.status === "clear" ? { earnedMajorCredits: parsed.majorEarned.value } : {}),
+                  })
+                }
+              >
+                확인했어요 — 목표 {parsed.target.value}학점
+                {parsed.earned.status === "clear" ? ` · 취득 ${parsed.earned.value}학점` : ""}
+                {parsed.majorEarned.status === "clear" ? ` · 전공 취득 ${parsed.majorEarned.value}학점` : ""} 사용
+              </Button>
+            ) : (
+              <p className="mt-3 text-red">목표 졸업학점 줄을 분명하게 읽지 못했어요. 왼쪽에 직접 적어 주세요.</p>
+            )}
+            <p className="mt-2 text-[12px] text-muted">이 값은 이 학생 한 명의 입력값으로만 써요. 학교 공통 졸업요건으로 저장하지 않아요.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CareerStep({ ctx }: { ctx: StepCtx }) {
+  return (
+    <div>
+      <BigChoices<CareerTrack | "unsure">
+        ctx={ctx}
+        label="관심 진로"
+        cols={3}
+        options={[
+          ...CAREER_TRACKS.map((t) => ({ value: t as CareerTrack | "unsure", label: CAREER_LABEL[t] })),
+          { value: "unsure", label: "잘 모르겠어요", desc: "짧은 질문으로 추천받을래요" },
+        ]}
+        selected={(v) => ctx.d.career === v}
+        onPick={(v) => ctx.set({ career: v })}
+      />
+      <Help>고른 진로를 맨 앞에 두고, 다른 진로 트랙도 함께 비교해 보여 드려요. 진로 분류는 서비스가 정한 것이며 학교 공식 트랙이 아니에요.</Help>
+    </div>
+  );
+}
+
+function QuizStep({ ctx }: { ctx: StepCtx }) {
+  return (
+    <ol className="grid gap-6">
+      {QUIZ.map((q, i) => (
+        <li key={q.id}>
+          <p className="mb-2 flex items-baseline gap-2 text-[17px] font-semibold">
+            <span className="font-hand text-[24px] font-normal text-pen">Q{i + 1}.</span>
+            {q.prompt}
+          </p>
+          <div role="radiogroup" aria-label={q.prompt} className="flex flex-wrap gap-2">
+            {q.options.map((o) => (
+              <Choice key={o.id} selected={ctx.d.answers[q.id] === o.id} onClick={() => ctx.update((x) => ({ ...x, answers: { ...x.answers, [q.id]: o.id } }))} className="min-h-[48px] text-[15px]">
+                {o.label}
+              </Choice>
+            ))}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function PaceStep({ ctx }: { ctx: StepCtx }) {
+  return (
+    <div>
+      <BigChoices<number | "compare">
+        ctx={ctx}
+        label="학기당 학점"
+        cols={4}
+        options={[
+          { value: 15, label: "15학점", desc: "여유 있게" },
+          { value: 18, label: "18학점", desc: "보통" },
+          { value: 20, label: "20학점", desc: "빠르게" },
+          { value: "compare", label: "비교해 주세요", desc: "15·18·20을 모두 계산" },
+        ]}
+        selected={(v) => ctx.d.paceCredits === v}
+        onPick={(v) => ctx.set({ paceCredits: v })}
+      />
+      <Help>내가 정하는 계획 상한이에요(학교 승인값 아님). 확인된 학교 최대 수강학점이 더 작으면 그 값을 써요.</Help>
+    </div>
+  );
+}
+
+function LateStep({ ctx }: { ctx: StepCtx }) {
+  const { d, set } = ctx;
+  const pace = typeof d.paceCredits === "number" ? d.paceCredits : 18;
+  const bands = paceBandsFor("late_light", pace);
+  const custom = d.customPace ?? { early: pace, year3: pace, year4: pace };
+  return (
+    <div>
+      <BigChoices
+        ctx={ctx}
+        label="학점 배치 방식"
+        cols={4}
+        autoAdvance={false}
+        options={[
+          { value: "balanced" as const, label: "균형형", desc: "매 학기 비슷한 학점" },
+          { value: "late_light" as const, label: "후반 여유형", desc: `3학년 ${bands[1].credits} · 4학년 ${bands[2].credits}학점까지` },
+          { value: "compare" as const, label: "둘 다 비교", desc: "균형형과 후반 여유형을 나란히" },
+          { value: "custom" as const, label: "직접 설정", desc: "학년별 학점을 적을게요" },
+        ]}
+        selected={(v) => d.paceStyle === v}
+        onPick={(v) => set({ paceStyle: v, ...(v === "custom" && !d.customPace ? { customPace: custom } : {}) })}
+      />
+      {d.paceStyle === "custom" && (
+        <div className="mt-6 flex gap-8">
+          {(
+            [
+              ["early", "1·2학년"],
+              ["year3", "3학년"],
+              ["year4", "4학년 이후"],
+            ] as const
+          ).map(([k, label]) => (
+            <label key={k} className="grid gap-1 text-[13px] text-muted">
+              {label} 학기당
+              <input
+                type="number"
+                min={1}
+                max={30}
+                value={custom[k]}
+                onChange={(e) => set({ customPace: { ...custom, [k]: Number(e.target.value) } })}
+                className="!w-[120px] !text-[22px] font-serif font-bold"
+              />
+            </label>
+          ))}
+        </div>
+      )}
+      <div className="mt-6 max-w-[820px] rounded-[8px] border-l-[3px] border-marker bg-marker/20 px-4 py-3 text-[14px] text-ink-soft">
+        <b className="text-ink">{LATE_LIGHT_CONFIG.disclaimer}</b> {LATE_LIGHT_CONFIG.rationale} 후반 학점을 줄이면 계획 완료가 늦어질 수 있고, 그 결과도 숨기지 않고 보여 드려요.
+      </div>
+    </div>
+  );
+}
+
+function MilitaryStep({ ctx }: { ctx: StepCtx }) {
+  const setMil = (status: Draft["military"]["status"]) => ctx.update((x) => ({ ...x, military: { ...x.military, status } }));
+  return (
+    <div>
+      <BigChoices
+        ctx={ctx}
+        label="군 복무"
+        cols={4}
+        options={[
+          { value: "planned" as const, label: "다녀올 예정이에요" },
+          { value: "undecided" as const, label: "고민 중이에요", desc: "언제·어떻게 갈지 비교" },
+          { value: "done" as const, label: "마쳤어요" },
+          { value: "none" as const, label: "해당 없어요", desc: "면제 등" },
+        ]}
+        selected={(v) => ctx.d.military.status === v}
+        onPick={setMil}
+      />
+      <InfoLink href="/info/military" title="군대 트랙 자세히 알아보기" desc="육군 현역병·기술행정병·카투사의 지원자격, 선발 방식, 자격증 반영을 병무청 원문 기준으로 정리했어요." />
+    </div>
+  );
+}
+
+function MilitaryTrackStep({ ctx }: { ctx: StepCtx }) {
+  const { d, update } = ctx;
+  const tracks = ctx.dataset?.military?.tracks ?? [];
+  const toggle = (id: string) =>
+    update((x) => ({
+      ...x,
+      military: { ...x.military, trackIds: x.military.trackIds.includes(id) ? x.military.trackIds.filter((t) => t !== id) : [...x.military.trackIds, id] },
+    }));
+  useEffect(() => {
+    ctx.registerKeys(tracks.map((t) => () => toggle(t.id)));
+  });
+  return (
+    <div>
+      <p className="mb-3 text-[14px] text-muted">여러 개 골라도 돼요. 고른 트랙마다 따로 계산해 비교해요.</p>
+      <div className="grid grid-cols-3 gap-3">
+        {tracks.map((t, i) => (
+          <BigChoice key={t.id} n={i + 1} role="checkbox" selected={d.military.trackIds.includes(t.id)} onClick={() => toggle(t.id)}>
+            <span className="block text-[18px] font-semibold">{t.officialName}</span>
+            <span className="mt-0.5 block text-[13px] text-ink-soft">
+              복무기간 {t.serviceMonths !== null && t.serviceMonthsStatus === "verified" ? `${t.serviceMonths}개월(공식 확인)` : "확인 필요"}
+            </span>
+          </BigChoice>
+        ))}
+      </div>
+      {tracks.length === 0 && <p className="text-[15px] text-ink-soft">군 복무 트랙 자료를 불러오지 못했어요. 트랙 없이 기간만으로 계산해요.</p>}
+      <div className="mt-8 flex items-end gap-6">
+        <label className="grid gap-1 text-[13px] text-muted">
+          직접 확인한 예상 복무기간(선택)
+          <span className="flex items-baseline gap-2">
+            <input
+              type="number"
+              min={1}
+              max={48}
+              value={d.military.months ?? ""}
+              placeholder="개월"
+              onChange={(e) => update((x) => ({ ...x, military: { ...x.military, months: e.target.value === "" ? null : Number(e.target.value) } }))}
+              className="!w-[120px] !text-[20px]"
+            />
+            <span className="text-[15px] text-ink-soft">개월</span>
+          </span>
+        </label>
+        <p className="max-w-[560px] pb-1 text-[13px] text-ink-soft">
+          공식 자료로 복무기간을 확인한 트랙은 그 값을 쓰고, 확인하지 못한 트랙에는 여기 적은 값을 <b>사용자 가정</b>으로 써요. 비워 두면 그 트랙의 완료 학기는 ‘확인 필요’로 남겨요.
+        </p>
+      </div>
+      <InfoLink href="/info/military" title="군대 트랙 비교·보유 자격증 확인" desc="트랙별 지원자격·선발 방식·공식 출처와, 보유 자격증의 공식 관련성을 확인해요." />
+    </div>
+  );
+}
+
+function MilitaryTimingStep({ ctx }: { ctx: StepCtx }) {
+  const { d, update } = ctx;
+  const setMil = (patch: Partial<Draft["military"]>) => update((x) => ({ ...x, military: { ...x.military, ...patch } }));
+  return (
+    <div>
+      <BigChoices
+        ctx={ctx}
+        label="입대 시점"
+        cols={2}
+        autoAdvance={false}
+        options={[
+          { value: "recommend" as const, label: "아직이에요 — 시기별로 비교해 주세요", desc: "학년을 마친 시점마다 트랙을 따로 계산해요" },
+          { value: "fixed" as const, label: "입영일이 정해졌어요", desc: "날짜를 직접 적을게요" },
+        ]}
+        selected={(v) => d.military.timing === v}
+        onPick={(v) => setMil({ timing: v, ...(v === "recommend" ? { startDate: null } : {}) })}
+      />
+      {d.military.timing === "fixed" && (
+        <label className="mt-6 grid w-[280px] gap-1 text-[13px] text-muted">
+          입영일
+          <input type="date" value={d.military.startDate ?? ""} onChange={(e) => setMil({ startDate: e.target.value || null })} className="!text-[18px]" />
+        </label>
       )}
     </div>
   );
 }
 
-function Interest() {
-  const { d, updateDraft } = useDraft();
+function KatusaStep({ ctx }: { ctx: StepCtx }) {
   return (
     <div>
-      <Hand className="mb-6 block">정답은 없어요. {MIN_ANSWERS}개 이상 답하면 그걸로 진로를 추천하고, 트랙을 만들어요.</Hand>
-      <ol className="grid gap-7">
-        {QUIZ.map((q, i) => (
-          <li key={q.id}>
-            <p className="mb-2.5 flex items-baseline gap-2 text-[16px] font-semibold">
-              <span className="font-hand text-[22px] font-normal text-pen">Q{i + 1}.</span>
-              {q.prompt}
-            </p>
-            <div role="radiogroup" aria-label={q.prompt} className="flex flex-wrap gap-2">
-              {q.options.map((o) => (
-                <Choice key={o.id} selected={d.answers[q.id] === o.id} onClick={() => updateDraft((x) => ({ ...x, answers: { ...x.answers, [q.id]: o.id } }))}>
-                  {o.label}
-                </Choice>
-              ))}
-            </div>
-          </li>
-        ))}
-      </ol>
+      <BigChoices
+        ctx={ctx}
+        label="카투사 우선"
+        cols={2}
+        options={[
+          { value: true, label: "네, 카투사에 선발된다면 다른 군 복무 트랙보다 카투사를 우선하겠습니다." },
+          { value: false, label: "아니요, 우선하지 않아요", desc: "고른 군 복무 트랙을 그대로 비교해요" },
+        ]}
+        selected={(v) => ctx.d.katusa.priority === v}
+        onPick={(v) => ctx.update((x) => ({ ...x, katusa: { ...x.katusa, priority: v } }))}
+      />
+      <Help>
+        우선을 고르면 선발 결과에 따라 계획을 나눠 보여 드려요. 결과가 나오기 전이면 ‘카투사 선발 시’와 ‘선발되지 않을 경우’ 두 트랙을 함께 보여 드리고, 합격 가능성은 계산하지 않아요.
+      </Help>
     </div>
   );
 }
 
-const SERVICE: Array<[number, string]> = [
-  [18, "18개월 · 육군·해병대"],
-  [20, "20개월 · 해군"],
-  [21, "21개월 · 공군·사회복무요원"],
+const KATUSA_DESC: Record<KatusaStatus, string> = {
+  not_applying: "카투사를 기본 후보에서 빼요",
+  preparing: "선발 시·미선발 시를 함께 보여 줘요",
+  applied_waiting: "선발 시·미선발 시를 함께 보여 줘요",
+  selected: "카투사로 기본 계획을 세워요",
+  not_selected: "카투사를 빼고 다른 트랙으로 비교해요",
+  undecided: "선발 시·미선발 시를 함께 보여 줘요",
+};
+
+function KatusaStatusStep({ ctx }: { ctx: StepCtx }) {
+  const order: KatusaStatus[] = ["preparing", "applied_waiting", "selected", "not_selected", "not_applying", "undecided"];
+  return (
+    <BigChoices
+      ctx={ctx}
+      label="카투사 상태"
+      cols={3}
+      options={order.map((s) => ({ value: s, label: KATUSA_STATUS_LABEL[s], desc: KATUSA_DESC[s] }))}
+      selected={(v) => ctx.d.katusa.status === v}
+      onPick={(v) => ctx.update((x) => ({ ...x, katusa: { ...x.katusa, status: v } }))}
+    />
+  );
+}
+
+const ORDINAL_CHOICES: Array<[number, string]> = [
+  [2, "1학년 마치고"],
+  [3, "2학년 1학기 마치고"],
+  [4, "2학년 마치고"],
+  [5, "3학년 1학기 마치고"],
+  [6, "3학년 마치고"],
 ];
 
-function Military() {
-  const { d, updateDraft } = useDraft();
-  const setMil = (patch: Partial<Draft["military"]>) => updateDraft((x) => ({ ...x, military: { ...x.military, ...patch } }));
+function LeaveStep({ ctx }: { ctx: StepCtx }) {
+  const { d, update } = ctx;
+  const setLeave = (patch: Partial<Draft["leave"]>) => update((x) => ({ ...x, leave: { ...x.leave, ...patch } }));
+  const done = d.completedTerms ?? 0;
   return (
-    <div className="grid gap-8">
-      <InfoLink href="/info/military" title="군대 정보 자세히 알아보기" desc="복무 형태별 기간, 입대 시기 고르는 법, 휴학·복학 흐름을 정리했어요." />
-      <div role="radiogroup" aria-label="군 복무 계획" className="grid grid-cols-3 gap-2">
-        <Choice selected={d.military.mode === "recommend"} onClick={() => setMil({ mode: "recommend", startDate: null })}>
-          <b className="font-semibold">다녀와야 해요</b>
-          <span className="block text-[12px] text-muted">언제 갈지는 트랙으로 추천받을래요</span>
-        </Choice>
-        <Choice selected={d.military.mode === "fixed"} onClick={() => setMil({ mode: "fixed" })}>
-          <b className="font-semibold">입영일이 정해졌어요</b>
-          <span className="block text-[12px] text-muted">날짜를 직접 적을게요</span>
-        </Choice>
-        <Choice selected={d.military.mode === "none"} onClick={() => setMil({ mode: "none", months: null, startDate: null })}>
-          <b className="font-semibold">해당 없어요</b>
-          <span className="block text-[12px] text-muted">마쳤거나 면제 등</span>
-        </Choice>
-      </div>
-      {d.military.mode !== "none" && (
-        <div className="grid grid-cols-2 gap-10">
-          <Field label="어떤 형태로 다녀올 생각인가요?" hint="기간은 병무청에서 꼭 확인하세요. 고른 값은 계획용 가정으로만 써요.">
-            <select value={d.military.months ?? ""} onChange={(e) => setMil({ months: e.target.value === "" ? null : Number(e.target.value) })}>
-              <option value="">골라 주세요</option>
-              {SERVICE.map(([m, label]) => (
-                <option key={m} value={m}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </Field>
-          {d.military.mode === "fixed" ? (
-            <Field label="입영일">
-              <input type="date" value={d.military.startDate ?? ""} onChange={(e) => setMil({ startDate: e.target.value || null })} />
-            </Field>
-          ) : (
-            <p className="self-end pb-1">
-              <Hand>학년을 마친 시점마다 트랙을 따로 만들어 비교해 드릴게요.</Hand>
-            </p>
-          )}
+    <div>
+      <BigChoices
+        ctx={ctx}
+        label="휴학 계획"
+        cols={2}
+        autoAdvance={false}
+        options={[
+          { value: "none" as const, label: "없어요", desc: needsMilitary(d) ? "군 휴학은 군 복무 질문에서 따로 다뤄요" : undefined },
+          { value: "pick" as const, label: "한 학기 쉬고 싶어요", desc: "언제 쉴지 고를게요" },
+        ]}
+        selected={(v) => d.leave.mode === v}
+        onPick={(v) => setLeave({ mode: v, ...(v === "none" ? { ordinal: null } : {}) })}
+      />
+      {d.leave.mode === "pick" && (
+        <div role="radiogroup" aria-label="휴학 시점" className="mt-5 flex flex-wrap gap-2">
+          {ORDINAL_CHOICES.filter(([o]) => o >= done).map(([o, label]) => (
+            <Choice key={o} selected={d.leave.ordinal === o} onClick={() => setLeave({ ordinal: o })} className="min-h-[52px] text-[15px]">
+              {label}
+            </Choice>
+          ))}
         </div>
       )}
     </div>
@@ -352,90 +868,115 @@ const EXCHANGE_TERMS: Array<[number, string]> = [
   [6, "4학년 1학기"],
 ];
 
-function Exchange() {
-  const { d, updateDraft } = useDraft();
-  const setEx = (patch: Partial<Draft["exchange"]>) => updateDraft((x) => ({ ...x, exchange: { ...x.exchange, ...patch } }));
+function ExchangeStep({ ctx }: { ctx: StepCtx }) {
+  const { d, update } = ctx;
+  const setEx = (patch: Partial<Draft["exchange"]>) => update((x) => ({ ...x, exchange: { ...x.exchange, ...patch } }));
+  const done = d.completedTerms ?? 0;
   return (
-    <div className="grid gap-8">
-      <InfoLink href="/info/exchange" title="교환학생 정보 자세히 알아보기" desc="교환학생이 뭔지, 언제 준비하는지, 학점 인정은 어떻게 하는지 정리했어요." />
-      <div role="radiogroup" aria-label="교환학생 계획" className="grid grid-cols-3 gap-2">
-        <Choice selected={d.exchange.mode === "recommend"} onClick={() => setEx({ mode: "recommend", ordinal: null })}>
-          <b className="font-semibold">관심 있어요</b>
-          <span className="block text-[12px] text-muted">언제 갈지는 트랙으로 추천받을래요</span>
-        </Choice>
-        <Choice selected={d.exchange.mode === "pick"} onClick={() => setEx({ mode: "pick" })}>
-          <b className="font-semibold">가고 싶은 학기가 있어요</b>
-          <span className="block text-[12px] text-muted">학년·학기를 고를게요</span>
-        </Choice>
-        <Choice selected={d.exchange.mode === "none"} onClick={() => setEx({ mode: "none", ordinal: null })}>
-          <b className="font-semibold">생각 없어요</b>
-          <span className="block text-[12px] text-muted">국내에서만 다닐래요</span>
-        </Choice>
-      </div>
+    <div>
+      <BigChoices
+        ctx={ctx}
+        label="교환학생"
+        cols={3}
+        autoAdvance={false}
+        options={[
+          { value: "recommend" as const, label: "관심 있어요", desc: "언제 갈지는 트랙으로 추천받을래요" },
+          { value: "pick" as const, label: "가고 싶은 학기가 있어요", desc: "학년·학기를 고를게요" },
+          { value: "none" as const, label: "생각 없어요", desc: "국내에서만 다닐래요" },
+        ]}
+        selected={(v) => d.exchange.mode === v}
+        onPick={(v) => setEx({ mode: v, ...(v !== "pick" ? { ordinal: null } : {}) })}
+      />
       {d.exchange.mode === "pick" && (
-        <div role="radiogroup" aria-label="교환 학기" className="flex flex-wrap gap-2">
-          {EXCHANGE_TERMS.map(([ord, label]) => (
-            <Choice key={ord} selected={d.exchange.ordinal === ord} onClick={() => setEx({ ordinal: ord })}>
+        <div role="radiogroup" aria-label="교환 학기" className="mt-5 flex flex-wrap gap-2">
+          {EXCHANGE_TERMS.filter(([o]) => o >= done).map(([o, label]) => (
+            <Choice key={o} selected={d.exchange.ordinal === o} onClick={() => setEx({ ordinal: o })} className="min-h-[52px] text-[15px]">
               {label}
             </Choice>
           ))}
         </div>
       )}
-      {d.exchange.mode !== "none" && (
-        <p className="text-[12px] text-muted">
-          교환 학기는 군 복무와 겹치지 않게 넣어요. 인정 학점은 학교 승인 전이라 정해지지 않은 것으로 두고, 그 뒤 완료 시점은 “확인 필요”로 보여 드려요.
-        </p>
-      )}
+      <Help>교환 학기는 군 복무와 겹치지 않게 넣어요. 인정 학점은 학교 승인 전이라 더하지 않고, 그 뒤 완료 시점은 ‘확인 필요’로 보여 드려요.</Help>
+      <InfoLink href="/info/exchange" title="교환학생 선택지 자세히 알아보기" desc="교환·방문학생 차이, 준비 흐름, 학점 인정 방식을 정리했어요." />
     </div>
   );
 }
 
-const PRIORITIES: Array<[PriorityKey, string, string]> = [
-  ["fast_completion", "빨리 끝내기", "졸업까지 걸리는 학기가 적은 트랙"],
-  ["career_core", "진로 과목 먼저", "진로 핵심 과목을 일찍 듣는 트랙"],
-  ["light_terms", "여유 있는 학기", "한 학기에 듣는 학점이 적은 트랙"],
-];
+function PriorityStep({ ctx }: { ctx: StepCtx }) {
+  const opts: Array<Opt<PriorityKey>> = [
+    { value: "fast_completion", label: "빨리 끝내기", desc: "계획 완료 학기가 빠른 트랙" },
+    { value: "career_core", label: "진로 과목 먼저", desc: "진로 핵심 과목을 일찍 듣는 트랙" },
+    { value: "light_terms", label: "여유 있는 학기", desc: "한 학기 최대 학점이 적은 트랙" },
+  ];
+  return <BigChoices ctx={ctx} label="우선순위" cols={3} options={opts} selected={(v) => ctx.d.priority === v} onPick={(v) => ctx.set({ priority: v })} />;
+}
 
-function Goals() {
-  const { d, set } = useDraft();
+function ReviewStep({ ctx }: { ctx: StepCtx }) {
+  const { d, dataset } = ctx;
+  const steps = visibleSteps(d).filter((s) => s !== "review");
+  const mil = dataset?.military?.tracks ?? [];
+  const value = (s: StepId): string => {
+    switch (s) {
+      case "name":
+        return d.name || "—";
+      case "admission":
+        return d.admissionYear ? `${d.admissionYear}년` : "말하지 않음";
+      case "completed":
+        return d.completedTerms === null ? "—" : completedTermsLabel(d.completedTerms);
+      case "start":
+        return d.startTerm ? formatTerm(d.startTerm) : "—";
+      case "credits":
+        return d.earnedCredits === null ? "—" : `${d.earnedCredits}학점`;
+      case "major":
+        return d.earnedMajorCredits === null ? "—" : `${d.earnedMajorCredits}학점`;
+      case "courses":
+        return d.completedCourseCodes.length > 0 ? `${d.completedCourseCodes.length}과목` : d.coursesConfirmed ? "없음으로 확인" : "—";
+      case "target":
+        return d.targetCredits === null ? "모름(완료 학기 확인 필요)" : `${d.targetCredits}학점 · ${d.targetSource === "graduation_check" ? "졸업사정 조회" : "내 목표"}`;
+      case "career":
+        return d.career === "unsure" ? "질문으로 추천받기" : d.career ? CAREER_LABEL[d.career] : "—";
+      case "quiz":
+        return `${Object.keys(d.answers).length}개 답함`;
+      case "pace":
+        return d.paceCredits === "compare" ? "15·18·20 비교" : d.paceCredits ? `${d.paceCredits}학점` : "—";
+      case "late":
+        return d.paceStyle === "compare" ? "균형형·후반 여유형 비교" : d.paceStyle === "late_light" ? "후반 여유형" : d.paceStyle === "custom" ? `직접 설정 ${d.customPace?.early}/${d.customPace?.year3}/${d.customPace?.year4}` : d.paceStyle === "balanced" ? "균형형" : "—";
+      case "military":
+        return { planned: "다녀올 예정", undecided: "고민 중", done: "마침", none: "해당 없음" }[d.military.status ?? "none"] ?? "—";
+      case "military-track":
+        return d.military.trackIds.map((id) => mil.find((t) => t.id === id)?.officialName ?? id).join(", ") || "아직 모름";
+      case "military-timing":
+        return d.military.timing === "fixed" ? `입영일 ${d.military.startDate ?? "—"}` : "시기별 비교";
+      case "katusa":
+        return d.katusa.priority === null ? "—" : d.katusa.priority ? "선발되면 카투사 우선" : "우선 안 함";
+      case "katusa-status":
+        return KATUSA_STATUS_LABEL[d.katusa.status];
+      case "leave":
+        return d.leave.mode === "pick" ? `${ORDINAL_CHOICES.find(([o]) => o === d.leave.ordinal)?.[1] ?? "?"} 한 학기` : d.leave.mode === "none" ? "없음" : "—";
+      case "exchange":
+        return d.exchange.mode === "recommend" ? "관심 있음" : d.exchange.mode === "pick" ? (EXCHANGE_TERMS.find(([o]) => o === d.exchange.ordinal)?.[1] ?? "?") : d.exchange.mode === "none" ? "생각 없음" : "—";
+      case "priority":
+        return d.priority === "fast_completion" ? "빨리 끝내기" : d.priority === "career_core" ? "진로 과목 먼저" : d.priority === "light_terms" ? "여유 있는 학기" : "—";
+      default:
+        return "";
+    }
+  };
   return (
-    <div className="grid gap-9">
-      <div>
-        <p className="mb-2.5 text-[13px] font-medium text-muted">트랙 순위를 매길 때 가장 먼저 볼 것</p>
-        <div role="radiogroup" aria-label="가장 중요한 것" className="grid grid-cols-3 gap-2">
-          {PRIORITIES.map(([key, label, desc]) => (
-            <Choice key={key} selected={d.priority === key} onClick={() => set({ priority: key })}>
-              <b className="font-semibold">{label}</b>
-              <span className="block text-[12px] text-muted">{desc}</span>
-            </Choice>
-          ))}
-        </div>
-      </div>
-      <div className="max-w-[320px]">
-        <Field label="목표 총학점 (선택)" hint="졸업사정 조회에서 확인한 값. 비우면 완료 학기를 계산하지 않아요.">
-          <input
-            type="number"
-            min={1}
-            max={250}
-            placeholder="모르면 비워 두기"
-            value={d.targetCredits ?? ""}
-            onChange={(e) => set({ targetCredits: e.target.value === "" ? null : Number(e.target.value) })}
-          />
-        </Field>
-      </div>
-    </div>
+    <dl className="grid grid-cols-2 gap-x-10 border-t-[1.5px] border-ink">
+      {steps.map((s) => {
+        const p = stepProblem(s, d);
+        const title = INPUT_STEPS.find((x) => x.id === s)!.title;
+        return (
+          <div key={s} className="flex min-h-[52px] items-center gap-4 border-b border-rule">
+            <dt className="w-[120px] shrink-0 text-[13px] text-muted">{title}</dt>
+            <dd className={`min-w-0 flex-1 truncate text-[15px] font-medium ${p ? "text-red" : ""}`}>{p ? p : value(s)}</dd>
+            <Link href={stepPath(s)} className="inline-flex shrink-0 items-center gap-1 rounded-[6px] px-2 py-1 text-[13px] text-pen hover:bg-paper-2" aria-label={`${title} 고치기`}>
+              <PencilLine size={13} aria-hidden /> 고치기
+            </Link>
+          </div>
+        );
+      })}
+    </dl>
   );
 }
 
-function InfoLink({ href, title, desc }: { href: string; title: string; desc: string }): ReactNode {
-  return (
-    <Link href={href} className="group flex items-center gap-4 rounded-[6px] border-[1.5px] border-dashed border-pen/50 bg-pen/[0.04] px-5 py-4 hover:border-pen">
-      <BookOpen size={22} className="shrink-0 text-pen" aria-hidden />
-      <span className="min-w-0">
-        <span className="block text-[15px] font-semibold text-pen">{title}</span>
-        <span className="block text-[12px] text-ink-soft">{desc}</span>
-      </span>
-      <ArrowRight size={18} className="ml-auto shrink-0 text-pen transition-transform group-hover:translate-x-0.5" aria-hidden />
-    </Link>
-  );
-}

@@ -2,6 +2,10 @@ import type {
   CareerTrack,
   Dataset,
   ISODate,
+  KatusaStatus,
+  PaceBand,
+  PaceStyle,
+  PeriodInput,
   PlanInput,
   PlanInputV2,
   PriorityKey,
@@ -9,40 +13,69 @@ import type {
   TrackCandidate,
 } from "@/contracts/types";
 import { addMonths, DEFAULT_PRIORITIES, termIndex, termRange, toEngineInput, validatePlanInputV2 } from "@/engine";
-import { isBlocked } from "@/engine/terms";
+import { isBlocked, nextTerm, overlaps } from "@/engine/terms";
+import { resolvePeriodRange } from "@/engine/inputV2";
 import { answeredCount } from "./recommend";
 
 /**
- * 정보 입력 화면의 값. 진로와 입대 시기는 사용자가 정하지 않고 다음 화면에서 추천한다.
- * 학교 수치(목표학점·복무기간)는 채우지 않고 사용자가 고른 값만 쓴다.
+ * 01 아(내 정보) 질문형 입력 값. 질문 하나에 값 하나.
+ * null = 아직 답하지 않음(0과 구분한다). 학교 수치(목표학점·복무기간)는 사용자가 적은 값만 쓴다.
  */
 export interface Draft {
-  schemaVersion: 3;
+  schemaVersion: 4;
   name: string;
   admissionYear: number | null;
-  completedTerms: number;
-  earnedCredits: number;
-  earnedMajorCredits: number;
+  /** 실제로 마친 유효학기 수(휴학·군 복무 학기 제외) */
+  completedTerms: number | null;
+  startTerm: Term | null;
+  earnedCredits: number | null;
+  earnedMajorCredits: number | null;
   completedCourseCodes: string[];
+  /** 이수 과목 질문에 답했는지(빈 배열 = 들은 학과 과목 없음으로 확인) */
+  coursesConfirmed: boolean;
   targetCredits: number | null;
-  startTerm: Term;
-  /** 질문 id → 고른 선택지 id */
+  /** 목표학점 출처. graduation_check = 개인 졸업사정 조회 결과(공식 졸업학점으로 일반화하지 않음) */
+  targetSource: "graduation_check" | "user_goal" | null;
+  /** 관심 진로. unsure = 질문으로 추천받기 */
+  career: CareerTrack | "unsure" | null;
+  /** 진로 추천 질문 id → 고른 선택지 id */
   answers: Record<string, string>;
+  /** 학기당 희망 학점. compare = 15·18·20 비교 */
+  paceCredits: number | "compare" | null;
+  /** compare = 균형형과 후반 여유형 비교 */
+  paceStyle: PaceStyle | "compare" | null;
+  /** 직접 설정: 1·2학년 / 3학년 / 4학년 이후 학기당 학점 */
+  customPace: { early: number; year3: number; year4: number } | null;
   military: {
-    /** recommend = 시기 추천받기, fixed = 입영일이 정해짐, none = 해당 없음 */
-    mode: "recommend" | "fixed" | "none";
-    /** 사용자가 고른 예상 복무 기간(개월) */
-    months: number | null;
-    /** mode가 fixed일 때 입영일 */
+    /** done = 마침, planned = 다녀올 예정, undecided = 고민 중, none = 해당 없음 */
+    status: "done" | "planned" | "undecided" | "none" | null;
+    /** 관심 군 복무 트랙 ID(검토 자료). 빈 배열 = 아직 모름 */
+    trackIds: string[];
+    /** 입대 시점: recommend = 학년 마친 시점별 비교, fixed = 입영일 확정 */
+    timing: "recommend" | "fixed";
     startDate: ISODate | null;
+    /** 사용자가 직접 확인한 예상 복무기간(개월). 공식 확인값이 있으면 그 값을 우선한다 */
+    months: number | null;
+    /** 보유 자격증 ID */
+    certificateIds: string[];
   };
-  exchange: {
-    /** none = 생각 없음, recommend = 시기 추천받기, pick = 가고 싶은 학년·학기가 있음 */
-    mode: "none" | "recommend" | "pick";
-    /** pick일 때: 교환 학기 전까지 마친 학기 수(예: 3학년 1학기 = 4) */
+  katusa: {
+    /** "카투사에 선발된다면 다른 군 복무 트랙보다 카투사를 우선" */
+    priority: boolean | null;
+    status: KatusaStatus;
+  };
+  leave: {
+    mode: "none" | "pick" | null;
+    /** 휴학 학기 전까지 마친 학기 수 */
     ordinal: number | null;
   };
-  priority: PriorityKey;
+  exchange: {
+    mode: "none" | "recommend" | "pick" | null;
+    ordinal: number | null;
+  };
+  priority: PriorityKey | null;
+  /** 테스트 프로필로 불러온 경우(가상 데이터) */
+  demo: { profileId: string; label: string; genEd: Array<{ studyIndex: number; credits: 2 | 3 }> } | null;
 }
 
 /** 오늘 기준으로 처음 계획할 학기(사용자가 바꿀 수 있는 기본값). */
@@ -61,28 +94,70 @@ export function todayISO(): ISODate {
 
 export function blankDraft(today: ISODate): Draft {
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
     name: "",
     admissionYear: null,
-    completedTerms: 0,
-    earnedCredits: 0,
-    earnedMajorCredits: 0,
+    completedTerms: null,
+    startTerm: today ? upcomingTerm(today) : null,
+    earnedCredits: null,
+    earnedMajorCredits: null,
     completedCourseCodes: [],
+    coursesConfirmed: false,
     targetCredits: null,
-    startTerm: upcomingTerm(today),
+    targetSource: null,
+    career: null,
     answers: {},
-    military: { mode: "none", months: null, startDate: null },
-    exchange: { mode: "none", ordinal: null },
-    priority: "fast_completion",
+    paceCredits: null,
+    paceStyle: null,
+    customPace: null,
+    military: { status: null, trackIds: [], timing: "recommend", startDate: null, months: null, certificateIds: [] },
+    katusa: { priority: null, status: "undecided" },
+    leave: { mode: null, ordinal: null },
+    exchange: { mode: null, ordinal: null },
+    priority: null,
+    demo: null,
   };
 }
 
 export const MIN_ANSWERS = 3;
 
-/** 추천 계산에 넘기는 v2 입력. 진로는 넘겨받은 것만, 학점 페이스는 15·18·20 비교로 펼친다. */
+/** 군 복무 기간을 계획에 넣는지 */
+export const needsMilitary = (d: Draft) => d.military.status === "planned" || d.military.status === "undecided";
+
+/** 마친 학기 수가 ordinal이 되는 첫 학기(군 복무·교환 구간은 건너뜀) */
+export function termAfterOrdinal(input: PlanInputV2, ordinal: number, skipKinds: PeriodInput["kind"][] = ["military"]): Term | null {
+  if (!input.startTerm) return null;
+  const ranges = input.periods.flatMap((p) => {
+    const r = resolvePeriodRange(p);
+    return r && skipKinds.includes(p.kind) ? [r] : [];
+  });
+  let done = input.progress.completedTerms ?? 0;
+  let t = input.startTerm;
+  for (let i = 0; i < 24; i++, t = nextTerm(t)) {
+    if (ranges.some((r) => overlaps(termRange(t), r))) continue;
+    if (done >= ordinal) return t;
+    done++;
+  }
+  return null;
+}
+
+function paceBandsOf(d: Draft): PaceBand[] | null {
+  if (!d.customPace) return null;
+  return [
+    { fromOrdinal: 1, credits: d.customPace.early },
+    { fromOrdinal: 5, credits: d.customPace.year3 },
+    { fromOrdinal: 7, credits: d.customPace.year4 },
+  ];
+}
+
+/** 추천 계산에 넘기는 v2 입력. 진로는 넘겨받은 것만, 학점 페이스는 고른 값(또는 비교값)으로 펼친다. */
 export function draftToInputV2(draft: Draft, dataset: Dataset, careers: CareerTrack[]): PlanInputV2 {
   const m = draft.military;
-  return {
+  const withMil = needsMilitary(draft);
+  const paceStyles: PaceStyle[] =
+    draft.paceStyle === "compare" ? ["balanced", "late_light"] : draft.paceStyle ? [draft.paceStyle] : ["balanced"];
+  const priority = draft.priority ?? "fast_completion";
+  const base: PlanInputV2 = {
     schemaVersion: 2,
     displayName: draft.name || null,
     campus: dataset.campus,
@@ -93,70 +168,99 @@ export function draftToInputV2(draft: Draft, dataset: Dataset, careers: CareerTr
       completedTerms: draft.completedTerms,
       earnedCredits: draft.earnedCredits,
       earnedMajorCredits: draft.earnedMajorCredits,
-      completedCourseCodes: draft.completedCourseCodes,
+      completedCourseCodes: draft.coursesConfirmed || draft.completedCourseCodes.length > 0 ? draft.completedCourseCodes : null,
       inProgressCourseCodes: [],
       unrecognizedLines: [],
     },
-    target: draft.targetCredits === null ? null : { value: draft.targetCredits, source: "user_goal", checkedAt: null },
+    target:
+      draft.targetCredits === null
+        ? null
+        : { value: draft.targetCredits, source: draft.targetSource ?? "user_goal", checkedAt: null },
     requiredCourses: null,
     careers,
-    pace: { mode: "compare", options: null },
-    military: m.mode === "none" ? "not_applicable" : "planned",
-    leave: "none",
+    pace:
+      draft.paceCredits === null || draft.paceCredits === "compare"
+        ? { mode: "compare", options: null }
+        : { mode: "fixed", credits: draft.paceCredits },
+    military: withMil ? (m.status === "planned" ? "planned" : "undecided") : m.status === "done" ? "done" : "not_applicable",
+    leave: draft.leave.mode === "pick" ? "included" : "none",
     exchange: "none",
-    periods:
-      m.mode === "none"
-        ? []
-        : [
-            {
-              id: "mil-1",
-              kind: "military",
-              timing: m.mode === "fixed" ? "fixed" : "flexible",
-              startDate: m.mode === "fixed" ? m.startDate : null,
-              endDate: null,
-              durationMonths: m.months,
-              returnTerm: null,
-              status: "user_assumption",
-            },
-          ],
-    priorities: [draft.priority, ...DEFAULT_PRIORITIES.filter((p) => p !== draft.priority)],
+    periods: withMil
+      ? [
+          {
+            id: "mil-1",
+            kind: "military",
+            timing: m.timing === "fixed" ? "fixed" : "flexible",
+            startDate: m.timing === "fixed" ? m.startDate : null,
+            endDate: null,
+            durationMonths: m.months,
+            returnTerm: null,
+            status: "user_assumption",
+          },
+        ]
+      : [],
+    priorities: [priority, ...DEFAULT_PRIORITIES.filter((p) => p !== priority)],
+    paceStyles,
+    customPaceBands: draft.paceStyle === "custom" ? paceBandsOf(draft) : null,
+    militaryPlan: withMil
+      ? {
+          trackIds: m.trackIds,
+          katusaPriority: draft.katusa.priority === true,
+          katusaStatus: draft.katusa.status,
+          certificateIds: m.certificateIds,
+        }
+      : null,
   };
-}
-
-/** 입력 단계별로 다음으로 넘어가기 전에 막을 문제. 없으면 null */
-export function stepProblem(step: string, draft: Draft): string | null {
-  switch (step) {
-    case "record":
-      if (draft.earnedMajorCredits > draft.earnedCredits) return "전공학점은 총 이수학점 안에 포함되어야 해요.";
-      if (draft.earnedCredits < 0 || draft.earnedMajorCredits < 0) return "학점은 0 이상이어야 해요.";
-      return null;
-    case "interest":
-      return answeredCount(draft.answers) < MIN_ANSWERS ? `질문에 ${MIN_ANSWERS}개 이상 답해 주세요.` : null;
-    case "military":
-      if (draft.military.mode !== "none" && draft.military.months === null) return "예상 복무 기간을 골라 주세요.";
-      if (draft.military.mode === "fixed" && !draft.military.startDate) return "입영일을 입력해 주세요.";
-      return null;
-    case "exchange":
-      return draft.exchange.mode === "pick" && draft.exchange.ordinal === null ? "가고 싶은 학기를 골라 주세요." : null;
-    default:
-      return null;
+  // 휴학: 마친 학기 수가 ordinal이 되는 첫 학기 한 학기(군 복무 구간은 피함)
+  if (draft.leave.mode === "pick" && draft.leave.ordinal !== null) {
+    const t = termAfterOrdinal(base, draft.leave.ordinal);
+    if (t) {
+      const r = termRange(t);
+      base.periods = [
+        ...base.periods,
+        { id: "leave-1", kind: "leave", timing: "fixed", startDate: r.start, endDate: r.end, durationMonths: null, returnTerm: null, status: "user_assumption" },
+      ];
+    }
   }
-}
-
-/** 트랙을 만들기 전 전체 검사. 없으면 null */
-export function draftProblem(draft: Draft, dataset: Dataset | null): string | null {
-  for (const step of ["record", "interest", "military", "exchange"]) {
-    const p = stepProblem(step, draft);
-    if (p) return p;
-  }
-  if (!dataset) return "학과 자료를 불러오는 중이에요.";
-  const errors = validatePlanInputV2(draftToInputV2(draft, dataset, ["software"])).filter((i) => i.severity === "error");
-  return errors[0]?.message ?? null;
+  return base;
 }
 
 /** 후보를 로드맵 화면이 쓰는 고정 입력(v1)으로 바꾼다. */
 export function candidatePlanInput(c: TrackCandidate): PlanInput | null {
-  return toEngineInput(c.input, c.key.career, c.key.paceCredits);
+  return toEngineInput(c.input, c.key.career, c.key.paceCredits, c.key.paceStyle ?? "balanced");
+}
+
+/** 트랙을 만들기 전 전체 검사. 없으면 null */
+export function draftProblem(draft: Draft, dataset: Dataset | null, today: ISODate = ""): { step: string; message: string } | null {
+  if (draft.completedTerms === null) return { step: "completed", message: "마친 학기 수를 알려 주세요." };
+  if (!draft.startTerm) return { step: "start", message: "계획을 시작할 학기를 골라 주세요." };
+  if (draft.earnedCredits === null) return { step: "credits", message: "지금까지 이수한 총학점을 알려 주세요." };
+  if (draft.earnedMajorCredits === null) return { step: "major", message: "그중 전공학점을 알려 주세요." };
+  if (draft.career === "unsure" && answeredCount(draft.answers) < MIN_ANSWERS)
+    return { step: "quiz", message: `진로 추천 질문에 ${MIN_ANSWERS}개 이상 답해 주세요.` };
+  if (draft.military.timing === "fixed" && needsMilitary(draft) && !draft.military.startDate)
+    return { step: "military-timing", message: "입영일을 입력해 주세요." };
+  if (draft.exchange.mode === "pick" && draft.exchange.ordinal === null) return { step: "exchange", message: "가고 싶은 학기를 골라 주세요." };
+  if (draft.leave.mode === "pick" && draft.leave.ordinal === null) return { step: "leave", message: "휴학할 시점을 골라 주세요." };
+  if (draft.paceStyle === "custom" && !draft.customPace) return { step: "late", message: "학년별 학점을 정해 주세요." };
+  if (!dataset) return { step: "", message: "학과 자료를 불러오는 중이에요." };
+  const errors = validatePlanInputV2(draftToInputV2(draft, dataset, ["software"]), { today: today || undefined }).filter(
+    (i) => i.severity === "error",
+  );
+  if (errors[0]) return { step: fieldStep(errors[0].field), message: errors[0].message };
+  return null;
+}
+
+/** 입력 오류 경로 → 그 값을 묻는 질문 */
+function fieldStep(field: string): string {
+  if (field.startsWith("startTerm")) return "start";
+  if (field === "progress.completedTerms") return "completed";
+  if (field === "progress.earnedMajorCredits") return "major";
+  if (field.startsWith("progress.earned")) return "credits";
+  if (field === "target") return "target";
+  if (field.startsWith("periods")) return "military-timing";
+  if (field === "customPaceBands") return "late";
+  return "review";
 }
 
 /** 군 복무 구간을 학기 단위(6개월)로 당기거나 미룬다. */
@@ -186,7 +290,7 @@ export function militarySummary(
   return { first: blocked[0].term, back, count: blocked.length };
 }
 
-/** "2학년 1학기" 같은 학년 표시. 마친 학기 수 + 이번 계획에서 다닌 학기 수 */
+/** "2학년 1학기" 같은 학년 표시. 마친 학기 수 기준(0부터) */
 export function gradeLabel(ordinal: number): string {
   return `${Math.floor(ordinal / 2) + 1}학년 ${(ordinal % 2) + 1}학기`;
 }

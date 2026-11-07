@@ -7,7 +7,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CAREER_LABEL } from "@/contracts/careers";
 import type { DatasetV2, PlanInput, PlanResult, Term } from "@/contracts/types";
 import { diffPlans, ENGINE_VERSION, formatTerm, simulatePlan, termIndex } from "@/engine";
-import { type ChatMessage, type FeedbackReply, requestTrackFeedback } from "../feedbackAgent";
+import { type ChatMessage, type FeedbackReply, type FeedbackResponder, requestTrackFeedback } from "../feedbackAgent";
+import { SCRIPTED_DEMO_LABEL, scriptedDemoResponder } from "../feedbackDemo";
 import { usePlanner } from "../PlannerApp";
 import { militarySummary } from "../plan";
 import type { PlanState } from "../storage";
@@ -15,13 +16,17 @@ import { ActionBar } from "./OutputScreen";
 import { Button, Empty, Hand, PageTitle } from "./ui";
 
 const SUGGESTIONS = [
-  "계절학기를 들어서 조금 더 빨리 끝내고 싶어요",
-  "OOO 교수님 수업은 피하고 싶어요",
-  "3학년 1학기는 15학점 이하로 가볍게 다니고 싶어요",
-  "입대 전에 데이터베이스시스템은 꼭 듣고 싶어요",
+  "특정 교수님의 과목은 피하고 싶어요",
+  "계절학기를 활용하고 싶어요",
+  "4학년 2학기는 최대한 가볍게 하고 싶어요",
+  "조금 더 빨리 끝내고 싶어요",
 ];
 
-export function FeedbackScreen() {
+/**
+ * 개인화 화면. responder를 넘기면 그 함수로 응답을 받는다(개인화 담당자 연결 지점).
+ * 넘기지 않으면 미연결 응답, 사용자가 켜면 "시연용 예시 응답"을 쓴다.
+ */
+export function FeedbackScreen({ responder }: { responder?: FeedbackResponder } = {}) {
   const { mounted, plan, dataset } = usePlanner();
   if (!mounted) return <div className="h-96 animate-pulse rounded bg-paper-2" aria-busy="true" />;
   if (!plan || !dataset)
@@ -30,11 +35,13 @@ export function FeedbackScreen() {
         먼저 02 맞(맞춰가기)에서 기본 트랙을 골라 주세요.
       </Empty>
     );
-  return <Feedback plan={plan} dataset={dataset} />;
+  return <Feedback plan={plan} dataset={dataset} responder={responder} />;
 }
 
 /** 04 피드백 — 기본 트랙을 보여 주고, 하고 싶은 말을 적으면 개인 맞춤 트랙으로 고친다. */
-function Feedback({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
+function Feedback({ plan, dataset, responder }: { plan: PlanState; dataset: DatasetV2; responder?: FeedbackResponder }) {
+  const [demo, setDemo] = useState(false);
+  const respond: FeedbackResponder = responder ?? (demo ? scriptedDemoResponder : requestTrackFeedback);
   const { setPlan, draft } = usePlanner();
   const router = useRouter();
   const base = plan.input;
@@ -64,8 +71,8 @@ function Feedback({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
     setText("");
     setBusy(true);
     try {
-      const reply = await requestTrackFeedback({ message: m, history, plan, dataset });
-      setMessages((h) => [...h, { role: "assistant", text: reply.message }]);
+      const reply = await respond({ message: m, history, plan, dataset });
+      setMessages((h) => [...h, { role: "assistant", text: reply.message, demo: reply.origin === "scripted_demo" }]);
       if (reply.nextInput) setProposal(reply);
     } finally {
       setBusy(false);
@@ -79,6 +86,7 @@ function Feedback({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
       ...plan,
       input: next,
       previous: { schemaVersion: 1, savedAt: new Date().toISOString(), input: base, result: before, catalogVersion: before.catalogVersion, engineVersion: ENGINE_VERSION },
+      previousGenEd: plan.genEd,
       lastChanges: changes,
       confirmedAt: null,
     });
@@ -96,7 +104,7 @@ function Feedback({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
       <PageTitle
         step="03 · 다 — 맞춤 피드백"
         title="나에게 맞게 다듬기"
-        sub="기본 트랙을 보면서 바라는 점을 적어 주세요. 고친 결과는 전·후를 비교해 보여 드려요."
+        sub="선택한 기본 트랙을 보면서 바라는 점을 적어 주세요. 고친 결과는 적용 전에 전·후를 비교해 보여 드려요."
         aside={
           <Link href="/output" className="inline-flex items-center gap-2 text-[14px] text-ink-soft hover:text-ink">
             <ArrowLeft size={15} aria-hidden /> 기본 트랙 로드맵
@@ -113,7 +121,7 @@ function Feedback({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
                 <li key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   {m.role === "assistant" ? (
                     <div className="max-w-[78%]">
-                      <p className="mb-1 font-hand text-[18px] leading-none text-pen">아맞다</p>
+                      <p className="mb-1 font-hand text-[18px] leading-none text-pen">아맞다{m.demo ? ` · ${SCRIPTED_DEMO_LABEL}` : ""}</p>
                       <p className="rounded-[4px_14px_14px_14px] border border-line bg-paper-2 px-4 py-3 text-[15px] leading-relaxed">{m.text}</p>
                     </div>
                   ) : (
@@ -130,6 +138,12 @@ function Feedback({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
           </div>
 
           <div className="border-t border-line px-5 pt-3 pb-4">
+            {!responder && (
+              <label className="mb-2 flex w-fit cursor-pointer items-center gap-2 text-[12px] text-ink-soft">
+                <input type="checkbox" checked={demo} onChange={(e) => setDemo(e.target.checked)} />
+                {SCRIPTED_DEMO_LABEL} 사용 — 생성형 AI가 아니라 정해진 문장에만 반응해요
+              </label>
+            )}
             <div className="mb-3 flex flex-wrap gap-1.5">
               {SUGGESTIONS.map((s) => (
                 <button
@@ -190,9 +204,17 @@ function Feedback({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
             {plan.lastChanges.length > 0 && <p className="mt-3 text-[12px] text-ink-soft">최근 반영: {plan.lastChanges.join(" · ")}</p>}
           </div>
 
+          {!(proposal?.nextInput && after) && (
+            <div className="rounded-[8px] border-[1.5px] border-dashed border-line p-5 text-[13px] text-muted" aria-live="polite">
+              <p className="font-semibold text-ink-soft">적용 결과 미리보기</p>
+              {busy ? "처리 중이에요…" : "피드백으로 바뀌는 계획이 있으면 여기서 수정 전·후를 비교한 뒤 반영할지 고를 수 있어요."}
+            </div>
+          )}
           {proposal?.nextInput && after && (
             <div className="rounded-[8px] border-[1.5px] border-pen bg-paper p-5">
-              <p className="font-hand text-[22px] leading-none text-pen">이렇게 바꿔 볼까요?</p>
+              <p className="font-hand text-[22px] leading-none text-pen">
+                이렇게 바꿔 볼까요?{proposal.origin === "scripted_demo" && <span className="ml-2 font-sans text-[11px] text-muted">{SCRIPTED_DEMO_LABEL}</span>}
+              </p>
               <Proposal before={before} after={after} changes={proposal.changes} />
               <div className="mt-4 flex gap-2">
                 <Button kind="ink" onClick={() => apply(proposal.nextInput!, proposal.changes)} className="flex-1">

@@ -2,10 +2,12 @@
 
 import { MessageSquareText, Printer, Undo2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { CAREER_LABEL } from "@/contracts/careers";
 import type { DatasetV2 } from "@/contracts/types";
-import { formatTerm, simulatePlan, termIndex } from "@/engine";
+import type { Term } from "@/contracts/types";
+import { addGenEd, formatTerm, GEN_ED_NOTE, removeGenEd, simulatePlan, staleGenEd, termIndex } from "@/engine";
+import { sameTerm } from "@/engine/terms";
 import { buildGuidance } from "@/features/guidance/buildGuidance";
 import { usePlanner } from "../PlannerApp";
 import { militarySummary } from "../plan";
@@ -63,12 +65,29 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
       ? termIndex(result.expectedCompletion) - termIndex(prev.result.expectedCompletion)
       : null;
 
+  const [genEdMsg, setGenEdMsg] = useState<string | null>(null);
+  const addGE = (term: Term, credits: 2 | 3) => {
+    const r = addGenEd(plan.genEd, result.terms.find((t) => sameTerm(t.term, term)), credits);
+    if (!r.ok) return setGenEdMsg(r.reason);
+    setGenEdMsg(`${formatTerm(term)}에 ${r.item.label}(${credits}학점) 자리를 넣었어요. 학기 합계는 그대로예요.`);
+    setPlan({ ...plan, genEd: r.state });
+  };
+  const removeGE = (id: string) => {
+    setGenEdMsg(null);
+    setPlan({ ...plan, genEd: removeGenEd(plan.genEd, id) });
+  };
+  const stale = staleGenEd(plan.genEd, result.terms);
+  const careerCerts = (dataset.military?.careerCertificates ?? []).filter((x) => x.career === input.track);
+  const certName = (id: string) => dataset.military?.certificates.find((x) => x.id === id)?.officialName ?? id;
+  const capRules = [...new Set(result.terms.flatMap((t) => (t.capRuleId ? [t.capRuleId] : [])))];
+
   const confirm = () => setPlan({ ...plan, confirmedAt: today || new Date().toISOString().slice(0, 10) });
   const reopen = () => {
     setPlan({ ...plan, confirmedAt: null });
     router.push("/output/feedback");
   };
-  const undo = () => prev && setPlan({ ...plan, input: prev.input, previous: null, lastChanges: [], confirmedAt: null });
+  const undo = () =>
+    prev && setPlan({ ...plan, input: prev.input, previous: null, lastChanges: [], confirmedAt: null, genEd: plan.previousGenEd ?? plan.genEd, previousGenEd: null });
 
   const warnings = dedupe(result.warnings.filter((w) => w.code !== "UNPLACED_COURSE").map((w) => w.message));
 
@@ -87,9 +106,10 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
           step={confirmed ? "03 · 다 — 최종 트랙" : "03 · 다 — 기본 트랙"}
           title={plan.trackTitle}
           sub={
-            confirmed
+            (confirmed
               ? `${plan.confirmedAt}에 확정한 계획이에요. 인쇄하거나 PDF로 저장해 두세요.`
-              : `${name ? `${name}님이 ` : ""}고른 기본 트랙이에요. 피드백으로 나에게 맞게 다듬은 뒤 “아 맞다!”로 확정하세요.`
+              : `${name ? `${name}님이 ` : ""}고른 기본 트랙이에요. 피드백으로 나에게 맞게 다듬은 뒤 “아 맞다!”로 확정하세요.`) +
+            (plan.lastChanges.length > 0 ? ` 기본 트랙에서 바꾼 점: ${plan.lastChanges.join(" · ")}` : "")
           }
         />
         {confirmed && (
@@ -101,15 +121,28 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
 
       <dl className="mb-8 grid grid-cols-5 border-y-[1.5px] border-ink">
         <Cell label="진로">{CAREER_LABEL[input.track]}</Cell>
-        <Cell label="군 복무" sub={mil ? (mil.back ? `${formatTerm(mil.back)} 복학` : "복학은 계획 범위 밖") : undefined}>
-          {mil ? `${formatTerm(mil.first)} 입대` : "없음"}
+        <Cell label={plan.military?.label ?? "군 복무"} sub={mil ? (mil.back ? `${formatTerm(mil.back)} 복학` : "복학은 계획 범위 밖") : plan.military ? "기간 확인 필요" : undefined}>
+          {mil ? `${formatTerm(mil.first)} 입대` : plan.military ? "일정 미정" : "없음"}
         </Cell>
-        <Cell label="학기당 최대">{input.creditCap}학점</Cell>
+        <Cell label="학기당 계획" sub={input.paceStyle === "late_light" ? "후반 여유형(서비스 계획 방식)" : input.paceStyle === "custom" ? "직접 설정" : undefined}>
+          최대 {input.creditCap}학점
+        </Cell>
         <Cell label="예상 계획 완료" strong>
           {result.expectedCompletion ? formatTerm(result.expectedCompletion) : "목표학점 필요"}
         </Cell>
         <Cell label="남은 학점 / 계획">{remaining === null ? `— / ${total}학점` : `${remaining} / ${total}학점`}</Cell>
       </dl>
+
+      {plan.military?.conditional && (
+        <p className="mb-6 border-l-[3px] border-red bg-red-soft/40 px-4 py-2.5 text-[14px]">
+          <b>선발 결과에 따라 달라지는 조건부 계획이에요.</b> 카투사 선발을 가정했으며 합격 가능성 예측이 아니에요. 선발되지 않으면 02 맞에서 대체 트랙을 고르세요.
+        </p>
+      )}
+      {stale.length > 0 && (
+        <p className="mb-6 border-l-[3px] border-red px-4 py-2 text-[13px] text-red print:hidden">
+          계획이 바뀌어 맞지 않는 교양 자리가 있어요: {stale.map((g) => `${g.label}(${formatTerm(g.term)})`).join(", ")}. 빼고 다시 넣어 주세요.
+        </p>
+      )}
 
       {prev && plan.lastChanges.length > 0 && !confirmed && (
         <div className="mb-8 flex items-center justify-between gap-4 border-l-[3px] border-pen bg-pen/[0.05] px-4 py-3 print:hidden">
@@ -126,7 +159,23 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
       )}
 
       <div className="grid grid-cols-[minmax(0,1fr)_280px] gap-10 print:block">
-        <Roadmap input={input} result={result} dataset={dataset} exchange={plan.exchange} />
+        <div>
+          {!confirmed && (
+            <p className="mb-3 text-[13px] text-ink-soft print:hidden" role="status">
+              학기 카드의 <b className="text-pen">+ 2학점 교양</b> · <b className="text-pen">+ 3학점 교양</b>으로 미지정 자리를 교양 자리로 바꿀 수 있어요. {GEN_ED_NOTE}
+              {genEdMsg && <span className="mt-1 block font-medium text-ink">{genEdMsg}</span>}
+            </p>
+          )}
+          <Roadmap
+            input={input}
+            result={result}
+            dataset={dataset}
+            exchange={plan.exchange}
+            genEd={plan.genEd}
+            onAddGenEd={confirmed ? undefined : addGE}
+            onRemoveGenEd={confirmed ? undefined : removeGE}
+          />
+        </div>
 
         <aside className="grid content-start gap-8 print:mt-6">
           <section>
@@ -144,6 +193,38 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
                 </li>
               ))}
             </ul>
+          </section>
+
+          {careerCerts.length > 0 && (
+            <section>
+              <h2 className="mb-1 font-serif text-[16px] font-bold">자격증 준비</h2>
+              <p className="mb-2 text-[11px] text-muted">진로 준비에 도움이 되는 서비스 추천이에요. 공식 필수 자격이 아니에요.</p>
+              <ul className="grid gap-1.5 text-[13px]">
+                {careerCerts.map((x) => (
+                  <li key={x.certificateId}>
+                    <label className="flex cursor-pointer items-start gap-2">
+                      <input type="checkbox" className="mt-1" checked={!!checked[`cert:${x.certificateId}`]} onChange={() => toggleChecked(`cert:${x.certificateId}`)} />
+                      <span>
+                        <b className="font-medium">{certName(x.certificateId)}</b>
+                        <span className="block text-[12px] text-muted">{x.reason}</span>
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section className="text-[12px] text-ink-soft">
+            <h2 className="mb-1 font-serif text-[16px] font-bold text-ink">공식 자료와 사용자 가정</h2>
+            <p>
+              <b className="text-sage-ink">공식</b> 과목·학점: {dataset.department} {dataset.curriculum} 교육과정 자료
+              {capRules.length > 0 && ` · 학기 상한: ${capRules.map((id) => dataset.creditCapRules?.find((r) => r.id === id)).filter(Boolean).map((r) => `${r!.maxCredits}학점(${r!.sourceRef.sourceId} ${r!.sourceRef.pages.join("·")}쪽)`).join(", ")}`}
+            </p>
+            <p className="mt-1">
+              <b className="text-pen">가정</b> 학기당 계획 학점 · 학기 구간(3~6월/9~12월) · {input.targetCredits === null ? "목표학점 없음" : `목표 ${input.targetCredits}학점(내 입력)`}
+              {plan.military && ` · ${plan.military.label} ${plan.military.monthsStatus === "verified" ? "복무기간(공식 확인)" : "복무기간(확인 필요 또는 내 입력)"}`}
+            </p>
           </section>
 
           {result.unplaced.length > 0 && (

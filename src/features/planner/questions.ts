@@ -1,0 +1,96 @@
+import { INPUT_STEPS, type StepId } from "./inputSteps";
+import { type Draft, MIN_ANSWERS, needsMilitary } from "./plan";
+import { answeredCount } from "./recommend";
+
+/** 지금 답에 따라 보이는 질문(조건부 질문은 필요할 때만) */
+export function visibleSteps(d: Draft): StepId[] {
+  return INPUT_STEPS.map((s) => s.id).filter((id) => {
+    switch (id) {
+      case "quiz":
+        return d.career === "unsure";
+      case "military-track":
+      case "military-timing":
+      case "katusa":
+        return needsMilitary(d);
+      case "katusa-status":
+        return needsMilitary(d) && d.katusa.priority === true;
+      default:
+        return true;
+    }
+  });
+}
+
+/** 다음으로 넘어가기 전에 막을 문제. 없으면 null. 선택 질문(이름·입학연도·목표학점)은 비워도 된다. */
+export function stepProblem(step: StepId, d: Draft): string | null {
+  switch (step) {
+    case "completed":
+      return d.completedTerms === null ? "마친 학기 수를 골라 주세요." : null;
+    case "start":
+      return d.startTerm === null ? "시작 학기를 골라 주세요." : null;
+    case "credits":
+      if (d.earnedCredits === null) return "총 이수학점을 적어 주세요. 신입생이면 0이에요.";
+      return d.earnedCredits < 0 ? "학점은 0 이상이어야 해요." : null;
+    case "major":
+      if (d.earnedMajorCredits === null) return "전공학점을 적어 주세요. 없으면 0이에요.";
+      if (d.earnedMajorCredits < 0) return "학점은 0 이상이어야 해요.";
+      if (d.earnedCredits !== null && d.earnedMajorCredits > d.earnedCredits)
+        return "전공학점은 총 이수학점 안에 포함돼요. 총학점보다 클 수 없어요.";
+      return null;
+    case "target":
+      return d.targetCredits !== null && d.targetCredits <= 0 ? "목표학점은 0보다 커야 해요." : null;
+    case "career":
+      return d.career === null ? "관심 진로를 고르거나 ‘잘 모르겠어요’를 눌러 주세요." : null;
+    case "quiz":
+      return answeredCount(d.answers) < MIN_ANSWERS ? `질문에 ${MIN_ANSWERS}개 이상 답해 주세요.` : null;
+    case "pace":
+      return d.paceCredits === null ? "학기당 학점을 골라 주세요." : null;
+    case "late":
+      if (d.paceStyle === null) return "학점 배치 방식을 골라 주세요.";
+      if (d.paceStyle === "custom") {
+        const c = d.customPace;
+        if (!c) return "학년별 학점을 적어 주세요.";
+        if ([c.early, c.year3, c.year4].some((n) => !Number.isInteger(n) || n < 1 || n > 30)) return "학기당 학점은 1~30 사이로 적어 주세요.";
+      }
+      return null;
+    case "military":
+      return d.military.status === null ? "군 복무 상황을 골라 주세요." : null;
+    case "military-track":
+      return d.military.months !== null && (!Number.isInteger(d.military.months) || d.military.months < 1)
+        ? "예상 복무기간은 1 이상의 개월 수로 적어 주세요."
+        : null;
+    case "military-timing":
+      return d.military.timing === "fixed" && !d.military.startDate ? "입영일을 입력해 주세요." : null;
+    case "katusa":
+      return d.katusa.priority === null ? "카투사 우선 여부를 골라 주세요." : null;
+    case "leave":
+      if (d.leave.mode === null) return "휴학 계획을 골라 주세요.";
+      return d.leave.mode === "pick" && d.leave.ordinal === null ? "휴학할 시점을 골라 주세요." : null;
+    case "exchange":
+      if (d.exchange.mode === null) return "교환학생 계획을 골라 주세요.";
+      return d.exchange.mode === "pick" && d.exchange.ordinal === null ? "가고 싶은 학기를 골라 주세요." : null;
+    case "priority":
+      return d.priority === null ? "가장 중요한 것을 하나 골라 주세요." : null;
+    default:
+      return null;
+  }
+}
+
+/** 질문에 답했는지(진행률·목차 체크용) */
+export function stepAnswered(step: StepId, d: Draft): boolean {
+  switch (step) {
+    case "name":
+      return d.name !== "";
+    case "admission":
+      return d.admissionYear !== null;
+    case "courses":
+      return d.coursesConfirmed || d.completedCourseCodes.length > 0;
+    case "target":
+      return d.targetCredits !== null;
+    case "review":
+      return false;
+    case "military-track":
+      return d.military.trackIds.length > 0;
+    default:
+      return stepProblem(step, d) === null;
+  }
+}

@@ -13,6 +13,8 @@ import type { PlanState } from "./storage";
 export interface ChatMessage {
   role: "user" | "assistant";
   text: string;
+  /** 시연용 예시 응답이면 true(화면에 표시) */
+  demo?: boolean;
 }
 
 export interface FeedbackRequest {
@@ -23,6 +25,8 @@ export interface FeedbackRequest {
 }
 
 export interface FeedbackReply {
+  /** agent = 실제 개인화 로직(다른 담당자가 연결), scripted_demo = 시연용 예시 응답, none = 미연결 */
+  origin: "agent" | "scripted_demo" | "none";
   /** 채팅에 보여 줄 답 */
   message: string;
   /** 바꾼 계획 입력. 바꿀 게 없거나 아직 처리하지 못하면 null */
@@ -31,9 +35,13 @@ export interface FeedbackReply {
   changes: string[];
 }
 
+/** 화면이 주입받는 응답 함수 경계. 개인화 담당자는 이 모양의 함수를 넘기면 된다. */
+export type FeedbackResponder = (req: FeedbackRequest) => Promise<FeedbackReply>;
+
 export async function requestTrackFeedback(req: FeedbackRequest): Promise<FeedbackReply> {
   void req;
   return {
+    origin: "none",
     message: "피드백 반영 기능은 아직 연결 중이에요. 적어 주신 내용은 이 대화에 남겨 둘게요.",
     nextInput: null,
     changes: [],

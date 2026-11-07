@@ -226,3 +226,33 @@ input[type="checkbox"]:focus-visible {
     display: none;
   }
 }
+
+/* 질문 전환: 짧게(200ms) 미끄러지며 나타남. 모션 감소 설정이면 끈다. */
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.step-in {
+  animation: step-in 200ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .step-in,
+  .stamp-in {
+    animation: none !important;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 키보드 포커스를 분명하게 */
+:where(button, a, input, select, textarea, [role="radio"], [role="checkbox"]):focus-visible {
+  outline: 3px solid var(--pen);
+  outline-offset: 2px;
+}

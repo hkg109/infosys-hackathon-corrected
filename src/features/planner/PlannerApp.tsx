@@ -6,7 +6,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { CatalogResponse, DatasetV2 } from "@/contracts/types";
 import { type Draft, draftProblem, todayISO } from "./plan";
 import { loadChecked, loadDraft, loadPlan, type PlanState, saveChecked, saveDraft, savePlan } from "./storage";
-import { buildTracks } from "./tracks";
+import type { TestProfile } from "./testProfiles";
+import { buildTracks, type TrackSet } from "./tracks";
 import { useCatalog } from "./useCatalog";
 
 interface PlannerContext {
@@ -22,12 +23,14 @@ interface PlannerContext {
   /** 이전 값 기준으로 고친다(빠른 연속 입력에도 덮어쓰지 않음). 저장값이 없으면 아무것도 하지 않는다. */
   updateDraft: (fn: (d: Draft) => Draft) => void;
   /** 입력이 다 차면 계산한 트랙 목록. 아직이면 null */
-  tracks: ReturnType<typeof buildTracks> | null;
+  tracks: TrackSet | null;
   plan: PlanState | null;
   setPlan: (p: PlanState | null) => void;
   checked: Record<string, boolean>;
   toggleChecked: (id: string) => void;
   resetAll: () => void;
+  /** 테스트 프로필 불러오기: 입력·선택 트랙·교양 자리·전후 비교·확정·체크리스트를 모두 초기화한 뒤 가상 입력으로 채운다 */
+  loadProfile: (p: TestProfile) => void;
 }
 
 const Ctx = createContext<PlannerContext | null>(null);
@@ -51,10 +54,11 @@ export function PlannerApp({ children }: { children: ReactNode }) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    setDraftState(loadDraft());
+    const t = todayISO();
+    setDraftState(loadDraft(t));
     setPlanState(loadPlan());
     setChecked(loadChecked());
-    setToday(todayISO());
+    setToday(t);
     setMounted(true);
     reload();
   }, [reload]);
@@ -88,16 +92,23 @@ export function PlannerApp({ children }: { children: ReactNode }) {
     setChecked({});
     saveChecked(null);
   }, [setDraft, setPlan]);
+  const loadProfile = useCallback(
+    (p: TestProfile) => {
+      resetAll();
+      setDraft(p.draft(today || todayISO()));
+    },
+    [resetAll, setDraft, today],
+  );
 
   const dataset = catalog?.dataset ?? null;
   const tracks = useMemo(
-    () => (draft && dataset && !draftProblem(draft, dataset) ? buildTracks(draft, dataset) : null),
-    [draft, dataset],
+    () => (draft && dataset && !draftProblem(draft, dataset, today) ? buildTracks(draft, dataset, today) : null),
+    [draft, dataset, today],
   );
 
   const value = useMemo<PlannerContext>(
-    () => ({ mounted, today, catalog, dataset, loading, reload, draft, setDraft, updateDraft, tracks, plan, setPlan, checked, toggleChecked, resetAll }),
-    [mounted, today, catalog, dataset, loading, reload, draft, setDraft, updateDraft, tracks, plan, setPlan, checked, toggleChecked, resetAll],
+    () => ({ mounted, today, catalog, dataset, loading, reload, draft, setDraft, updateDraft, tracks, plan, setPlan, checked, toggleChecked, resetAll, loadProfile }),
+    [mounted, today, catalog, dataset, loading, reload, draft, setDraft, updateDraft, tracks, plan, setPlan, checked, toggleChecked, resetAll, loadProfile],
   );
 
   return (
@@ -126,6 +137,9 @@ function Notebook({ children }: { children: ReactNode }) {
   const { tracks, plan, mounted, today, catalog } = usePlanner();
   const active = (m: readonly string[]) => m.some((p) => (p === "/" ? path === "/" : path.startsWith(p)));
   const ds = catalog?.dataset;
+
+  // 00 표지는 화면 전체를 채운다(노트 틀 없이).
+  if (path === "/") return <div className="min-h-dvh min-w-[1100px] bg-desk">{children}</div>;
 
   return (
     <div className="flex min-h-dvh min-w-[1100px] flex-col print:block print:min-w-0">
@@ -162,7 +176,7 @@ function Notebook({ children }: { children: ReactNode }) {
             <Link href="/" className="flex items-baseline gap-3">
               <span className="font-serif text-[22px] font-bold tracking-tight text-ink">아 맞다</span>
               <span className="text-xs text-muted">
-                <b className="font-semibold text-ink-soft">아</b>름다운 인생을 <b className="font-semibold text-ink-soft">맞</b>춰 줍니<b className="font-semibold text-ink-soft">다</b> · 정보시스템학과 트랙 플래너
+                <b className="font-semibold text-ink-soft">아</b>름다운 인생을 <b className="font-semibold text-ink-soft">맞</b>춰드립니<b className="font-semibold text-ink-soft">다</b> · 정보시스템학과 트랙 플래너
               </span>
             </Link>
             <div className="flex items-center gap-4 text-xs text-muted">

@@ -96,6 +96,8 @@ export function recommendCareers(
   answers: Record<string, string>,
   completedCourseCodes: string[] = [],
   dataset: Dataset | null = null,
+  /** 사용자가 직접 고른 관심 진로. 있으면 맨 앞에 둔다 */
+  picked: CareerTrack | null = null,
 ): CareerMatch[] {
   const rows = CAREER_TRACKS.map((track) => ({ track, score: 0, matchedAnswers: 0, reasons: [] as string[] }));
   const row = (t: CareerTrack) => rows.find((r) => r.track === t)!;
@@ -126,6 +128,6 @@ export function recommendCareers(
 
   return rows
     .map((r, i) => ({ r, i }))
-    .sort((a, b) => b.r.score - a.r.score || a.i - b.i)
+    .sort((a, b) => Number(b.r.track === picked) - Number(a.r.track === picked) || b.r.score - a.r.score || a.i - b.i)
     .map(({ r }) => r);
 }
