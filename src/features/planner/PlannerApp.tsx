@@ -2,8 +2,18 @@
 
 import { CheckCircle2, Printer, RotateCcw, UserRoundPen } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { CandidateSet, PlanInput, PlanResult, SavedPlan, Term, TrackCandidate } from "@/contracts/types";
-import { diffPlans, ENGINE_VERSION, formatTerm, simulatePlan, termIndex } from "@/engine";
+import type { CandidateSet, PlanInput, PlanResult, PriorityKey, SavedPlan, Term, TrackCandidate } from "@/contracts/types";
+import {
+  candidateIdOf,
+  DEFAULT_PRIORITIES,
+  diffPlans,
+  ENGINE_VERSION,
+  formatTerm,
+  generateCandidates,
+  planInputFromV1,
+  simulatePlan,
+  termIndex,
+} from "@/engine";
 import { buildGuidance } from "@/features/guidance/buildGuidance";
 import { CandidateList } from "./components/CandidateList";
 import { CatalogBar, CatalogNotice, CatalogProblem } from "./components/CatalogStatus";
@@ -54,14 +64,15 @@ export function PlannerApp() {
   const [focusTerm, setFocusTerm] = useState<Term | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [editing, setEditing] = useState(false);
-  /** BE-2 연결 전: 개발 서버에서 `?example=normal|no-target|empty`일 때만 예시 후보를 쓴다. */
-  const [candidateSet, setCandidateSet] = useState<CandidateSet | null>(null);
-  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  /** 개발 서버에서 `?example=normal|no-target|empty`일 때만 예시 후보로 엔진 결과를 대신한다(빈 상태 확인용). */
+  const [exampleSet, setExampleSet] = useState<CandidateSet | null>(null);
+  /** 후보 비교에서 가장 먼저 볼 기준. 나머지는 엔진의 기본 순서를 따른다. */
+  const [firstPriority, setFirstPriority] = useState<PriorityKey>(DEFAULT_PRIORITIES[0]);
 
   // localStorage·URL은 브라우저 시작 후에만 읽는다.
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") {
-      setCandidateSet(exampleCandidates(new URLSearchParams(window.location.search).get("example")));
+      setExampleSet(exampleCandidates(new URLSearchParams(window.location.search).get("example")));
     }
     setInput(loadInput());
     setPlanA(loadPlanA());
@@ -118,6 +129,39 @@ export function PlannerApp() {
     [input, result, dataset],
   );
   const diff = useMemo(() => (planA && result ? diffPlans(planA.result, result) : null), [planA, result]);
+
+  /**
+   * 후보: 지금 입력의 진로는 그대로 두고 학점 페이스만 비교로 펼쳐 엔진이 계산·정렬한다.
+   * 화면은 결과를 그대로 보여주고 순위를 다시 계산하지 않는다.
+   */
+  const engineSet = useMemo(() => {
+    if (!dataset || !input) return null;
+    const v2 = planInputFromV1(input, { campus: dataset.campus, department: dataset.department });
+    return generateCandidates(
+      {
+        ...v2,
+        pace: { mode: "compare", options: null },
+        priorities: [firstPriority, ...DEFAULT_PRIORITIES.filter((p) => p !== firstPriority)],
+      },
+      dataset,
+    );
+  }, [input, dataset, firstPriority]);
+  const candidateSet = exampleSet ?? engineSet;
+
+  /** 지금 조건(진로·학점 상한)과 같은 후보. 중복 제거로 합쳐졌으면 대표 후보를 가리킨다. */
+  const selectedCandidateId = useMemo(() => {
+    if (!candidateSet || !input) return null;
+    const id = candidateIdOf({ career: input.track, militaryStartTerm: null, paceCredits: input.creditCap });
+    const target = candidateSet.dedupedInto[id] ?? id;
+    return candidateSet.candidates.some((c) => c.id === target) ? target : null;
+  }, [candidateSet, input]);
+
+  /** "이 트랙으로 시작": 후보의 진로·학점 페이스를 지금 조건으로 가져온다. */
+  const startFromCandidate = (c: TrackCandidate) => {
+    if (!input) return;
+    updateInput({ ...input, track: c.key.career, creditCap: c.key.paceCredits });
+    setRevision((r) => r + 1);
+  };
 
   const saveA = () => {
     if (!result || !input) return;
@@ -237,7 +281,9 @@ export function PlannerApp() {
                         onConfirm={confirmPlan}
                         candidateSet={candidateSet}
                         selectedCandidateId={selectedCandidateId}
-                        onSelectCandidate={(c) => setSelectedCandidateId(c.id)}
+                        onSelectCandidate={startFromCandidate}
+                        firstPriority={firstPriority}
+                        onFirstPriority={setFirstPriority}
                       />
                     )}
                     {view === "da" && (
@@ -269,9 +315,15 @@ export function PlannerApp() {
   );
 }
 
+const PRIORITY_CHOICES: Array<[PriorityKey, string]> = [
+  ["fast_completion", "빨리 끝내기"],
+  ["career_core", "진로 과목 먼저"],
+  ["light_terms", "여유 있는 학기"],
+];
+
 /**
- * 맞 단계. 계산된 후보 카드(BE-2 연결 후) → 지금 계획 → A와 비교 → "맞다!" 확정.
- * 후보가 없으면(BE-2 연결 전) 가짜 후보를 채우지 않고 안내만 보여준다.
+ * 맞 단계. 엔진이 계산한 후보 카드 → 지금 계획 → A와 비교 → "맞다!" 확정.
+ * 후보는 generateCandidates 결과 그대로이며 화면에서 만들거나 정렬하지 않는다.
  */
 function MatchStage({
   input,
@@ -283,6 +335,8 @@ function MatchStage({
   candidateSet,
   selectedCandidateId,
   onSelectCandidate,
+  firstPriority,
+  onFirstPriority,
 }: {
   input: PlanInput;
   result: PlanResult;
@@ -293,12 +347,33 @@ function MatchStage({
   candidateSet: CandidateSet | null;
   selectedCandidateId: string | null;
   onSelectCandidate: (c: TrackCandidate) => void;
+  firstPriority: PriorityKey;
+  onFirstPriority: (p: PriorityKey) => void;
 }) {
   return (
     <>
       <section aria-label="계획 후보" className="mb-8">
-        <h2 className="mb-3 text-[15px] font-semibold">계산한 후보</h2>
-        {candidateSet ? (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-[15px] font-semibold">학점 페이스별 후보</h2>
+          <div role="radiogroup" aria-label="가장 먼저 볼 기준" className="flex items-center gap-1 text-xs">
+            <span className="mr-1 text-muted">가장 중요한 것</span>
+            {PRIORITY_CHOICES.map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                role="radio"
+                aria-checked={firstPriority === key}
+                onClick={() => onFirstPriority(key)}
+                className={`cursor-pointer rounded-full border px-3 py-1 font-medium ${
+                  firstPriority === key ? "border-brand bg-brand text-contrast" : "border-line bg-panel text-ink hover:bg-bg"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {candidateSet && (
           <>
             {candidateSet.engineVersion === "example" && (
               <p className="mb-3 rounded-lg bg-warm px-4 py-2 text-xs text-warm-ink">
@@ -307,10 +382,6 @@ function MatchStage({
             )}
             <CandidateList set={candidateSet} selectedId={selectedCandidateId} onSelect={onSelectCandidate} />
           </>
-        ) : (
-          <p className="rounded-lg border border-dashed border-line px-4 py-3 text-xs text-muted">
-            진로·학점 페이스를 바꾼 후보를 계산해 순위대로 비교하는 기능은 준비 중이에요. 지금은 위 조건을 직접 바꿔 보고, A로 저장해 비교할 수 있어요.
-          </p>
         )}
       </section>
 
