@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "fixture-2026-11-07-db2",
+  "catalogVersion": "fixture-2026-11-07-db3",
   "campus": "서울",
   "department": "정보시스템학과",
   "curriculum": "2024-2027",
@@ -737,6 +737,21 @@
       "reason": "자료 처리와 알고리즘의 공통 기초입니다."
     },
     {
+      "courseCode": "GEN0044",
+      "group": "common",
+      "reason": "정보시스템의 조직·경영 맥락을 이해하는 공통 기초입니다."
+    },
+    {
+      "courseCode": "ITE1010",
+      "group": "common",
+      "reason": "두 진로에서 활용하는 프로그래밍 기초를 보강합니다."
+    },
+    {
+      "courseCode": "ACC2056",
+      "group": "common",
+      "reason": "기업 업무와 회계 데이터를 이해하는 공통 기초입니다."
+    },
+    {
       "courseCode": "ITE3032",
       "group": "common",
       "reason": "두 진로 모두에서 쓰는 객체지향 개발 기초입니다."
@@ -1302,6 +1317,67 @@
     "ITE4049": "S1 표기: 2027-1 ~ 2030-2",
     "ITE4037": "S1 표기: 2027-1 ~ 2030-2",
     "HYP4002": "S1 표기: 2027-1 ~ 2030-2"
+  },
+  "recommendation": {
+    "configVersion": "rec-2026-11-07-v1",
+    "careers": [
+      {
+        "track": "security",
+        "label": "정보보안",
+        "coreCourses": [
+          {
+            "courseCode": "ELE3019",
+            "reason": "시스템 보안에 필요한 하드웨어 동작 이해와 연결됩니다."
+          },
+          {
+            "courseCode": "CSE3004",
+            "reason": "운영체제 보안·권한 구조 이해와 연결됩니다."
+          },
+          {
+            "courseCode": "ENE4019",
+            "reason": "네트워크 보안의 기반이 되는 통신 구조를 다룹니다."
+          },
+          {
+            "courseCode": "ITE4023",
+            "reason": "정보보호의 핵심 개념을 직접 다룹니다."
+          },
+          {
+            "courseCode": "ITE4049",
+            "reason": "암호·분산 신뢰 구조와 연결됩니다."
+          }
+        ]
+      },
+      {
+        "track": "data",
+        "label": "데이터 분석",
+        "coreCourses": [
+          {
+            "courseCode": "MAT4015",
+            "reason": "데이터 분석의 통계 기초입니다."
+          },
+          {
+            "courseCode": "ITE3051",
+            "reason": "인공지능 기법과 응용을 다룹니다."
+          },
+          {
+            "courseCode": "ITE4086",
+            "reason": "인공지능을 실무 데이터에 적용합니다."
+          },
+          {
+            "courseCode": "ITE4087",
+            "reason": "데이터 기반 의사결정을 직접 다룹니다."
+          }
+        ]
+      }
+    ],
+    "paceOptions": [
+      15,
+      18,
+      20
+    ],
+    "maxMilitaryTimings": 3,
+    "maxCandidates": 18,
+    "initialVisible": 3
   },
   "reviewedAt": "2026-11-07"
 }

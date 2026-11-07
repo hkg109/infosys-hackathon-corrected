@@ -100,7 +100,7 @@ describe("generateCandidates", () => {
   });
 
   it("핵심 과목 자료가 없으면 '진로 과목 먼저'를 계산하지 않는다", () => {
-    const set = generateCandidates(sampleInputV2, fixtureDataset);
+    const set = generateCandidates(sampleInputV2, { ...fixtureDataset, recommendation: undefined });
     expect(set.configVersion).toBe("default-1");
     expect(set.ranking.excludedMetrics.map((e) => e.key)).toContain("career_core");
   });
