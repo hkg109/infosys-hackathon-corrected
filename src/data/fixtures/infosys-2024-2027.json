@@ -1,0 +1,58 @@
+{
+  "catalogVersion": "fixture-2026-11-07",
+  "campus": "서울",
+  "department": "정보시스템학과",
+  "curriculum": "2024-2027",
+  "collectedAt": "2026-11-07",
+  "publishedAt": null,
+  "courses": [
+    { "code": "CSE1002", "name": "전산학개론", "credits": 3, "recommendedYear": 1, "semester": 1, "offeringEndYear": 2027, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE1012", "name": "정보시스템개론", "credits": 3, "recommendedYear": 1, "semester": 2, "offeringEndYear": 2027, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE1009", "name": "C프로그래밍", "credits": 3, "recommendedYear": 2, "semester": 1, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "APA2054", "name": "데이터구조", "credits": 3, "recommendedYear": 2, "semester": 1, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE3032", "name": "객체지향프로그래밍-Java", "credits": 3, "recommendedYear": 2, "semester": 1, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ELE3019", "name": "컴퓨터구조1", "credits": 3, "recommendedYear": 2, "semester": 1, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE2023", "name": "알고리즘분석", "credits": 3, "recommendedYear": 2, "semester": 2, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "CSE3004", "name": "오퍼레이팅시스템", "credits": 3, "recommendedYear": 2, "semester": 2, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE3016", "name": "데이터베이스시스템", "credits": 3, "recommendedYear": 3, "semester": 1, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ENE4019", "name": "컴퓨터네트워크", "credits": 3, "recommendedYear": 3, "semester": 2, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "MAT4015", "name": "확률및통계", "credits": 3, "recommendedYear": 3, "semester": 2, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE3051", "name": "인공지능및응용", "credits": 3, "recommendedYear": 3, "semester": 2, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE4086", "name": "인공지능실무응용", "credits": 3, "recommendedYear": 3, "semester": 1, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE4023", "name": "정보보호", "credits": 3, "recommendedYear": 4, "semester": 1, "offeringEndYear": 2030, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE4087", "name": "데이터사이언스기반의사결정지원", "credits": 3, "recommendedYear": 4, "semester": 2, "offeringEndYear": 2030, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE4049", "name": "블록체인개론", "credits": 3, "recommendedYear": 4, "semester": 2, "offeringEndYear": 2030, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
+    { "code": "ITE4088", "name": "정보시스템학종합설계", "credits": 1, "recommendedYear": 4, "semester": null, "offeringEndYear": 2030, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" }
+  ],
+  "careerTags": [
+    { "courseCode": "CSE1002", "group": "common", "reason": "두 진로가 함께 쓰는 전산 기초입니다." },
+    { "courseCode": "ITE1012", "group": "common", "reason": "정보시스템 전반을 이해하는 기초입니다." },
+    { "courseCode": "ITE1009", "group": "common", "reason": "두 진로 모두에 필요한 프로그래밍 기초입니다." },
+    { "courseCode": "APA2054", "group": "common", "reason": "자료 처리와 알고리즘의 공통 기초입니다." },
+    { "courseCode": "ITE3032", "group": "common", "reason": "두 진로 모두에서 쓰는 객체지향 개발 기초입니다." },
+    { "courseCode": "ITE2023", "group": "common", "reason": "문제 해결과 성능 분석의 공통 기초입니다." },
+    { "courseCode": "ITE3016", "group": "common", "reason": "데이터 저장·관리의 공통 기초입니다." },
+    { "courseCode": "ITE4088", "group": "common", "reason": "전공 종합 프로젝트 과목입니다." },
+    { "courseCode": "ELE3019", "group": "security", "reason": "시스템 보안에 필요한 하드웨어 동작 이해와 연결됩니다." },
+    { "courseCode": "CSE3004", "group": "security", "reason": "운영체제 보안·권한 구조 이해와 연결됩니다." },
+    { "courseCode": "ENE4019", "group": "security", "reason": "네트워크 보안의 기반이 되는 통신 구조를 다룹니다." },
+    { "courseCode": "ITE4023", "group": "security", "reason": "정보보호의 핵심 개념을 직접 다룹니다." },
+    { "courseCode": "ITE4049", "group": "security", "reason": "암호·분산 신뢰 구조와 연결됩니다." },
+    { "courseCode": "MAT4015", "group": "data", "reason": "데이터 분석의 통계 기초입니다." },
+    { "courseCode": "ITE3051", "group": "data", "reason": "인공지능 기법과 응용을 다룹니다." },
+    { "courseCode": "ITE4086", "group": "data", "reason": "인공지능을 실무 데이터에 적용합니다." },
+    { "courseCode": "ITE4087", "group": "data", "reason": "데이터 기반 의사결정을 직접 다룹니다." }
+  ],
+  "rules": [
+    { "key": "graduation.totalCredits", "value": "unknown", "status": "unknown", "sourceId": null, "note": "적용 교육과정의 졸업 총학점은 학사안내와 대조 전입니다." }
+  ],
+  "sources": [
+    { "id": "hy-curriculum", "title": "2024-2027 공과대학 정보시스템학과 개설과목", "url": "https://m.hanyang.ac.kr/v3/hy_curriculum.page", "kind": "public_page", "checkedAt": "2026-11-07" }
+  ],
+  "unknowns": [
+    "2026학년도 입학생에게 실제 적용되는 교육과정 코드",
+    "공식 선수요건",
+    "졸업 총학점·전공학점 요건",
+    "ITE4088 이수학기"
+  ]
+}

@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* 시안(infosys-mvp-preview) 색상 토큰 */
+:root {
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --ink: #17283e;
+  --muted: #64758b;
+  --line: #e2e8f0;
+  --brand: #173f73;
+  --active: #e9f0fa;
+  --warm: #fff3d9;
+  --warm-ink: #805519;
+  --ok: #e6f2eb;
+  --ok-ink: #286445;
+  --contrast: #ffffff;
+  --break: #e8edf1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10161d;
+    --panel: #1a222d;
+    --ink: #e4ebf5;
+    --muted: #a0aec2;
+    --line: #344254;
+    --brand: #a6caff;
+    --active: #273c58;
+    --warm: #42351c;
+    --warm-ink: #f0ce91;
+    --ok: #203e32;
+    --ok-ink: #9ad6b4;
+    --contrast: #142238;
+    --break: #29323e;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-active: var(--active);
+  --color-warm: var(--warm);
+  --color-warm-ink: var(--warm-ink);
+  --color-ok: var(--ok);
+  --color-ok-ink: var(--ok-ink);
+  --color-contrast: var(--contrast);
+  --color-break: var(--break);
+  --font-sans: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+input,
+select {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--ink);
+  padding: 7px 8px;
+  min-height: 35px;
+  font-size: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+input[type="checkbox"] {
+  width: 16px;
+  min-height: 0;
+  height: 16px;
+  accent-color: var(--brand);
+}
+
+input:disabled {
+  opacity: 0.5;
+}
