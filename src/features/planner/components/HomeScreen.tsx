@@ -6,59 +6,75 @@ import { CAREER_LABEL, CAREER_TRACKS } from "@/contracts/careers";
 import { usePlanner } from "../PlannerApp";
 import { Button, GroupDot, Hand, LinkButton } from "./ui";
 
+/** 아·맞·다 = 아름다운 인생을 맞춰 줍니다 */
+const ACROSTIC: Array<[string, string]> = [
+  ["아", "아름다운 인생을"],
+  ["맞", "맞춰 줍니"],
+  ["다", "다"],
+];
+
 const CONTENTS = [
-  { no: "01", title: "아 맞다", desc: "지금까지 들은 것, 끌리는 것, 군 복무 여부를 적어요", page: "/input" },
-  { no: "02", title: "맞춰가기", desc: "추천 진로·입대 시기·학기 학점을 선택지로 좁혀요", page: "/processing" },
-  { no: "03", title: "다 했다", desc: "학기별 로드맵을 보고, 피드백으로 고친 뒤 확정해요", page: "/output" },
+  { no: "01", syl: "아", title: "내 정보", desc: "질문에 답하며 이수 현황·끌리는 것·군대·교환학생 계획을 적어요" },
+  { no: "02", syl: "맞", title: "맞춰가기", desc: "추천 순위대로 놓인 트랙을 둘러보고, 마음에 드는 트랙을 기본 트랙으로 골라요" },
+  { no: "03", syl: "다", title: "다했다", desc: "기본 트랙에 피드백을 더해 나만의 최종 트랙을 확정해요" },
 ];
 
 export function HomeScreen() {
-  const { draft, plan, mounted, resetAll } = usePlanner();
+  const { draft, plan, tracks, mounted, resetAll } = usePlanner();
   const router = useRouter();
-  const resume = plan ? "/output" : draft ? "/processing" : null;
+  const resume = plan ? "/output" : tracks ? "/match" : draft ? "/input" : null;
 
   return (
-    <div className="grid min-h-[600px] grid-cols-2">
+    <div className="grid min-h-[calc(100dvh-230px)] grid-cols-2">
       {/* 왼쪽 면: 표지 */}
       <div className="relative flex flex-col justify-between border-r border-line pr-14">
         <div>
           <div className="tape absolute -top-3 left-8 h-7 w-32 -rotate-3" aria-hidden />
-          <p className="pt-10 font-hand text-[26px] text-pen">정보시스템학과 4년, 한 권에 정리하기</p>
-          <h1 className="mt-4 font-serif text-[64px] leading-[1.05] font-bold tracking-tight">
-            아 맞다,
-            <br />
-            <span className="marker">인생!</span>
+          <p className="pt-10 font-hand text-[26px] text-pen">정보시스템학과 4년, 트랙 하나로 정리하기</p>
+
+          <h1 className="mt-6 flex items-end gap-6" aria-label="아 맞다 — 아름다운 인생을 맞춰 줍니다">
+            {ACROSTIC.map(([syl, word], i) => (
+              <span key={syl} className="flex flex-col items-start">
+                <span className={`font-serif text-[96px] leading-none font-bold ${i === 1 ? "marker" : ""}`}>{syl}</span>
+                <span className="mt-3 font-hand text-[22px] leading-none text-pen">{word}</span>
+              </span>
+            ))}
           </h1>
-          <p className="mt-6 max-w-[420px] text-[16px] leading-relaxed text-ink-soft">
-            무엇을 언제 들을지, 군대는 언제 다녀올지. 정해 두지 않아도 괜찮아요. 몇 가지만 적으면 선택지를 추천하고,
-            고른 대로 학기별 로드맵을 그려 드려요.
+
+          <p className="mt-10 max-w-[460px] font-serif text-[22px] font-bold leading-snug">
+            <span className="text-red">아</span>름다운 인생을 <span className="text-red">맞</span>춰 줍니<span className="text-red">다</span>.
+          </p>
+          <p className="mt-3 max-w-[460px] text-[15px] leading-relaxed text-ink-soft">
+            무엇을 언제 들을지, 군대와 교환학생은 언제 다녀올지. 몇 가지 질문에 답하면 그에 맞는 트랙들을 추천 순위대로 보여 드려요.
+            마음에 드는 트랙을 고르고, 나에게 맞게 다듬어 확정하세요.
           </p>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center gap-3">
-          {mounted && resume ? (
-            <>
-              <LinkButton href={resume} kind="ink" className="px-6">
-                이어서 쓰기 <ArrowRight size={16} aria-hidden />
+        <div className="mt-10">
+          <div className="flex flex-wrap items-center gap-3">
+            {mounted && resume ? (
+              <>
+                <LinkButton href={resume} kind="ink" className="px-6">
+                  이어서 쓰기 <ArrowRight size={16} aria-hidden />
+                </LinkButton>
+                <Button
+                  kind="ghost"
+                  onClick={() => {
+                    resetAll();
+                    router.push("/input");
+                  }}
+                >
+                  새 플래너로 시작
+                </Button>
+              </>
+            ) : (
+              <LinkButton href="/input" kind="ink" className="px-6">
+                플래너 펼치기 <ArrowRight size={16} aria-hidden />
               </LinkButton>
-              <Button
-                kind="ghost"
-                onClick={() => {
-                  resetAll();
-                  router.push("/input");
-                }}
-              >
-                새 플래너로 시작
-              </Button>
-            </>
-          ) : (
-            <LinkButton href="/input" kind="ink" className="px-6">
-              플래너 펼치기 <ArrowRight size={16} aria-hidden />
-            </LinkButton>
-          )}
+            )}
+          </div>
+          <p className="mt-4 text-[12px] text-muted">입력한 정보는 이 브라우저에만 저장되고 어디로도 보내지 않아요.</p>
         </div>
-
-        <p className="mt-6 text-[12px] text-muted">입력한 정보는 이 브라우저에만 저장되고 어디로도 보내지 않아요.</p>
       </div>
 
       {/* 오른쪽 면: 목차 */}
@@ -67,8 +83,9 @@ export function HomeScreen() {
         <h2 className="mt-1 font-serif text-[26px] font-bold">목차</h2>
         <ol className="mt-6 border-t border-rule">
           {CONTENTS.map((c) => (
-            <li key={c.no} className="grid grid-cols-[52px_minmax(0,1fr)] items-baseline border-b border-rule py-[18px]">
-              <span className="font-serif text-[22px] text-red tabular-nums">{c.no}</span>
+            <li key={c.no} className="grid grid-cols-[52px_56px_minmax(0,1fr)] items-baseline border-b border-rule py-[18px]">
+              <span className="font-serif text-[18px] text-muted tabular-nums">{c.no}</span>
+              <span className="font-serif text-[30px] font-bold text-red">{c.syl}</span>
               <div>
                 <p className="font-serif text-[19px] font-bold">{c.title}</p>
                 <p className="text-[13px] text-ink-soft">{c.desc}</p>
@@ -78,7 +95,7 @@ export function HomeScreen() {
         </ol>
 
         <div className="mt-10">
-          <p className="mb-3 text-[12px] font-medium text-muted">이 플래너가 다루는 진로 다섯 갈래</p>
+          <p className="mb-3 text-[12px] font-medium text-muted">트랙을 이루는 진로 다섯 갈래</p>
           <ul className="flex flex-wrap gap-x-5 gap-y-2">
             {CAREER_TRACKS.map((t) => (
               <li key={t} className="flex items-center gap-2 text-[14px]">
@@ -87,7 +104,7 @@ export function HomeScreen() {
               </li>
             ))}
           </ul>
-          <Hand className="mt-4 block">진로는 직접 고르지 않아도 돼요. 답을 보고 추천해 드릴게요.</Hand>
+          <Hand className="mt-4 block">같은 진로라도 군대·교환학생 시기에 따라 트랙이 여러 개로 나뉘어요.</Hand>
         </div>
       </div>
     </div>

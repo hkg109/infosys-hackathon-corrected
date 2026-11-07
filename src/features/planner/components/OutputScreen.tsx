@@ -18,8 +18,8 @@ export function OutputScreen() {
   if (!mounted) return <div className="h-96 animate-pulse rounded bg-paper-2" aria-busy="true" />;
   if (!plan)
     return (
-      <Empty title="아직 그린 로드맵이 없어요" href="/processing" cta="선택지 고르러 가기">
-        맞춰가기에서 진로·입대 시기·학점을 고르면 로드맵이 그려져요.
+      <Empty title="아직 고른 트랙이 없어요" href="/match" cta="트랙 고르러 가기">
+        02 맞(맞춰가기)에서 트랙을 하나 골라 결정하면 여기서 학기별로 펼쳐 보여 드려요.
       </Empty>
     );
   if (!dataset)
@@ -36,7 +36,21 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
   const router = useRouter();
   const { input } = plan;
   const result = useMemo(() => simulatePlan(input, dataset), [input, dataset]);
-  const guidance = useMemo(() => buildGuidance(input, result, dataset), [input, result, dataset]);
+  const guidance = useMemo(() => {
+    const g = buildGuidance(input, result, dataset);
+    if (!plan.exchange) return g;
+    return {
+      items: [
+        {
+          id: "exchange",
+          title: "교환학생 지원 일정·학점 인정 확인",
+          detail: "교환 학기 1년쯤 전부터 국제처 모집 공지를 확인하세요. 인정 학점이 정해지면 다시 맞추세요.",
+          sourceIds: [],
+        },
+        ...g.items,
+      ].slice(0, 6),
+    };
+  }, [input, result, dataset, plan.exchange]);
   const mil = militarySummary(input, result);
   const confirmed = plan.confirmedAt !== null;
   const remaining = input.targetCredits === null ? null : Math.max(0, input.targetCredits - input.earnedCredits);
@@ -70,12 +84,12 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
 
       <div className="relative print:hidden">
         <PageTitle
-          step={confirmed ? "03 · 다 했다 — 최종 로드맵" : "03 · 다 했다"}
-          title={name ? `${name}님의 학기 로드맵` : "나의 학기 로드맵"}
+          step={confirmed ? "03 · 다 — 최종 트랙" : "03 · 다 — 기본 트랙"}
+          title={plan.trackTitle}
           sub={
             confirmed
               ? `${plan.confirmedAt}에 확정한 계획이에요. 인쇄하거나 PDF로 저장해 두세요.`
-              : "마음에 들면 “아 맞다!”로 확정하고, 아니면 피드백으로 고쳐 보세요."
+              : `${name ? `${name}님이 ` : ""}고른 기본 트랙이에요. 피드백으로 나에게 맞게 다듬은 뒤 “아 맞다!”로 확정하세요.`
           }
         />
         {confirmed && (
@@ -112,7 +126,7 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
       )}
 
       <div className="grid grid-cols-[minmax(0,1fr)_280px] gap-10 print:block">
-        <Roadmap input={input} result={result} dataset={dataset} />
+        <Roadmap input={input} result={result} dataset={dataset} exchange={plan.exchange} />
 
         <aside className="grid content-start gap-8 print:mt-6">
           <section>
@@ -177,11 +191,11 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
         ) : (
           <>
             <p className="text-[14px] text-ink-soft">
-              <Hand className="mr-2 text-[20px]">어딘가 아쉽다면?</Hand>피드백을 남기면 바로 다시 계산해서 보여 드려요.
+              <Hand className="mr-2 text-[20px]">듣기 싫은 수업, 계절학기…</Hand>하고 싶은 말을 적으면 기본 트랙을 나에게 맞게 고쳐 드려요.
             </p>
             <div className="flex gap-2">
               <LinkButton href="/output/feedback">
-                <MessageSquareText size={16} aria-hidden /> 피드백 주기
+                <MessageSquareText size={16} aria-hidden /> 피드백으로 맞춤화
               </LinkButton>
               <Button kind="stamp" onClick={confirm} disabled={!!result.error} className="px-7 font-serif text-[17px] font-bold tracking-wide">
                 아 맞다!

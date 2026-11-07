@@ -1,8 +1,8 @@
 import type { PlanInput, SavedPlan } from "@/contracts/types";
 import type { Draft } from "./plan";
 
-const DRAFT_KEY = "infosys:planner:draft:v2";
-const PLAN_KEY = "infosys:planner:plan:v2";
+const DRAFT_KEY = "infosys:planner:draft:v3";
+const PLAN_KEY = "infosys:planner:plan:v3";
 const CHECKED_KEY = "infosys:planner:checked:v1";
 
 /**
@@ -10,10 +10,13 @@ const CHECKED_KEY = "infosys:planner:checked:v1";
  * previous는 마지막 피드백 직전 계획(되돌리기·전후 비교용).
  */
 export interface PlanState {
-  schemaVersion: 2;
+  schemaVersion: 3;
   input: PlanInput;
-  /** 처음 고른 후보 ID(엔진 형식) */
-  candidateId: string | null;
+  /** 기본 트랙으로 고른 트랙 ID와 이름 */
+  trackId: string;
+  trackTitle: string;
+  /** 교환학생 학기 구간 [start, end). 엔진 입력(v1)에서는 중단 구간으로만 들어가므로 표시용으로 따로 둔다. */
+  exchange: { startDate: string; endDate: string } | null;
   previous: SavedPlan | null;
   /** 마지막 피드백에서 바꾼 것 */
   lastChanges: string[];
@@ -41,13 +44,13 @@ function write(key: string, value: unknown) {
 
 export function loadDraft(): Draft | null {
   const d = read<Draft>(DRAFT_KEY);
-  return d?.schemaVersion === 2 ? d : null;
+  return d?.schemaVersion === 3 ? d : null;
 }
 export const saveDraft = (d: Draft | null) => write(DRAFT_KEY, d);
 
 export function loadPlan(): PlanState | null {
   const p = read<PlanState>(PLAN_KEY);
-  return p?.schemaVersion === 2 ? p : null;
+  return p?.schemaVersion === 3 ? p : null;
 }
 export const savePlan = (p: PlanState | null) => write(PLAN_KEY, p);
 

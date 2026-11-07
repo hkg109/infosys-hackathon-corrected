@@ -6,7 +6,18 @@ import { GroupDot, groupLabel } from "./ui";
 /**
  * 학기별 로드맵: 연도 한 줄에 1·2학기 두 칸. 엔진 결과(PlanResult)를 그대로 그린다.
  */
-export function Roadmap({ input, result, dataset }: { input: PlanInput; result: PlanResult; dataset: Dataset }) {
+export function Roadmap({
+  input,
+  result,
+  dataset,
+  exchange = null,
+}: {
+  input: PlanInput;
+  result: PlanResult;
+  dataset: Dataset;
+  /** 교환학생 학기 구간. v1 입력에서는 중단 구간과 구분되지 않아 따로 받는다. */
+  exchange?: { startDate: string; endDate: string } | null;
+}) {
   const years = [...new Set(result.terms.map((t) => t.term.year))];
   const completionIdx = result.expectedCompletion ? termIndex(result.expectedCompletion) : null;
   const category = (code: string) => dataset.courses.find((c) => c.code === code)?.category ?? null;
@@ -46,7 +57,7 @@ export function Roadmap({ input, result, dataset }: { input: PlanInput; result: 
                   key={season}
                   t={t}
                   grade={ordinal.has(idx) ? gradeLabel(ordinal.get(idx)!) : null}
-                  breakName={t.status === "break" ? breakName(t, input.breaks) : null}
+                  breakName={t.status === "break" ? breakName(t, input.breaks, exchange) : null}
                   isCompletion={idx === completionIdx}
                   category={category}
                 />
@@ -59,7 +70,8 @@ export function Roadmap({ input, result, dataset }: { input: PlanInput; result: 
   );
 }
 
-function breakName(t: PlannedTerm, breaks: BreakPeriod[]): string {
+function breakName(t: PlannedTerm, breaks: BreakPeriod[], exchange: { startDate: string; endDate: string } | null): string {
+  if (exchange && isBlocked(t.term, [{ kind: "leave", ...exchange }])) return "교환학생";
   const hit = breaks.filter((b) => isBlocked(t.term, [b]));
   return hit.some((b) => b.kind === "military") ? "군 복무" : "휴학";
 }

@@ -1,5 +1,5 @@
-import { InputScreen } from "@/features/planner/components/InputScreen";
+import { InputStep } from "@/features/planner/components/InputSteps";
 
 export default function Page() {
-  return <InputScreen />;
+  return <InputStep step="basic" />;
 }

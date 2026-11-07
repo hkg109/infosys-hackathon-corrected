@@ -17,7 +17,7 @@ import { answeredCount } from "./recommend";
  * 학교 수치(목표학점·복무기간)는 채우지 않고 사용자가 고른 값만 쓴다.
  */
 export interface Draft {
-  schemaVersion: 2;
+  schemaVersion: 3;
   name: string;
   admissionYear: number | null;
   completedTerms: number;
@@ -35,6 +35,12 @@ export interface Draft {
     months: number | null;
     /** mode가 fixed일 때 입영일 */
     startDate: ISODate | null;
+  };
+  exchange: {
+    /** none = 생각 없음, recommend = 시기 추천받기, pick = 가고 싶은 학년·학기가 있음 */
+    mode: "none" | "recommend" | "pick";
+    /** pick일 때: 교환 학기 전까지 마친 학기 수(예: 3학년 1학기 = 4) */
+    ordinal: number | null;
   };
   priority: PriorityKey;
 }
@@ -55,7 +61,7 @@ export function todayISO(): ISODate {
 
 export function blankDraft(today: ISODate): Draft {
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     name: "",
     admissionYear: null,
     completedTerms: 0,
@@ -66,6 +72,7 @@ export function blankDraft(today: ISODate): Draft {
     startTerm: upcomingTerm(today),
     answers: {},
     military: { mode: "none", months: null, startDate: null },
+    exchange: { mode: "none", ordinal: null },
     priority: "fast_completion",
   };
 }
@@ -116,11 +123,32 @@ export function draftToInputV2(draft: Draft, dataset: Dataset, careers: CareerTr
   };
 }
 
-/** 입력 화면에서 다음으로 넘어가기 전에 막을 문제. 없으면 null */
+/** 입력 단계별로 다음으로 넘어가기 전에 막을 문제. 없으면 null */
+export function stepProblem(step: string, draft: Draft): string | null {
+  switch (step) {
+    case "record":
+      if (draft.earnedMajorCredits > draft.earnedCredits) return "전공학점은 총 이수학점 안에 포함되어야 해요.";
+      if (draft.earnedCredits < 0 || draft.earnedMajorCredits < 0) return "학점은 0 이상이어야 해요.";
+      return null;
+    case "interest":
+      return answeredCount(draft.answers) < MIN_ANSWERS ? `질문에 ${MIN_ANSWERS}개 이상 답해 주세요.` : null;
+    case "military":
+      if (draft.military.mode !== "none" && draft.military.months === null) return "예상 복무 기간을 골라 주세요.";
+      if (draft.military.mode === "fixed" && !draft.military.startDate) return "입영일을 입력해 주세요.";
+      return null;
+    case "exchange":
+      return draft.exchange.mode === "pick" && draft.exchange.ordinal === null ? "가고 싶은 학기를 골라 주세요." : null;
+    default:
+      return null;
+  }
+}
+
+/** 트랙을 만들기 전 전체 검사. 없으면 null */
 export function draftProblem(draft: Draft, dataset: Dataset | null): string | null {
-  if (answeredCount(draft.answers) < MIN_ANSWERS) return `끌리는 것 질문에 ${MIN_ANSWERS}개 이상 답해 주세요.`;
-  if (draft.military.mode !== "none" && draft.military.months === null) return "예상 복무 기간을 골라 주세요.";
-  if (draft.military.mode === "fixed" && !draft.military.startDate) return "입영일을 입력해 주세요.";
+  for (const step of ["record", "interest", "military", "exchange"]) {
+    const p = stepProblem(step, draft);
+    if (p) return p;
+  }
   if (!dataset) return "학과 자료를 불러오는 중이에요.";
   const errors = validatePlanInputV2(draftToInputV2(draft, dataset, ["software"])).filter((i) => i.severity === "error");
   return errors[0]?.message ?? null;
