@@ -1,0 +1,208 @@
+{
+  "catalogVersion": "military-fixture-2026-11-07",
+  "reviewedAt": "2026-11-07",
+  "tracks": [
+    {
+      "id": "army-general",
+      "officialName": "육군 현역병(입영일자 본인선택)",
+      "branch": "army",
+      "recruitType": "general_enlistment",
+      "description": "병역판정검사에서 현역 판정을 받은 사람이 병무청 누리집의 ‘현역병 입영 본인선택원’에서 입영일자를 골라 육군 현역병으로 입영합니다.",
+      "fitsFor": ["입영 시기를 학기 일정에 맞춰 직접 고르고 싶은 사람", "별도 모집 분야 지원 없이 다녀오려는 사람"],
+      "eligibility": ["병역판정검사 결과 현역병 입영대상(원문 기준)", "2027년 입영분: 2007년생 등 병역판정검사를 받은 사람(원문 기준)"],
+      "selection": ["입영일자 본인선택은 선착순으로 처리되며 선택 즉시 입영일자가 정해지고 입영부대는 전산으로 정해집니다."],
+      "relatedMajors": [],
+      "certificatesConsidered": "unknown",
+      "serviceMonths": 18,
+      "serviceMonthsStatus": "verified",
+      "serviceMonthsNote": "병무청 ‘입영신청 절차 및 복무기간’ 페이지: 육군 복무기간 18개월(기초군사훈련 5주 포함, 2020.6.2. 이후 입영자).",
+      "appliesTo": "2027년 입영분(2026년 7~11월 선택)",
+      "sources": [
+        {
+          "title": "입영신청 절차 및 복무기간 - 현역병,상근예비역 - 병무청",
+          "url": "https://www.mma.go.kr/contents.do?mc=mma0000728",
+          "checkedAt": "2026-11-07",
+          "locator": "입영일자 본인선택 안내, 육군 복무기간 항목",
+          "appliesTo": "2027년 입영분"
+        }
+      ],
+      "checkedAt": "2026-11-07",
+      "status": "verified",
+      "prepare": ["병무청 누리집에서 입영일자 본인선택 접수 회차와 마감을 확인하기", "입영일이 정해지면 학교 군입대 휴학 절차 확인하기"],
+      "cautions": ["선착순이라 원하는 입영일이 마감될 수 있습니다.", "본인이 입영일자를 선택하면 일반 사유로는 입영 연기가 제한될 수 있습니다. 병무청 원문을 확인하세요."]
+    },
+    {
+      "id": "army-technical",
+      "officialName": "육군 기술행정병",
+      "branch": "army",
+      "recruitType": "technical_admin",
+      "description": "육군 모집병 중 자격·면허와 전공을 반영해 군사특기별로 선발하는 분야입니다. 연단위 모집으로 운영되며 회차별 일정은 ‘이달의 모집계획’에서 공지합니다.",
+      "fitsFor": ["전공·자격증과 관련된 군사특기를 노려 보고 싶은 사람", "모집 회차 일정에 맞춰 미리 준비할 수 있는 사람"],
+      "eligibility": [
+        "지원서 접수연도 기준 만 18~28세('26년 기준 1998.1.1.~2008.12.31. 출생자)",
+        "병역판정검사 결과 신체등급 1~4급 현역병 입영대상자",
+        "군사특기별 세부 자격요건 충족"
+      ],
+      "selection": [
+        "1차: 자격·면허 50점 + 전공학과 40점 + 가산점 10점 합산 고득점 순",
+        "1차 합격 후 서류검증·신체검사·범죄경력조회를 거쳐 최종 선발",
+        "출결(5점)·면접은 '25.12.30. 접수분부터 평가항목에서 제외"
+      ],
+      "relatedMajors": [],
+      "certificatesConsidered": "yes",
+      "serviceMonths": null,
+      "serviceMonthsStatus": "unknown",
+      "serviceMonthsNote": "기술행정병 모집안내 페이지에 복무기간이 적혀 있지 않습니다. 병무청 원문에서 직접 확인하세요.",
+      "appliesTo": "'25.12.30. 접수분부터 변경된 선발기준. 2026년 11월 모집: 접수 2026.10.28.~11.3., 2027년 2월 입영",
+      "sources": [
+        {
+          "title": "육군 기술행정병 모집안내 - 병무청",
+          "url": "https://www.mma.go.kr/contents.do?mc=mma0000386",
+          "checkedAt": "2026-11-07",
+          "locator": "지원자격, 선발방법, 배점 항목",
+          "appliesTo": "'25.12.30. 접수분부터"
+        },
+        {
+          "title": "평가요소 및 배점기준 - 기술행정병(연단위모집) - 육군 - 병무청",
+          "url": "https://www.mma.go.kr/contents.do?mc=mma0003711",
+          "checkedAt": "2026-11-07",
+          "locator": "기술자격·면허 배점표",
+          "appliesTo": "'25.12.30. 접수분부터"
+        },
+        {
+          "title": "이달의 모집계획 - 병무청",
+          "url": "https://www.mma.go.kr/contents.do?mc=mma0000743",
+          "checkedAt": "2026-11-07",
+          "locator": "2026년 11월 육군 기술행정병 행",
+          "appliesTo": "2026년 11월 모집계획"
+        }
+      ],
+      "checkedAt": "2026-11-07",
+      "status": "verified",
+      "prepare": [
+        "희망 군사특기의 ‘군사특기임무 및 설명’에서 직접관련·간접관련 자격을 확인하기",
+        "‘이달의 모집계획’에서 다음 접수 회차 확인하기"
+      ],
+      "cautions": [
+        "자격증이 어떤 군사특기에서 직접관련인지 간접관련인지는 특기별 원문에서 확인해야 하며, 이 서비스는 점수를 계산하지 않습니다.",
+        "여러 자격을 제출하면 최상위 점수만 인정됩니다(원문). 자격증 점수를 더하지 않습니다.",
+        "선발 결과를 예측하지 않습니다."
+      ]
+    },
+    {
+      "id": "katusa",
+      "officialName": "카투사(KATUSA)",
+      "branch": "army",
+      "recruitType": "katusa",
+      "description": "미8군에 증강된 한국군 육군 요원으로 한미연합 관련 임무를 수행합니다. 어학성적 기준을 충족한 지원자 중 전산 무작위 추첨으로 선발합니다.",
+      "fitsFor": ["영어 사용 환경에서 복무해 보고 싶은 사람", "지원 시기(연 1회)에 맞춰 어학성적을 미리 준비할 수 있는 사람"],
+      "eligibility": [
+        "지원서 접수년도 기준 18세 이상 28세 이하(2026년 기준 1998.1.1.~2008.12.31. 출생자)",
+        "신체등급 1~4급으로 현역병 입영대상 판정을 받은 사람 등",
+        "어학성적 기준 충족(원문 예: TOEIC 780점 이상, TEPS 299점 이상). 다른 시험·응시일별 기준은 원문 표 확인"
+      ],
+      "selection": [
+        "입영희망월별·어학점수대별 지원자 분포 비율을 적용한 전산 무작위 추첨",
+        "지원은 1회에 한함(접수취소자·신체검사 불합격자는 재지원 가능)",
+        "카투사교육대 체력검정을 통과하지 못하면 일반부대로 재분류될 수 있음"
+      ],
+      "relatedMajors": [],
+      "certificatesConsidered": "no",
+      "serviceMonths": null,
+      "serviceMonthsStatus": "unknown",
+      "serviceMonthsNote": "카투사 모집안내 페이지에 복무기간이 적혀 있지 않습니다. 병무청 원문에서 직접 확인하세요.",
+      "appliesTo": "2026년 모집(지원서 접수 '26.7.9.~7.15., 선발일 '26.9.1., 2027년 입영대상)",
+      "sources": [
+        {
+          "title": "모집안내-카투사(KATUSA) - 병무청",
+          "url": "https://www.mma.go.kr/contents.do?mc=mma0000525",
+          "checkedAt": "2026-11-07",
+          "locator": "지원자격, 어학성적 기준표, 선발방법, 모집일정",
+          "appliesTo": "2026년 모집(2027년 입영대상)"
+        }
+      ],
+      "checkedAt": "2026-11-07",
+      "status": "verified",
+      "prepare": ["어학성적 기준(원문 표)을 충족하는 정기시험 성적 준비", "다음 연도 모집 공고에서 접수 기간 확인"],
+      "cautions": [
+        "선발은 추첨입니다. 어학점수가 높다고 선발이 보장되지 않습니다.",
+        "원문에서 자격증 가산점은 확인되지 않았습니다. IT 자격증으로 가산점을 받을 수 있다고 보지 않습니다.",
+        "2026년 모집은 9월 1일에 선발이 끝났습니다. 다음 모집 일정은 새 공고를 확인하세요."
+      ]
+    }
+  ],
+  "certificates": [
+    {
+      "id": "programming-craftsman",
+      "officialName": "프로그래밍기능사",
+      "aliases": [
+        { "name": "정보처리기능사", "relation": "former_name", "status": "unknown", "sourceUrl": null }
+      ],
+      "grade": "기능사",
+      "issuer": "한국산업인력공단",
+      "kind": "national_technical",
+      "officialUrl": "https://www.q-net.or.kr/crf005.do?id=crf00503&jmCd=6921",
+      "checkedAt": "2026-11-07",
+      "status": "verified"
+    },
+    { "id": "info-processing-engineer", "officialName": "정보처리기사", "aliases": [], "grade": "기사", "issuer": null, "kind": "national_technical", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "info-processing-industrial", "officialName": "정보처리산업기사", "aliases": [], "grade": "산업기사", "issuer": null, "kind": "national_technical", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "info-security-engineer", "officialName": "정보보안기사", "aliases": [], "grade": "기사", "issuer": null, "kind": "national_technical", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "info-security-industrial", "officialName": "정보보안산업기사", "aliases": [], "grade": "산업기사", "issuer": null, "kind": "national_technical", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "bigdata-engineer", "officialName": "빅데이터분석기사", "aliases": [], "grade": "기사", "issuer": null, "kind": "national_technical", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "adsp", "officialName": "ADsP(데이터분석 준전문가)", "aliases": [{ "name": "데이터분석준전문가", "relation": "alias", "status": "unknown", "sourceUrl": null }], "grade": null, "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "adp", "officialName": "ADP(데이터분석 전문가)", "aliases": [{ "name": "데이터분석전문가", "relation": "alias", "status": "unknown", "sourceUrl": null }], "grade": null, "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "sqld", "officialName": "SQLD(SQL 개발자)", "aliases": [{ "name": "SQL개발자", "relation": "alias", "status": "unknown", "sourceUrl": null }], "grade": null, "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "sqlp", "officialName": "SQLP(SQL 전문가)", "aliases": [{ "name": "SQL전문가", "relation": "alias", "status": "unknown", "sourceUrl": null }], "grade": null, "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "linux-master-1", "officialName": "리눅스마스터 1급", "aliases": [], "grade": "1급", "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "linux-master-2", "officialName": "리눅스마스터 2급", "aliases": [], "grade": "2급", "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "network-admin-1", "officialName": "네트워크관리사 1급", "aliases": [], "grade": "1급", "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "network-admin-2", "officialName": "네트워크관리사 2급", "aliases": [], "grade": "2급", "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "info-equipment-craftsman", "officialName": "정보기기운용기능사", "aliases": [], "grade": "기능사", "issuer": null, "kind": "national_technical", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "topcit", "officialName": "TOPCIT", "aliases": [], "grade": null, "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "ccna", "officialName": "CCNA", "aliases": [], "grade": null, "issuer": null, "kind": "international", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "lpic", "officialName": "LPIC", "aliases": [], "grade": null, "issuer": null, "kind": "international", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "cos-pro", "officialName": "COS Pro", "aliases": [], "grade": null, "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "pc-technician", "officialName": "PC정비사", "aliases": [], "grade": null, "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" },
+    { "id": "sw-coding", "officialName": "SW코딩자격", "aliases": [], "grade": null, "issuer": null, "kind": "unknown", "officialUrl": null, "checkedAt": null, "status": "unknown" }
+  ],
+  "relations": [],
+  "scoringRules": [
+    {
+      "id": "army-technical-license-points-2025-12",
+      "militaryTrackId": "army-technical",
+      "title": "기술자격·면허 배점(50점 만점, 직접관련/간접관련)",
+      "rows": [
+        { "label": "국가기술자격 기사 이상", "value": "50 / 40" },
+        { "label": "국가기술자격 산업기사", "value": "45 / 35" },
+        { "label": "국가기술자격 기능사", "value": "40 / 30" },
+        { "label": "일반자격증 국가공인", "value": "30 / 25" },
+        { "label": "일반자격증 민간", "value": "26" },
+        { "label": "자격증 미소지", "value": "20" }
+      ],
+      "note": "직접관련·간접관련 여부는 군사특기별로 정해집니다. 여러 자격을 제출하면 최상위 점수만 인정됩니다. 이 서비스는 특기별 관련 여부를 확인하지 못해 점수를 계산하지 않습니다.",
+      "appliesTo": "'25.12.30. 접수분부터",
+      "source": {
+        "title": "평가요소 및 배점기준 - 기술행정병(연단위모집) - 육군 - 병무청",
+        "url": "https://www.mma.go.kr/contents.do?mc=mma0003711",
+        "checkedAt": "2026-11-07",
+        "locator": "기술자격·면허 배점표",
+        "appliesTo": "'25.12.30. 접수분부터"
+      },
+      "status": "verified"
+    }
+  ],
+  "careerCertificates": [
+    { "career": "software", "certificateId": "info-processing-engineer", "reason": "소프트웨어 설계·개발 전반을 정리하는 데 도움이 되는 서비스 추천입니다." },
+    { "career": "software", "certificateId": "sqld", "reason": "서비스 개발에 쓰는 SQL을 정리하는 데 도움이 되는 서비스 추천입니다." },
+    { "career": "data", "certificateId": "adsp", "reason": "데이터 분석 진로 준비에 도움이 되는 서비스 추천입니다." },
+    { "career": "data", "certificateId": "sqld", "reason": "데이터를 다루는 SQL 기초를 정리하는 데 도움이 되는 서비스 추천입니다." },
+    { "career": "data", "certificateId": "bigdata-engineer", "reason": "데이터 분석 진로 준비에 도움이 되는 서비스 추천입니다." },
+    { "career": "security", "certificateId": "info-security-engineer", "reason": "정보보안 진로 준비에 도움이 되는 서비스 추천입니다." },
+    { "career": "security", "certificateId": "linux-master-2", "reason": "서버·운영체제 기초를 다지는 데 도움이 되는 서비스 추천입니다." },
+    { "career": "security", "certificateId": "network-admin-2", "reason": "네트워크 기초를 다지는 데 도움이 되는 서비스 추천입니다." },
+    { "career": "consulting", "certificateId": "info-processing-engineer", "reason": "시스템 분석·설계 지식을 정리하는 데 도움이 되는 서비스 추천입니다." },
+    { "career": "consulting", "certificateId": "topcit", "reason": "IT 역량을 점검해 보는 데 도움이 되는 서비스 추천입니다." },
+    { "career": "business", "certificateId": "adsp", "reason": "서비스 데이터를 읽는 데 도움이 되는 서비스 추천입니다." }
+  ]
+}

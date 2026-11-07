@@ -923,6 +923,13 @@
       "url": "https://m.hanyang.ac.kr/v3/hy_curriculum.page",
       "kind": "public_page",
       "checkedAt": "2026-11-07"
+    },
+    {
+      "id": "S2",
+      "title": "한양인 포털 2026-2 수강신청 안내문",
+      "url": "docs/sources/S2-sugang-annae-2026-2.pdf",
+      "kind": "manual",
+      "checkedAt": "2026-11-07"
     }
   ],
   "unknowns": [
@@ -1559,5 +1566,70 @@
     "maxCandidates": 18,
     "initialVisible": 3
   },
-  "reviewedAt": "2026-11-07"
+  "reviewedAt": "2026-11-07",
+  "creditCapRules": [
+    {
+      "id": "S2-P17-CAP-2025",
+      "appliesTo": {
+        "admissionYearFrom": null,
+        "admissionYearTo": 2025,
+        "termOrdinalFrom": 1,
+        "termOrdinalTo": 7,
+        "curriculum": null,
+        "note": "2025학년도 입학자까지 첫째~일곱째 학기 기본 최대 20학점. 추가 인정학점은 자동 가산하지 않음"
+      },
+      "maxCredits": 20,
+      "minCredits": 10,
+      "status": "verified",
+      "sourceRef": {
+        "sourceId": "S2",
+        "pages": [
+          17
+        ]
+      }
+    },
+    {
+      "id": "S2-P17-P18-CAP-2026-EARLY",
+      "appliesTo": {
+        "admissionYearFrom": 2026,
+        "admissionYearTo": null,
+        "termOrdinalFrom": 1,
+        "termOrdinalTo": 4,
+        "curriculum": null,
+        "note": "2026학년도 신입생부터 첫째~넷째 학기 20학점(예정 안내)"
+      },
+      "maxCredits": 20,
+      "minCredits": null,
+      "status": "planned",
+      "sourceRef": {
+        "sourceId": "S2",
+        "pages": [
+          17,
+          18
+        ]
+      }
+    },
+    {
+      "id": "S2-P17-P18-CAP-2026-UPPER",
+      "appliesTo": {
+        "admissionYearFrom": 2026,
+        "admissionYearTo": null,
+        "termOrdinalFrom": 5,
+        "termOrdinalTo": null,
+        "curriculum": null,
+        "note": "서울 3학년 이상 최대 18학점 조정 예정(건축학부 제외 등 범위는 원문 확인)"
+      },
+      "maxCredits": 18,
+      "minCredits": null,
+      "status": "planned",
+      "sourceRef": {
+        "sourceId": "S2",
+        "pages": [
+          17,
+          18
+        ],
+        "note": "조정 예정"
+      }
+    }
+  ]
 }
