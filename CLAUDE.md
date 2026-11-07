@@ -23,6 +23,7 @@ Next.js(App Router) + TypeScript + Tailwind v4 + Supabase. 별도 백엔드 서�
 | `supabase/migrations/**` | DB 스키마·RLS |
 
 ## 규칙
+- 시연은 PC 브라우저로만 한다. 모바일 화면 대응·테스트는 하지 않는다.
 - 확인되지 않은 학교 수치(졸업학점, 선수요건, 모집일)를 만들지 않는다 → `unknown`/가정으로 표시.
 - 중단 기간은 `[startDate, endDate)`, 날짜는 `YYYY-MM-DD` 문자열 비교.
 - 전공학점은 총학점에 포함 — 더하지 않는다.

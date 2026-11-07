@@ -3,6 +3,8 @@
 세 명이 동시에 코딩해도 충돌하지 않도록 **고치는 경로**로 나눈다. 규칙은 [CLAUDE.md](CLAUDE.md)를 따른다.
 DB 없이 바로 시작할 수 있다. 기본값 `CATALOG_SOURCE=fixture`로 앱은 `src/data/fixtures`만 읽는다.
 
+**시연 환경:** 해커톤 시연은 PC 브라우저(데스크톱 화면)로만 한다. 모바일 화면 대응·모바일 테스트는 하지 않는다.
+
 | 담당 | 역할 | 도구 | 브랜치 | 고치는 경로 |
 |---|---|---|---|---|
 | 한지석 | 프론트엔드 | Claude Pro (Claude Code) | `feat/frontend` | `src/features/planner/**`, `src/app/page.tsx`, `src/app/layout.tsx`, `src/app/globals.css` |
@@ -18,7 +20,7 @@ DB 없이 바로 시작할 수 있다. 기본값 `CATALOG_SOURCE=fixture`로 앱
 
 ## 한지석: 프론트엔드
 
-1. 데모 흐름을 끝까지 눌러 보고 깨지는 곳을 고친다: 샘플로 시작 → 진로 변경 → 군 복무 → 플랜 A 저장 → 비교. 모바일 폭도 확인한다.
+1. 데모 흐름을 PC 화면에서 끝까지 눌러 보고 깨지는 곳을 고친다: 처음 입력 → 로드맵 → 진로 변경 → 군 복무 → 플랜 A 저장 → 비교.
 2. 입력 화면(`Controls`)은 중단 기간을 하나만 다룬다. 엔진은 여러 개를 지원하므로 필요하면 화면만 확장한다.
 3. 입력 오류(`result.error`)가 화면에 표시되는지 확인하고, 준비사항 체크 상태를 `storage.ts`에 저장한다(읽기는 `useEffect` 안에서만).
 4. 화면에서 학점·날짜를 다시 계산하지 않는다. `simulatePlan` 결과만 쓴다.
