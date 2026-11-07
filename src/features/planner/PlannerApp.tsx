@@ -2,10 +2,12 @@
 
 import { CheckCircle2, Printer, RotateCcw, UserRoundPen } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { PlanInput, PlanResult, SavedPlan, Term } from "@/contracts/types";
+import type { CandidateSet, PlanInput, PlanResult, SavedPlan, Term, TrackCandidate } from "@/contracts/types";
 import { diffPlans, ENGINE_VERSION, formatTerm, simulatePlan, termIndex } from "@/engine";
 import { buildGuidance } from "@/features/guidance/buildGuidance";
+import { CandidateList } from "./components/CandidateList";
 import { CatalogBar, CatalogNotice, CatalogProblem } from "./components/CatalogStatus";
+import { exampleCandidates } from "./dev/exampleCandidates";
 import { CompareView } from "./components/CompareView";
 import { Controls } from "./components/Controls";
 import { CoursesView } from "./components/CoursesView";
@@ -52,9 +54,15 @@ export function PlannerApp() {
   const [focusTerm, setFocusTerm] = useState<Term | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [editing, setEditing] = useState(false);
+  /** BE-2 연결 전: 개발 서버에서 `?example=normal|no-target|empty`일 때만 예시 후보를 쓴다. */
+  const [candidateSet, setCandidateSet] = useState<CandidateSet | null>(null);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
 
-  // localStorage는 브라우저 시작 후에만 읽는다.
+  // localStorage·URL은 브라우저 시작 후에만 읽는다.
   useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      setCandidateSet(exampleCandidates(new URLSearchParams(window.location.search).get("example")));
+    }
     setInput(loadInput());
     setPlanA(loadPlanA());
     setChecked(loadChecked() ?? {});
@@ -227,6 +235,9 @@ export function PlannerApp() {
                         diff={diff}
                         onSaveA={saveA}
                         onConfirm={confirmPlan}
+                        candidateSet={candidateSet}
+                        selectedCandidateId={selectedCandidateId}
+                        onSelectCandidate={(c) => setSelectedCandidateId(c.id)}
                       />
                     )}
                     {view === "da" && (
@@ -259,8 +270,8 @@ export function PlannerApp() {
 }
 
 /**
- * 맞 단계. 지금 계획 카드(엔진 결과) → A와 비교 → "맞다!" 확정.
- * 여러 후보의 순위 카드는 BE-3(후보 생성·정렬) 연결 후 이 자리에 들어간다.
+ * 맞 단계. 계산된 후보 카드(BE-2 연결 후) → 지금 계획 → A와 비교 → "맞다!" 확정.
+ * 후보가 없으면(BE-2 연결 전) 가짜 후보를 채우지 않고 안내만 보여준다.
  */
 function MatchStage({
   input,
@@ -269,6 +280,9 @@ function MatchStage({
   diff,
   onSaveA,
   onConfirm,
+  candidateSet,
+  selectedCandidateId,
+  onSelectCandidate,
 }: {
   input: PlanInput;
   result: PlanResult;
@@ -276,15 +290,33 @@ function MatchStage({
   diff: ReturnType<typeof diffPlans> | null;
   onSaveA: () => void;
   onConfirm: () => void;
+  candidateSet: CandidateSet | null;
+  selectedCandidateId: string | null;
+  onSelectCandidate: (c: TrackCandidate) => void;
 }) {
   return (
     <>
       <section aria-label="계획 후보" className="mb-8">
+        <h2 className="mb-3 text-[15px] font-semibold">계산한 후보</h2>
+        {candidateSet ? (
+          <>
+            {candidateSet.engineVersion === "example" && (
+              <p className="mb-3 rounded-lg bg-warm px-4 py-2 text-xs text-warm-ink">
+                개발용 예시 후보예요(가상 입력). 실제 입력으로 계산한 결과가 아니며 운영 화면에는 나오지 않아요.
+              </p>
+            )}
+            <CandidateList set={candidateSet} selectedId={selectedCandidateId} onSelect={onSelectCandidate} />
+          </>
+        ) : (
+          <p className="rounded-lg border border-dashed border-line px-4 py-3 text-xs text-muted">
+            진로·학점 페이스를 바꾼 후보를 계산해 순위대로 비교하는 기능은 준비 중이에요. 지금은 위 조건을 직접 바꿔 보고, A로 저장해 비교할 수 있어요.
+          </p>
+        )}
+      </section>
+
+      <section aria-label="지금 계획" className="mb-8">
         <h2 className="mb-3 text-[15px] font-semibold">지금 계획</h2>
         <TrackCard input={input} result={result} label="지금 조건으로 계산한 계획" />
-        <p className="mt-3 rounded-lg border border-dashed border-line px-4 py-3 text-xs text-muted">
-          입대 시점·학점 페이스를 바꾼 다른 선택지를 순위대로 비교하는 기능은 준비 중이에요. 지금은 위 조건을 직접 바꿔 보고, A로 저장해 비교할 수 있어요.
-        </p>
       </section>
 
       <section aria-label="A와 비교" className="mb-8">
