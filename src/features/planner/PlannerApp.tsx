@@ -1,6 +1,6 @@
 "use client";
 
-import { Printer, Save, UserRoundPen } from "lucide-react";
+import { CheckCircle2, Printer, RotateCcw, UserRoundPen } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { PlanInput, PlanResult, SavedPlan, Term } from "@/contracts/types";
 import { diffPlans, ENGINE_VERSION, formatTerm, simulatePlan, termIndex } from "@/engine";
@@ -14,21 +14,35 @@ import { PrintHeader } from "./components/PrintHeader";
 import { RoadmapView } from "./components/RoadmapView";
 import { Sidebar, type View } from "./components/Sidebar";
 import { SourcesView } from "./components/SourcesView";
+import { TrackCard } from "./components/TrackCard";
 import { Button } from "./components/ui";
 import { todayISO } from "./defaults";
 import { completedTermsLabel, type Profile } from "./profile";
-import { clearInput, loadChecked, loadInput, loadPlanA, loadProfile, saveChecked, saveInput, savePlanA, saveProfile } from "./storage";
+import {
+  clearInput,
+  loadChecked,
+  loadInput,
+  loadPlanA,
+  loadProfile,
+  loadStage,
+  saveChecked,
+  saveInput,
+  savePlanA,
+  saveProfile,
+  saveStage,
+} from "./storage";
 import { useCatalog } from "./useCatalog";
 
 const TITLES: Record<View, [string, string]> = {
-  roadmap: ["학기 로드맵", "진로와 일정에 맞춰 학기별로 무엇을 들을지 배치했어요"],
+  mat: ["계획 맞춰가기", "계획을 비교하고 조건을 고친 뒤, 마음에 들면 \u201c맞다!\u201d로 확정하세요"],
+  da: ["학기 로드맵", "확정한 계획을 학기별로 정리했어요"],
   courses: ["진로에 맞는 전공 과목", "학과 교육과정에 서비스의 진로 추천을 연결했어요"],
-  compare: ["플랜 A와 지금 비교", "조건을 바꾸기 전과 후에 무엇이 달라지는지 보여줘요"],
   sources: ["자료와 출처", "계획에 쓰인 학과 자료가 어디서 왔는지 확인하세요"],
 };
 
 export function PlannerApp() {
-  const [view, setView] = useState<View>("roadmap");
+  const [view, setViewState] = useState<View>("mat");
+  const [confirmed, setConfirmed] = useState(false);
   const { catalog, loading, reload } = useCatalog();
   const [mounted, setMounted] = useState(false);
   const [input, setInput] = useState<PlanInput | null>(null);
@@ -45,14 +59,30 @@ export function PlannerApp() {
     setPlanA(loadPlanA());
     setChecked(loadChecked() ?? {});
     setProfile(loadProfile());
+    const stage = loadStage();
+    if (stage) {
+      setViewState(stage.view);
+      setConfirmed(stage.confirmed);
+    }
     setMounted(true);
     reload();
   }, [reload]);
 
+  const setStage = (nextView: View, nextConfirmed: boolean) => {
+    setViewState(nextView);
+    setConfirmed(nextConfirmed);
+    saveStage({ view: nextView, confirmed: nextConfirmed });
+  };
+  const setView = (v: View) => setStage(v, confirmed);
+
+  /** 계획 조건이 바뀌면 확정을 풀고 다시 맞춰가기로 본다. */
   const updateInput = (next: PlanInput) => {
     setInput(next);
     saveInput(next);
+    if (confirmed) setStage(view, false);
   };
+
+  const confirmPlan = () => setStage("da", true);
 
   const finishProfile = (next: PlanInput, nextProfile: Profile) => {
     updateInput(next);
@@ -60,7 +90,7 @@ export function PlannerApp() {
     saveProfile(nextProfile);
     setEditing(false);
     setRevision((r) => r + 1);
-    setView("roadmap");
+    setStage("mat", false);
   };
 
   const restart = () => {
@@ -70,7 +100,7 @@ export function PlannerApp() {
     setProfile(null);
     setEditing(false);
     setRevision((r) => r + 1);
-    setView("roadmap");
+    setStage("mat", false);
   };
 
   const dataset = catalog?.dataset ?? null;
@@ -96,7 +126,7 @@ export function PlannerApp() {
   };
 
   const jumpTo = (term: Term) => {
-    setView("roadmap");
+    setView("da");
     setFocusTerm({ ...term }); // 같은 학기를 다시 눌러도 이동하도록 새 객체로 둔다.
   };
 
@@ -123,7 +153,19 @@ export function PlannerApp() {
   return (
     <div className="mx-auto max-w-[1240px] sm:p-4 print:max-w-none print:p-0">
       <div className="grid min-h-dvh overflow-clip bg-bg sm:min-h-0 sm:rounded-2xl sm:border sm:border-line grid-cols-[200px_minmax(0,1fr)] print:block print:min-h-0 print:border-0 print:bg-white">
-        <Sidebar view={view} onChange={(v) => { setFocusTerm(null); setView(v); }} disabled={onboarding} profile={profile} input={input} onEditProfile={input ? () => setEditing(true) : undefined} onRestart={input ? restart : undefined} />
+        <Sidebar
+          view={view}
+          onboarding={onboarding}
+          confirmed={confirmed}
+          onChange={(v) => {
+            setFocusTerm(null);
+            setView(v);
+          }}
+          onOpenInput={input ? () => setEditing(true) : undefined}
+          profile={profile}
+          input={input}
+          onRestart={input ? restart : undefined}
+        />
         <main className="min-w-0 px-4 py-5 sm:px-7 sm:py-6 print:p-0">
           <div className="print:hidden">
             <CatalogBar catalog={catalog} loading={loading} />
@@ -142,25 +184,29 @@ export function PlannerApp() {
                 <PrintHeader input={input} profile={profile} catalog={catalog} printedAt={mounted ? todayISO() : ""} />
                 <header className="mt-4 mb-5 flex flex-wrap items-end justify-between gap-3.5 print:hidden">
                   <div>
-                    <h1 className="text-[28px] font-semibold tracking-tight text-ink">{profile?.name ? `${profile.name}님의 ${title}` : title}</h1>
-                    <p className="mt-1 text-[13px] text-muted">{view === "roadmap" ? `${input.completedTerms === 0 ? "신입생으로" : `${completedTermsLabel(input.completedTerms)} 마친 상태에서`} ${formatTerm(input.startTerm)}부터 계획했어요` : desc}</p>
+                    <h1 className="text-[28px] font-semibold tracking-tight text-ink">{profile?.name && (view === "mat" || view === "da") ? `${profile.name}님의 ${title}` : title}</h1>
+                    <p className="mt-1 text-[13px] text-muted">{view === "da" ? `${input.completedTerms === 0 ? "신입생으로" : `${completedTermsLabel(input.completedTerms)} 마친 상태에서`} ${formatTerm(input.startTerm)}부터 계획했어요` : desc}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {view === "roadmap" && result && !result.error && (
+                    {view === "da" && result && !result.error && (
                       <Button onClick={() => window.print()}>
                         <Printer size={15} aria-hidden /> 인쇄·PDF 저장
                       </Button>
                     )}
-                    <Button onClick={() => setEditing(true)}>
-                      <UserRoundPen size={15} aria-hidden /> 내 정보 수정
-                    </Button>
-                    <Button primary onClick={saveA} disabled={!result || !!result.error}>
-                      <Save size={15} aria-hidden /> 플랜 A로 저장
-                    </Button>
+                    {view === "da" && (
+                      <Button onClick={() => setStage("mat", false)}>
+                        <RotateCcw size={15} aria-hidden /> 다시 맞추기
+                      </Button>
+                    )}
+                    {view === "mat" && (
+                      <Button onClick={() => setEditing(true)}>
+                        <UserRoundPen size={15} aria-hidden /> 내 정보 수정
+                      </Button>
+                    )}
                   </div>
                 </header>
 
-                {view !== "sources" && (
+                {view === "mat" && (
                   <div className="print:hidden">
                     <Controls input={input} revision={revision} onChange={updateInput} />
                   </div>
@@ -173,12 +219,29 @@ export function PlannerApp() {
                 ) : (
                   <>
                     <CatalogNotice catalog={catalog} />
-                    {(view === "roadmap" || view === "courses") && <Summary result={result} input={input} planA={planA} />}
-                    {view === "roadmap" && (
-                      <RoadmapView input={input} result={result} guidance={guidance} checked={checked} onToggle={toggleChecked} focusTerm={focusTerm} />
+                    {view === "mat" && (
+                      <MatchStage
+                        input={input}
+                        result={result}
+                        planA={planA}
+                        diff={diff}
+                        onSaveA={saveA}
+                        onConfirm={confirmPlan}
+                      />
+                    )}
+                    {view === "da" && (
+                      <>
+                        {!confirmed && (
+                          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-warm px-4 py-3 text-[13px] text-warm-ink print:hidden">
+                            아직 확정하지 않은 계획이에요. 맞춰가기에서 &ldquo;맞다!&rdquo;를 누르면 이 로드맵으로 확정됩니다.
+                            <Button onClick={() => setView("mat")}>맞춰가기로 가기</Button>
+                          </div>
+                        )}
+                        <Summary result={result} input={input} planA={planA} />
+                        <RoadmapView input={input} result={result} guidance={guidance} checked={checked} onToggle={toggleChecked} focusTerm={focusTerm} />
+                      </>
                     )}
                     {view === "courses" && <CoursesView input={input} dataset={dataset} result={result} onToggleCompleted={toggleCompleted} onJump={jumpTo} />}
-                    {view === "compare" && <CompareView planA={planA} input={input} result={result} diff={diff} onSaveA={saveA} />}
                   </>
                 )}
                 {view === "sources" && catalog && <SourcesView catalog={catalog} onReload={reload} loading={loading} />}
@@ -192,6 +255,52 @@ export function PlannerApp() {
         </main>
       </div>
     </div>
+  );
+}
+
+/**
+ * 맞 단계. 지금 계획 카드(엔진 결과) → A와 비교 → "맞다!" 확정.
+ * 여러 후보의 순위 카드는 BE-3(후보 생성·정렬) 연결 후 이 자리에 들어간다.
+ */
+function MatchStage({
+  input,
+  result,
+  planA,
+  diff,
+  onSaveA,
+  onConfirm,
+}: {
+  input: PlanInput;
+  result: PlanResult;
+  planA: SavedPlan | null;
+  diff: ReturnType<typeof diffPlans> | null;
+  onSaveA: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <>
+      <section aria-label="계획 후보" className="mb-8">
+        <h2 className="mb-3 text-[15px] font-semibold">지금 계획</h2>
+        <TrackCard input={input} result={result} label="지금 조건으로 계산한 계획" />
+        <p className="mt-3 rounded-lg border border-dashed border-line px-4 py-3 text-xs text-muted">
+          입대 시점·학점 페이스를 바꾼 다른 선택지를 순위대로 비교하는 기능은 준비 중이에요. 지금은 위 조건을 직접 바꿔 보고, A로 저장해 비교할 수 있어요.
+        </p>
+      </section>
+
+      <section aria-label="A와 비교" className="mb-8">
+        <h2 className="mb-3 text-[15px] font-semibold">저장한 A와 비교</h2>
+        <CompareView planA={planA} input={input} result={result} diff={diff} onSaveA={onSaveA} />
+      </section>
+
+      <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-panel px-5 py-4 shadow-[0_8px_24px_-12px_rgba(20,34,56,0.35)] print:hidden">
+        <p className="text-[13px] text-muted">
+          이 계획이 마음에 들면 확정하세요. 확정한 뒤에도 &ldquo;다시 맞추기&rdquo;로 돌아올 수 있어요.
+        </p>
+        <Button primary onClick={onConfirm} disabled={!!result.error} className="px-6 text-[15px]">
+          <CheckCircle2 size={17} aria-hidden /> 맞다!
+        </Button>
+      </div>
+    </>
   );
 }
 

@@ -5,6 +5,7 @@ const INPUT_KEY = "infosys:planner:input:v1";
 const PLAN_A_KEY = "infosys:planner:plan-a:v1";
 const CHECKED_KEY = "infosys:planner:checked:v1";
 const PROFILE_KEY = "infosys:planner:profile:v1";
+const STAGE_KEY = "infosys:planner:stage:v1";
 
 /** 브라우저 시작 후(useEffect 안)에서만 호출한다. */
 function read<T>(key: string): T | null {
@@ -43,3 +44,14 @@ export function loadProfile(): Profile | null {
   return p?.schemaVersion === 1 ? p : null;
 }
 export const saveProfile = (profile: Profile | null) => write(PROFILE_KEY, profile);
+
+/** 아·맞·다 단계 위치와 "맞다!" 확정 여부. 새로고침 후 같은 단계로 돌아온다. */
+export interface StageState {
+  view: "mat" | "da" | "courses" | "sources";
+  confirmed: boolean;
+}
+export function loadStage(): StageState | null {
+  const v = read<StageState>(STAGE_KEY);
+  return v && ["mat", "da", "courses", "sources"].includes(v.view) ? v : null;
+}
+export const saveStage = (stage: StageState) => write(STAGE_KEY, stage);
