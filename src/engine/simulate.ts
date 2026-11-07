@@ -3,6 +3,7 @@ import type {
   Course,
   CourseGroup,
   Dataset,
+  DatasetV2,
   PlacedCourse,
   PlanInput,
   PlannedTerm,
@@ -10,9 +11,10 @@ import type {
   PlanWarning,
   UnplacedCourse,
 } from "@/contracts/types";
+import { maxUserCap, termCapFor } from "./pace";
 import { formatTerm, isBlocked, isValidDate, nextTerm } from "./terms";
 
-export const ENGINE_VERSION = "0.1.1";
+export const ENGINE_VERSION = "0.2.0";
 export const MAX_FUTURE_TERMS = 24;
 
 export function groupOf(code: string, dataset: Dataset): CourseGroup | null {
@@ -42,6 +44,9 @@ export function validatePlanInput(input: PlanInput): string | null {
     return "시작 학기를 확인해 주세요.";
   if (!Number.isInteger(input.creditCap) || input.creditCap < 1 || input.creditCap > 30)
     return "학기당 학점 상한은 1~30 사이로 입력해 주세요.";
+  for (const b of input.paceBands ?? [])
+    if (!Number.isInteger(b.credits) || b.credits < 1 || b.credits > 30 || !Number.isInteger(b.fromOrdinal) || b.fromOrdinal < 1)
+      return "학기별 계획 학점은 1~30 사이로 입력해 주세요.";
   // NaN·Infinity는 비교식을 모두 통과하므로 먼저 거른다.
   if (!Number.isFinite(input.earnedCredits) || input.earnedCredits < 0)
     return "이수학점은 0 이상이어야 합니다.";
@@ -102,7 +107,7 @@ function pruneUnplaceable(
  * 확인된 필수과목 → 진로 추천 과목 순서의 결정적 단순 배치.
  * 최적 시간표나 공식 졸업 판정이 아니다.
  */
-export function simulatePlan(input: PlanInput, dataset: Dataset): PlanResult {
+export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
   const base = { engineVersion: ENGINE_VERSION, catalogVersion: dataset.catalogVersion };
   const error = validatePlanInput(input);
   if (error) {
@@ -123,7 +128,7 @@ export function simulatePlan(input: PlanInput, dataset: Dataset): PlanResult {
   const pruned = pruneUnplaceable(
     recommended.filter((c) => !done.has(c.code)),
     done,
-    input.creditCap,
+    maxUserCap(input),
   );
   let queue = pruned.queue;
   let remaining =
@@ -142,6 +147,8 @@ export function simulatePlan(input: PlanInput, dataset: Dataset): PlanResult {
     }
 
     const studentYear = Math.floor((input.completedTerms + activeTerms) / 2) + 1;
+    // 유효학기 순번(1부터)에 맞는 계획 상한: 후반 여유형 구간·확인된 학교 상한 중 작은 값
+    const { cap, ruleId } = termCapFor(input, dataset, input.completedTerms + activeTerms + 1);
     const placed: PlacedCourse[] = [];
     let used = 0;
 
@@ -149,7 +156,7 @@ export function simulatePlan(input: PlanInput, dataset: Dataset): PlanResult {
       if ((c.recommendedYear ?? 1) > studentYear) continue;
       if ((c.semester === 1 || c.semester === 2) && c.semester !== term.season) continue;
       if (!c.prerequisites.every((p) => done.has(p))) continue;
-      if (used + c.credits > input.creditCap) continue;
+      if (used + c.credits > cap) continue;
 
       const assumptions: PlacedCourse["assumptions"] = [];
       if (c.semester === null) assumptions.push("semester_unknown");
@@ -170,7 +177,7 @@ export function simulatePlan(input: PlanInput, dataset: Dataset): PlanResult {
     // 선수과목은 다음 학기부터 충족된 것으로 본다.
     placedCodes.forEach((code) => done.add(code));
 
-    const planned = remaining === null ? used : Math.min(input.creditCap, Math.max(used, remaining));
+    const planned = remaining === null ? used : Math.min(cap, Math.max(used, remaining));
     if (remaining !== null) remaining = Math.max(0, remaining - planned);
 
     for (const p of placed) {
@@ -190,7 +197,7 @@ export function simulatePlan(input: PlanInput, dataset: Dataset): PlanResult {
         });
     }
 
-    terms.push({ term, status: "study", courses: placed, slotCredits: planned - used, plannedCredits: planned });
+    terms.push({ term, status: "study", courses: placed, slotCredits: planned - used, plannedCredits: planned, capCredits: cap, capRuleId: ruleId });
     activeTerms++;
     lastStudyTerm = term;
     finished = queue.length === 0 && (remaining === null || remaining === 0);

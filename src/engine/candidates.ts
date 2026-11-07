@@ -6,7 +6,10 @@ import type {
   Dataset,
   DatasetV2,
   InputIssue,
+  ISODate,
   MetricKey,
+  MilitaryScenario,
+  PaceStyle,
   MetricValue,
   PlanInputV2,
   PlanResultV2,
@@ -21,6 +24,8 @@ import type {
 import { CAREER_LABEL, CAREER_TRACKS } from "@/contracts/careers";
 import { findPeriodConflicts, toEngineInput, validatePlanInputV2 } from "./inputV2";
 import { candidateIdOf, planResultFromV1 } from "./migrate";
+import { resolveMilitaryScenarios } from "./military";
+import { LATE_LIGHT_CONFIG, PACE_STYLE_LABEL } from "./pace";
 import { ENGINE_VERSION, MAX_FUTURE_TERMS, simulatePlan } from "./simulate";
 import { formatTerm, nextTerm, termIndex, termRange } from "./terms";
 
@@ -156,18 +161,33 @@ export function withMilitaryStart(input: PlanInputV2, periodId: string, term: Te
 
 // ── 후보 하나 ────────────────────────────────────────────
 
+interface Axis {
+  career: CareerTrack;
+  pace: number;
+  style: PaceStyle;
+  militaryStartTerm: Term | null;
+  scenario: MilitaryScenario | null;
+}
+
 function buildCandidate(
   input: PlanInputV2,
-  career: CareerTrack,
-  pace: number,
+  axis: Axis,
   dataset: DatasetV2,
   config: RecommendationConfig,
   missing: InputIssue[],
-  militaryStartTerm: Term | null = null,
 ): TrackCandidate | null {
-  const engineInput = toEngineInput(input, career, pace);
+  const { career, pace, style, militaryStartTerm, scenario } = axis;
+  const engineInput = toEngineInput(input, career, pace, style);
   if (!engineInput) return null;
-  const snapshot: PlanInputV2 = { ...input, careers: [career], pace: { mode: "fixed", credits: pace } };
+  const snapshot: PlanInputV2 = {
+    ...input,
+    careers: [career],
+    pace: { mode: "fixed", credits: pace },
+    ...(input.paceStyles ? { paceStyles: [style] } : {}),
+    ...(input.militaryPlan && scenario
+      ? { militaryPlan: { ...input.militaryPlan, trackIds: scenario.trackId ? [scenario.trackId] : [] } }
+      : {}),
+  };
   const v1 = simulatePlan(engineInput, dataset);
   const result = planResultFromV1(v1, snapshot, engineInput.completedTerms);
 
@@ -190,6 +210,37 @@ function buildCandidate(
     });
   }
 
+  if (style !== "balanced")
+    result.assumptions.push({
+      id: `pace_style:${style}`,
+      kind: "credit_cap_user_only",
+      message:
+        style === "late_light"
+          ? `${LATE_LIGHT_CONFIG.name}(${LATE_LIGHT_CONFIG.configVersion}): ${LATE_LIGHT_CONFIG.description} ${LATE_LIGHT_CONFIG.disclaimer}`
+          : "학기별 계획 학점을 직접 설정한 값으로 배치했습니다. 학교 공식 권장 학점이 아닙니다.",
+      status: "user_assumption",
+    });
+  if (scenario && scenario.trackId) {
+    result.assumptions.push({
+      id: `military_track:${scenario.trackId}:${scenario.role}`,
+      kind: "period_user_estimate",
+      message:
+        scenario.months === null
+          ? `${scenario.label}: 복무기간을 공식 자료로 확인하지 못해 완료 학기를 확정하지 않습니다.`
+          : scenario.monthsStatus === "verified"
+            ? `${scenario.label}: 공식 자료에서 확인한 복무기간 ${scenario.months}개월을 썼습니다.`
+            : `${scenario.label}: 직접 입력한 예상 복무기간 ${scenario.months}개월(사용자 가정)을 썼습니다.`,
+      status: scenario.monthsStatus,
+    });
+    if (scenario.role === "conditional")
+      result.assumptions.push({
+        id: "katusa_conditional",
+        kind: "period_user_estimate",
+        message: "카투사 선발 결과에 따라 달라지는 조건부 계획입니다. 선발을 가정한 것이며 합격 가능성 예측이 아닙니다.",
+        status: "unknown",
+      });
+  }
+
   const conflicts: CandidateConflict[] = findPeriodConflicts(input).map(({ a, b }) => ({
     code: "PERIOD_OVERLAP",
     message: "고정한 군 복무와 교환학생 기간이 겹칩니다.",
@@ -207,13 +258,21 @@ function buildCandidate(
       ? "conflict"
       : v1.warnings.some((w) => w.code === "SEARCH_LIMIT")
         ? "search_limit"
-        : missing.length > 0 || result.unplaced.length > 0
+        : missing.length > 0 || result.unplaced.length > 0 || scenario?.role === "conditional"
           ? "conditional"
           : "computable";
 
+  const key = {
+    career,
+    militaryStartTerm,
+    paceCredits: pace,
+    ...(style !== "balanced" ? { paceStyle: style } : {}),
+    ...(scenario?.trackId ? { militaryTrackId: scenario.trackId } : {}),
+    ...(scenario && scenario.role !== "normal" ? { militaryRole: scenario.role } : {}),
+  };
   return {
-    id: candidateIdOf({ career, militaryStartTerm, paceCredits: pace }),
-    key: { career, militaryStartTerm, paceCredits: pace },
+    id: candidateIdOf(key),
+    key,
     status,
     input: snapshot,
     result,
@@ -238,11 +297,13 @@ function exchangeAssumptions(input: PlanInputV2): Assumption[] {
 /** 같은 진로에서 학기·과목·학점 배치가 같으면 같은 후보다. */
 function fingerprint(c: TrackCandidate): string {
   const r = c.result;
-  if (!r) return `${c.key.career}|none`;
+  // 군 복무 트랙·시나리오 역할·페이스 방식이 다르면 배치가 같아도 다른 후보로 둔다.
+  const axes = `${c.key.career}|${c.key.militaryTrackId ?? "-"}|${c.key.militaryRole ?? "normal"}|${c.key.paceStyle ?? "balanced"}`;
+  if (!r) return `${axes}|none`;
   const terms = r.terms
     .map((t) => `${termIndex(t.term)}:${t.status}:${t.plannedCredits}:${t.courses.map((x) => x.code).join(",")}`)
     .join(";");
-  return `${c.key.career}|${terms}|${r.unplaced.map((u) => u.code).join(",")}|${r.expectedCompletion ? termIndex(r.expectedCompletion) : "-"}`;
+  return `${axes}|${terms}|${r.unplaced.map((u) => u.code).join(",")}|${r.expectedCompletion ? termIndex(r.expectedCompletion) : "-"}`;
 }
 
 // ── 정렬 ────────────────────────────────────────────────
@@ -341,8 +402,9 @@ export function generateCandidates(
   input: PlanInputV2,
   dataset: DatasetV2,
   config: RecommendationConfig = dataset.recommendation ?? DEFAULT_RECOMMENDATION_CONFIG,
+  opts: { today?: ISODate } = {},
 ): CandidateSet {
-  const issues = validatePlanInputV2(input);
+  const issues = validatePlanInputV2(input, opts);
   const errors = issues.filter((i) => i.severity === "error");
   const missing = issues.filter((i) => i.severity === "missing");
   const base = {
@@ -368,18 +430,44 @@ export function generateCandidates(
       ? [input.pace.credits]
       : [...new Set(input.pace.options ?? config.paceOptions)].sort((a, b) => a - b);
 
-  const flex = expandableMilitary(input);
-  const timings: Array<Term | null> = flex ? militaryTimingTerms(input, config.maxMilitaryTimings) : [];
-  if (timings.length === 0) timings.push(null);
+  const styles: PaceStyle[] = [...new Set(input.paceStyles && input.paceStyles.length > 0 ? input.paceStyles : ["balanced" as const])];
+
+  // 군 복무 트랙(카투사 우선 희망 포함)을 시나리오로 펼친다. 트랙 입력이 없으면 기존 병역 기간 하나.
+  const milPeriod = input.periods.find((p) => p.kind === "military") ?? null;
+  const resolution =
+    input.militaryPlan && milPeriod
+      ? resolveMilitaryScenarios(input.militaryPlan, dataset.military, milPeriod.durationMonths)
+      : null;
+  const scenarioInputs: Array<{ scenario: MilitaryScenario | null; input: PlanInputV2 }> = resolution
+    ? resolution.scenarios.map((sc) => ({
+        scenario: sc,
+        input: {
+          ...input,
+          periods: input.periods.map((p) =>
+            p.id === milPeriod!.id
+              ? { ...p, durationMonths: p.endDate ? p.durationMonths : sc.months }
+              : p,
+          ),
+        },
+      }))
+    : [{ scenario: null, input }];
 
   const built: TrackCandidate[] = [];
   for (const career of careers)
-    for (const timing of timings)
-      for (const pace of paces) {
-        const snapshot = flex && timing ? withMilitaryStart(input, flex.id, timing) : input;
-        const c = buildCandidate(snapshot, career, pace, dataset, config, missing, timing);
-        if (c) built.push(c);
-      }
+    for (const { scenario, input: scInput } of scenarioInputs) {
+      const flex = expandableMilitary(scInput);
+      const timings: Array<Term | null> = flex ? militaryTimingTerms(scInput, config.maxMilitaryTimings) : [];
+      if (timings.length === 0) timings.push(null);
+      // 시나리오마다 정보 부족이 다르다(복무기간 미확인 등).
+      const scMissing = scenario ? validatePlanInputV2(scInput, opts).filter((i) => i.severity === "missing") : missing;
+      for (const timing of timings)
+        for (const style of styles)
+          for (const pace of style === "custom" ? [paces[0]] : paces) {
+            const snapshot = flex && timing ? withMilitaryStart(scInput, flex.id, timing) : scInput;
+            const c = buildCandidate(snapshot, { career, pace, style, militaryStartTerm: timing, scenario }, dataset, config, scMissing);
+            if (c) built.push(c);
+          }
+    }
   if (built.length === 0) {
     const blocking = missing.filter((m) => m.field === "startTerm" || m.field.startsWith("progress"));
     return empty(
@@ -403,7 +491,8 @@ export function generateCandidates(
       unique.push(c);
     }
   }
-  const candidates = unique.slice(0, config.maxCandidates);
+  // 상한은 시나리오·페이스 방식 조합마다 적용한다(서로 다른 군 복무 시나리오가 잘려 사라지지 않게).
+  const candidates = unique.slice(0, config.maxCandidates * scenarioInputs.length * styles.length);
   const ranking = rankCandidates(candidates, input.priorities);
   const valid = candidates.filter((c) => c.status !== "conflict");
 
@@ -413,6 +502,7 @@ export function generateCandidates(
     ranking,
     dedupedInto,
     exploredCount: built.length,
+    military: resolution,
     emptyReason:
       valid.length === 0
         ? {
@@ -425,4 +515,4 @@ export function generateCandidates(
   };
 }
 
-export { METRIC_LABEL, CAREER_LABEL };
+export { METRIC_LABEL, CAREER_LABEL, PACE_STYLE_LABEL };

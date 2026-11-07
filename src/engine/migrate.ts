@@ -18,10 +18,17 @@ import { termIndex, termRange, overlaps } from "./terms";
 
 export const DEFAULT_PRIORITIES: PlanInputV2["priorities"] = ["fast_completion", "career_core", "light_terms"];
 
-/** 후보 ID 형식: "{career}|m{병역 시작 학기 인덱스 또는 -}|p{페이스}" — 같은 키면 같은 ID */
+/**
+ * 후보 ID 형식: "{career}|m{병역 시작 학기 인덱스 또는 -}|p{페이스}" — 같은 키면 같은 ID.
+ * 기본값이 아닌 축만 덧붙인다(기존 ID 유지): "|s{페이스 방식}", "|t{군 복무 트랙}", "|r{시나리오 역할}"
+ */
 export function candidateIdOf(key: CandidateKey): string {
   const m = key.militaryStartTerm ? String(termIndex(key.militaryStartTerm)) : "-";
-  return `${key.career}|m${m}|p${key.paceCredits}`;
+  let id = `${key.career}|m${m}|p${key.paceCredits}`;
+  if (key.paceStyle && key.paceStyle !== "balanced") id += `|s${key.paceStyle}`;
+  if (key.militaryTrackId) id += `|t${key.militaryTrackId}`;
+  if (key.militaryRole && key.militaryRole !== "normal") id += `|r${key.militaryRole}`;
+  return id;
 }
 
 function periodFromBreak(b: BreakPeriod, i: number): PeriodInput {
@@ -101,8 +108,8 @@ export function planResultFromV1(result: PlanResult, input: PlanInputV2, complet
       ...t,
       status: exchange ? "exchange" : t.status,
       periodIds: hits.map((p) => p.id),
-      capCredits: t.status === "study" ? cap : null,
-      capRuleId: null,
+      capCredits: t.status === "study" ? (t.capCredits ?? cap) : null,
+      capRuleId: t.status === "study" ? (t.capRuleId ?? null) : null,
       termOrdinal,
     };
   });

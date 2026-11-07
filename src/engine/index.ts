@@ -18,3 +18,27 @@ export { validatePlanInputV2, toEngineInput, resolvePeriodRange, addMonths } fro
 export { versionFromCandidate, applyFeedback, reviseVersion, diffVersions } from "./versions";
 export type { VersionIds, VersionAttempt } from "./versions";
 export type { DiffablePlan } from "./diff";
+export { LATE_LIGHT_CONFIG, PACE_STYLE_LABEL, paceBandsFor, userCapFor, schoolCapFor, termCapFor } from "./pace";
+export {
+  resolveMilitaryScenarios,
+  matchCertificates,
+  findCertificate,
+  scenarioMonths,
+  KATUSA_TRACK_ID,
+  DEFAULT_FALLBACK_TRACK_ID,
+  KATUSA_STATUS_LABEL,
+} from "./military";
+export type { CertificateMatch } from "./military";
+export {
+  GEN_ED_NOTE,
+  letterLabel,
+  emptyGenEd,
+  addGenEd,
+  removeGenEd,
+  genEdCreditsIn,
+  termBreakdown,
+  staleGenEd,
+} from "./genEd";
+export type { GenEdState, AddGenEdResult, TermCreditBreakdown } from "./genEd";
+export { planStats } from "./stats";
+export type { PlanStats } from "./stats";

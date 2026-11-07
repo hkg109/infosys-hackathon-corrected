@@ -128,6 +128,26 @@ export interface PlanInput {
   /** 학기당 계획 학점 상한(사용자 제약, 학교 승인값 아님) */
   creditCap: number;
   breaks: BreakPeriod[];
+  /**
+   * 유효학기 순번별 계획 학점(후반 여유형·직접 설정). 없으면 모든 학기 creditCap.
+   * 서비스 계획 방식이며 학교 공식 권장 학점이 아니다.
+   */
+  paceBands?: PaceBand[];
+  /** 학점 페이스 방식(표시·후보 구분용). 없으면 balanced */
+  paceStyle?: PaceStyle;
+  /** 입학연도. 확인된 학교 상한(CreditCapRule) 적용 범위를 고를 때만 쓴다. 모르면 null(학교 상한 미적용) */
+  admissionYear?: number | null;
+}
+
+// ── 학점 페이스(후반 여유형) ─────────────────────────────
+
+/** balanced = 매 학기 같은 상한, late_light = 3·4학년에 줄임(서비스 휴리스틱), custom = 사용자가 학년대별로 지정 */
+export type PaceStyle = "balanced" | "late_light" | "custom";
+
+/** fromOrdinal번째 유효학기(1부터)부터 다음 구간 전까지 credits를 계획 상한으로 쓴다. */
+export interface PaceBand {
+  fromOrdinal: number;
+  credits: number;
 }
 
 // ── 계산 결과 ─────────────────────────────────────────────
@@ -164,6 +184,10 @@ export interface PlannedTerm {
   /** 표본 외 미배정 전공·교양 학점 슬롯 */
   slotCredits: number;
   plannedCredits: number;
+  /** 이 학기에 쓴 계획 상한 = min(학점 페이스, 확인된 학교 상한). 중단 학기는 없음 */
+  capCredits?: number;
+  /** 상한에 학교 규칙을 썼으면 그 규칙 ID */
+  capRuleId?: string | null;
 }
 
 export interface UnplacedCourse {
@@ -322,6 +346,173 @@ export interface DatasetV2 extends Dataset {
   recommendation?: RecommendationConfig;
   /** 자료 검토일(제공본 기준). 학교 사이트 실시간 조회일이 아니다. */
   reviewedAt?: ISODate;
+  /** 군 복무 트랙·자격증 검토 자료. 없으면 군대 트랙 비교를 하지 않는다. */
+  military?: MilitaryCatalog;
+}
+
+// ── 군 복무 트랙·자격증(검토 자료) ───────────────────────
+
+/** 공식 원문 위치. 화면은 이 링크만 보여 주고 원문 사이트를 직접 호출하지 않는다. */
+export interface OfficialSource {
+  title: string;
+  url: string;
+  /** 직접 열어 확인한 날짜 */
+  checkedAt: ISODate;
+  /** 원문에서 주장을 확인할 수 있는 위치(표·항목 이름) */
+  locator: string;
+  /** 적용 모집연도·시험연도·회차 표기. 없으면 null */
+  appliesTo: string | null;
+}
+
+export type MilitaryBranch = "army" | "navy" | "air_force" | "marine";
+export type MilitaryRecruitType = "general_enlistment" | "technical_admin" | "katusa";
+
+export interface MilitaryTrackInfo {
+  /** 안정적인 ID(예: "army-general", "katusa") */
+  id: string;
+  /** 공식 표시 이름 */
+  officialName: string;
+  branch: MilitaryBranch;
+  recruitType: MilitaryRecruitType;
+  description: string;
+  /** 이런 사람에게(서비스 안내) */
+  fitsFor: string[];
+  /** 지원자격(공식 원문 요약) */
+  eligibility: string[];
+  /** 선발 방식(공식 원문 요약) */
+  selection: string[];
+  relatedMajors: string[];
+  /** 선발에 자격증을 반영하는지. 원문에 없으면 unknown */
+  certificatesConsidered: "yes" | "no" | "unknown";
+  /** 복무기간(개월). 공식 원문에서 확인하지 못하면 null — 추측하지 않는다 */
+  serviceMonths: number | null;
+  serviceMonthsStatus: ConfirmStatus;
+  serviceMonthsNote: string;
+  /** 적용 모집연도·회차 */
+  appliesTo: string | null;
+  sources: OfficialSource[];
+  /** 마지막으로 원문을 확인한 날짜. 확인 전이면 null */
+  checkedAt: ISODate | null;
+  status: ConfirmStatus;
+  /** 준비할 것(공식 원문 근거가 있는 것만) */
+  prepare: string[];
+  cautions: string[];
+}
+
+export type CertificateKind = "national_technical" | "national_certified_private" | "private" | "international" | "unknown";
+
+export interface CertificateInfo {
+  id: string;
+  /** 현재 공식 명칭 */
+  officialName: string;
+  /** 구 명칭·별칭. 공식 자료로 연결을 확인하지 못했으면 status unknown(같은 자격으로 단정하지 않음) */
+  aliases: Array<{ name: string; relation: "former_name" | "alias"; status: ConfirmStatus; sourceUrl: string | null }>;
+  /** 등급(1급, 기사 등). 해당 없거나 모르면 null */
+  grade: string | null;
+  issuer: string | null;
+  kind: CertificateKind;
+  officialUrl: string | null;
+  checkedAt: ISODate | null;
+  status: ConfirmStatus;
+}
+
+/**
+ * 군 트랙 ↔ 자격증의 공식 관계(지원자격·배점·우대). 공식 출처 필수.
+ * 진로 준비용 추천(CareerCertificateRecommendation)과 섞지 않는다.
+ */
+export interface MilitaryCertificateRelation {
+  militaryTrackId: string;
+  certificateId: string;
+  relation: "eligibility" | "score" | "preferred";
+  /** 원문의 기준 문장 */
+  criterion: string;
+  /** 원문에서 확인한 점수. 없으면 null(0으로 바꾸지 않는다) */
+  points: number | null;
+  appliesTo: string | null;
+  sourceUrl: string;
+  checkedAt: ISODate | null;
+  status: ConfirmStatus;
+  note: string;
+}
+
+/** 모집 분야의 공식 배점 기준(자격 등급별 등). 개별 자격증 인정과는 별개다. */
+export interface MilitaryScoringRule {
+  id: string;
+  militaryTrackId: string;
+  title: string;
+  rows: Array<{ label: string; value: string }>;
+  note: string;
+  appliesTo: string | null;
+  source: OfficialSource;
+  status: ConfirmStatus;
+}
+
+/** 진로 준비용 자격증 추천. 서비스 추천이며 공식 필수 자격이 아니다. */
+export interface CareerCertificateRecommendation {
+  career: CareerTrack;
+  certificateId: string;
+  reason: string;
+}
+
+export interface MilitaryCatalog {
+  catalogVersion: string;
+  reviewedAt: ISODate;
+  tracks: MilitaryTrackInfo[];
+  certificates: CertificateInfo[];
+  relations: MilitaryCertificateRelation[];
+  scoringRules: MilitaryScoringRule[];
+  careerCertificates: CareerCertificateRecommendation[];
+}
+
+/** 카투사 지원·선발 상태 */
+export type KatusaStatus = "not_applying" | "preparing" | "applied_waiting" | "selected" | "not_selected" | "undecided";
+
+/** 사용자가 고른 군 복무 트랙과 카투사 우선 희망. 입력에 없으면 기존 병역 후보 생성 그대로 */
+export interface MilitaryPlanInput {
+  /** 관심 군 복무 트랙 ID(MilitaryTrackInfo.id). 빈 배열 = 트랙 미지정 */
+  trackIds: string[];
+  /** "카투사에 선발된다면 다른 군 복무 트랙보다 카투사를 우선" */
+  katusaPriority: boolean;
+  katusaStatus: KatusaStatus;
+  /** 보유 자격증 ID */
+  certificateIds: string[];
+}
+
+/** 후보로 펼칠 군 복무 시나리오 하나 */
+export interface MilitaryScenario {
+  /** null = 트랙 미지정(기존 병역 기간 그대로) */
+  trackId: string | null;
+  /** primary = 확정 사용, conditional = 선발 결과에 따른 조건부, fallback = 선발되지 않을 경우, normal = 일반 비교 */
+  role: "normal" | "primary" | "conditional" | "fallback";
+  label: string;
+  /** 복무기간: 공식 확인값 > 사용자 가정 > null */
+  months: number | null;
+  monthsStatus: ConfirmStatus;
+}
+
+export interface MilitaryScenarioResolution {
+  scenarios: MilitaryScenario[];
+  /** 기본 후보에서 뺀 트랙과 이유 */
+  excluded: Array<{ trackId: string; reason: string }>;
+  /** 기본 계획에는 쓰지 않고 접어서 보여 줄 대안 */
+  alternatives: string[];
+}
+
+// ── 교양 자리(placeholder) ──────────────────────────────
+
+/**
+ * 학기의 미지정 학점(slotCredits)을 구체화한 교양 자리. 실제 과목이 아니며 과목 자료에 넣지 않는다.
+ * 구체화한 교양 학점 + 남은 slot = 원래 slotCredits (총학점에 다시 더하지 않는다)
+ */
+export interface GeneralEducationPlaceholder {
+  /** 안정적인 ID. 삭제해도 다른 항목의 ID·라벨은 바뀌지 않는다 */
+  id: string;
+  /** "교양 A" 형식 */
+  label: string;
+  credits: 2 | 3;
+  term: Term;
+  origin: "user" | "demo" | "engine";
+  status: "placeholder";
 }
 
 // ── 입력 v2(PLAN 4.1) ────────────────────────────────────
@@ -429,6 +620,12 @@ export interface PlanInputV2 {
   exchange: EventPlan;
   periods: PeriodInput[];
   priorities: PriorityKey[];
+  /** 비교할 학점 페이스 방식. 없으면 ["balanced"] */
+  paceStyles?: PaceStyle[];
+  /** paceStyles에 custom이 있을 때 쓰는 사용자 지정 구간 */
+  customPaceBands?: PaceBand[] | null;
+  /** 군 복무 트랙·카투사 우선 희망. 없으면 기존 병역 후보 생성 그대로 */
+  militaryPlan?: MilitaryPlanInput | null;
 }
 
 /** 입력 검증 결과. 오류(error)와 정보 부족(missing)을 구분한다(PLAN 4.2). */
@@ -445,7 +642,7 @@ export interface InputIssue {
 
 export type TermStatus = "study" | "break" | "exchange";
 
-export interface PlannedTermV2 extends Omit<PlannedTerm, "status"> {
+export interface PlannedTermV2 extends Omit<PlannedTerm, "status" | "capCredits" | "capRuleId"> {
   status: TermStatus;
   /** 이 학기를 막은 기간 ID(여러 개 가능) */
   periodIds: string[];
@@ -477,6 +674,12 @@ export interface CandidateKey {
   /** 병역 시작 학기 후보. 병역을 펼치지 않았으면 null */
   militaryStartTerm: Term | null;
   paceCredits: number;
+  /** 학점 페이스 방식. 없으면 balanced */
+  paceStyle?: PaceStyle;
+  /** 군 복무 트랙. 트랙을 펼치지 않았으면 null/없음 */
+  militaryTrackId?: string | null;
+  /** 군 복무 시나리오 역할(조건부 카투사·대체 트랙) */
+  militaryRole?: MilitaryScenario["role"];
 }
 
 export type MetricKey = PriorityKey;
@@ -559,6 +762,8 @@ export interface CandidateSet {
   exploredCount: number;
   /** 후보가 0개일 때 막은 조건과 바꿀 수 있는 입력 */
   emptyReason: { message: string; changeableFields: string[] } | null;
+  /** 군 복무 트랙을 펼쳤을 때: 시나리오·제외 이유·대안 */
+  military?: MilitaryScenarioResolution | null;
 }
 
 // ── 피드백·버전(PLAN 7) ──────────────────────────────────
