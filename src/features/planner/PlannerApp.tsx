@@ -14,11 +14,12 @@ import { RoadmapView } from "./components/RoadmapView";
 import { Sidebar, type View } from "./components/Sidebar";
 import { SourcesView } from "./components/SourcesView";
 import { Button } from "./components/ui";
-import { clearInput, loadChecked, loadInput, loadPlanA, saveChecked, saveInput, savePlanA } from "./storage";
+import { completedTermsLabel, type Profile } from "./profile";
+import { clearInput, loadChecked, loadInput, loadPlanA, loadProfile, saveChecked, saveInput, savePlanA, saveProfile } from "./storage";
 import { useCatalog } from "./useCatalog";
 
 const TITLES: Record<View, [string, string]> = {
-  roadmap: ["나의 학기 로드맵", "진로와 일정에 맞춰 학기별로 무엇을 들을지 배치했어요"],
+  roadmap: ["학기 로드맵", "진로와 일정에 맞춰 학기별로 무엇을 들을지 배치했어요"],
   courses: ["진로에 맞는 전공 과목", "학과 교육과정에 서비스의 진로 추천을 연결했어요"],
   compare: ["플랜 A와 지금 비교", "조건을 바꾸기 전과 후에 무엇이 달라지는지 보여줘요"],
   sources: ["자료와 출처", "계획에 쓰인 학과 자료가 어디서 왔는지 확인하세요"],
@@ -33,12 +34,15 @@ export function PlannerApp() {
   const [planA, setPlanA] = useState<SavedPlan | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [focusTerm, setFocusTerm] = useState<Term | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [editing, setEditing] = useState(false);
 
   // localStorage는 브라우저 시작 후에만 읽는다.
   useEffect(() => {
     setInput(loadInput());
     setPlanA(loadPlanA());
     setChecked(loadChecked() ?? {});
+    setProfile(loadProfile());
     setMounted(true);
     reload();
   }, [reload]);
@@ -48,9 +52,21 @@ export function PlannerApp() {
     saveInput(next);
   };
 
+  const finishProfile = (next: PlanInput, nextProfile: Profile) => {
+    updateInput(next);
+    setProfile(nextProfile);
+    saveProfile(nextProfile);
+    setEditing(false);
+    setRevision((r) => r + 1);
+    setView("roadmap");
+  };
+
   const restart = () => {
     clearInput();
+    saveProfile(null);
     setInput(null);
+    setProfile(null);
+    setEditing(false);
     setRevision((r) => r + 1);
     setView("roadmap");
   };
@@ -99,13 +115,13 @@ export function PlannerApp() {
     });
   };
 
-  const onboarding = mounted && !input;
+  const onboarding = mounted && (!input || editing);
   const [title, desc] = TITLES[view];
 
   return (
     <div className="mx-auto max-w-[1240px] sm:p-4">
-      <div className="grid min-h-dvh overflow-clip bg-bg sm:min-h-0 sm:rounded-2xl sm:border sm:border-line md:grid-cols-[188px_minmax(0,1fr)]">
-        <Sidebar view={view} onChange={(v) => { setFocusTerm(null); setView(v); }} disabled={onboarding} />
+      <div className="grid min-h-dvh overflow-clip bg-bg sm:min-h-0 sm:rounded-2xl sm:border sm:border-line grid-cols-[200px_minmax(0,1fr)]">
+        <Sidebar view={view} onChange={(v) => { setFocusTerm(null); setView(v); }} disabled={onboarding} profile={profile} input={input} onEditProfile={input ? () => setEditing(true) : undefined} onRestart={input ? restart : undefined} />
         <main className="min-w-0 px-4 py-5 sm:px-7 sm:py-6">
           <CatalogBar catalog={catalog} loading={loading} />
 
@@ -114,19 +130,19 @@ export function PlannerApp() {
           ) : onboarding ? (
             <div className="mt-6">
               {catalog && !dataset && <CatalogProblem catalog={catalog} onReload={reload} />}
-              <Onboarding dataset={dataset} onDone={(next) => { updateInput(next); setRevision((r) => r + 1); }} />
+              <Onboarding dataset={dataset} initialInput={editing ? input : null} initialProfile={profile} onDone={finishProfile} onCancel={editing ? () => setEditing(false) : undefined} />
             </div>
           ) : (
             input && (
               <>
                 <header className="mt-4 mb-5 flex flex-wrap items-end justify-between gap-3.5">
                   <div>
-                    <h1 className="text-[24px] font-semibold tracking-tight text-ink sm:text-[28px]">{title}</h1>
-                    <p className="mt-1 text-[13px] text-muted">{desc}</p>
+                    <h1 className="text-[28px] font-semibold tracking-tight text-ink">{profile?.name ? `${profile.name}님의 ${title}` : title}</h1>
+                    <p className="mt-1 text-[13px] text-muted">{view === "roadmap" ? `${input.completedTerms === 0 ? "신입생으로" : `${completedTermsLabel(input.completedTerms)} 마친 상태에서`} ${formatTerm(input.startTerm)}부터 계획했어요` : desc}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button onClick={restart}>
-                      <UserRoundPen size={15} aria-hidden /> 처음부터 다시 입력
+                    <Button onClick={() => setEditing(true)}>
+                      <UserRoundPen size={15} aria-hidden /> 내 정보 수정
                     </Button>
                     <Button primary onClick={saveA} disabled={!result || !!result.error}>
                       <Save size={15} aria-hidden /> 플랜 A로 저장

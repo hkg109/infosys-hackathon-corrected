@@ -1,8 +1,10 @@
 import type { PlanInput, SavedPlan } from "@/contracts/types";
+import type { Profile } from "./profile";
 
 const INPUT_KEY = "infosys:planner:input:v1";
 const PLAN_A_KEY = "infosys:planner:plan-a:v1";
 const CHECKED_KEY = "infosys:planner:checked:v1";
+const PROFILE_KEY = "infosys:planner:profile:v1";
 
 /** 브라우저 시작 후(useEffect 안)에서만 호출한다. */
 function read<T>(key: string): T | null {
@@ -35,3 +37,9 @@ export const savePlanA = (plan: SavedPlan | null) => write(PLAN_A_KEY, plan);
 
 export const loadChecked = () => read<Record<string, boolean>>(CHECKED_KEY);
 export const saveChecked = (checked: Record<string, boolean>) => write(CHECKED_KEY, checked);
+
+export function loadProfile(): Profile | null {
+  const p = read<Profile>(PROFILE_KEY);
+  return p?.schemaVersion === 1 ? p : null;
+}
+export const saveProfile = (profile: Profile | null) => write(PROFILE_KEY, profile);

@@ -18,9 +18,20 @@ const newRow = (kind: Kind = "military"): Row => ({ id: nextId++, kind, start: "
  * 두 월을 모두 고른 구간만 계획에 반영한다. 기본 날짜를 채워 넣지 않는다.
  * 부모가 입력을 통째로 바꿀 때는 key를 바꿔 다시 마운트한다.
  */
-export function BreakEditor({ breaks, onChange }: { breaks: BreakPeriod[]; onChange: (next: BreakPeriod[]) => void }) {
+export function BreakEditor({
+  breaks,
+  onChange,
+  preset,
+}: {
+  breaks: BreakPeriod[];
+  onChange: (next: BreakPeriod[]) => void;
+  /** 입력된 구간이 없을 때 빈 입력 줄 하나를 이 종류로 열어 둔다(날짜는 채우지 않는다). */
+  preset?: Kind;
+}) {
   const [rows, setRows] = useState<Row[]>(() =>
-    breaks.map((b) => ({ id: nextId++, kind: b.kind, start: startDateToMonth(b.startDate), end: endDateToMonth(b.endDate) })),
+    breaks.length === 0 && preset
+      ? [newRow(preset)]
+      : breaks.map((b) => ({ id: nextId++, kind: b.kind, start: startDateToMonth(b.startDate), end: endDateToMonth(b.endDate) })),
   );
 
   const commit = (next: Row[]) => {
