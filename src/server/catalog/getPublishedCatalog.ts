@@ -1,5 +1,6 @@
-import type { CatalogContext, CatalogResponse, Dataset, VerifyStatus } from "@/contracts/types";
+import type { CatalogContext, CatalogResponse, Dataset } from "@/contracts/types";
 import { fixtureDataset } from "@/data/fixtures";
+import { dbRowsToDataset } from "./dbRowsToDataset";
 import { getReadClient } from "./supabase";
 
 export const DEFAULT_CONTEXT: CatalogContext = {
@@ -64,40 +65,11 @@ async function loadFromDb(db: NonNullable<ReturnType<typeof getReadClient>>, ctx
   ]);
   for (const r of [courses, tags, rules, sources]) if (r.error) throw r.error;
 
-  return {
-    catalogVersion: version.version,
-    campus: version.campus,
-    department: version.department,
-    curriculum: version.curriculum,
-    collectedAt: version.collected_at,
-    publishedAt: version.published_at,
-    unknowns: version.unknowns ?? [],
-    courses: (courses.data ?? []).map((c) => ({
-      code: c.course_code,
-      name: c.name,
-      credits: Number(c.credits),
-      recommendedYear: c.recommended_year,
-      semester: c.semester,
-      offeringEndYear: c.offering_end_year,
-      category: c.category,
-      prerequisites: c.prerequisites ?? [],
-      prerequisiteStatus: c.prerequisite_status as VerifyStatus,
-      sourceId: c.source_id,
-    })),
-    careerTags: (tags.data ?? []).map((t) => ({ courseCode: t.course_code, group: t.group, reason: t.reason })),
-    rules: (rules.data ?? []).map((r) => ({
-      key: r.rule_key,
-      value: r.value,
-      status: r.status,
-      sourceId: r.source_id,
-      note: r.note,
-    })),
-    sources: (sources.data ?? []).map((s) => ({
-      id: s.id,
-      title: s.title,
-      url: s.url,
-      kind: s.kind,
-      checkedAt: version.collected_at,
-    })),
-  };
+  return dbRowsToDataset({
+    version,
+    courses: courses.data ?? [],
+    careerTags: tags.data ?? [],
+    rules: rules.data ?? [],
+    sources: sources.data ?? [],
+  });
 }
