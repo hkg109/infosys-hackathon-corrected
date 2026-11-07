@@ -1,4 +1,4 @@
-import type { Dataset, VerifyStatus } from "@/contracts/types";
+import type { CourseGroup, Dataset, VerifyStatus } from "@/contracts/types";
 
 export interface CatalogVersionRow {
   version: string;
@@ -25,7 +25,7 @@ export interface CourseRow {
 
 export interface CareerTagRow {
   course_code: string;
-  group: "common" | "security" | "data";
+  group: CourseGroup;
   reason: string;
 }
 

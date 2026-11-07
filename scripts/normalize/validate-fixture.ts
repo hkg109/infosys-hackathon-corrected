@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import type { DatasetV2 } from "../../src/contracts/types";
 import { fixtureDataset } from "../../src/data/fixtures";
+import { CAREER_TRACKS } from "../../src/contracts/careers";
 
 export function validateFixture(dataset: DatasetV2): string[] {
   const errors: string[] = [];
@@ -52,7 +53,7 @@ export function validateFixture(dataset: DatasetV2): string[] {
         }
       }
     }
-    for (const track of ["security", "data"]) {
+    for (const track of CAREER_TRACKS) {
       if (!tracks.has(track)) errors.push(`진로 추천 설정 누락: ${track}`);
     }
   }

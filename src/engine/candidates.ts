@@ -13,13 +13,16 @@ import type {
   PriorityKey,
   RankedEntry,
   RankingResult,
+  PeriodInput,
   RecommendationConfig,
+  Term,
   TrackCandidate,
 } from "@/contracts/types";
+import { CAREER_LABEL, CAREER_TRACKS } from "@/contracts/careers";
 import { findPeriodConflicts, toEngineInput, validatePlanInputV2 } from "./inputV2";
 import { candidateIdOf, planResultFromV1 } from "./migrate";
 import { ENGINE_VERSION, MAX_FUTURE_TERMS, simulatePlan } from "./simulate";
-import { formatTerm, termIndex } from "./terms";
+import { formatTerm, nextTerm, termIndex, termRange } from "./terms";
 
 export const RANKING_VERSION = "rank-1";
 
@@ -36,8 +39,7 @@ export const DEFAULT_RECOMMENDATION_CONFIG: RecommendationConfig = {
   initialVisible: 3,
 };
 
-const CAREER_ORDER: CareerTrack[] = ["security", "data"];
-const CAREER_LABEL: Record<CareerTrack, string> = { security: "정보보안", data: "데이터 분석" };
+const CAREER_ORDER = CAREER_TRACKS;
 /** 1순위가 같을 때의 고정 비교 순서(PLAN 5.1) */
 const DEFAULT_METRIC_ORDER: MetricKey[] = ["fast_completion", "career_core", "light_terms"];
 const METRIC_LABEL: Record<MetricKey, string> = {
@@ -117,6 +119,41 @@ function exchangeMetric(input: PlanInputV2): MetricValue {
   };
 }
 
+// ── 병역 시점 펼치기 ─────────────────────────────────────
+
+/** 시작만 미정이고 길이(개월)가 있는 병역 기간. 시점을 후보로 펼친다. */
+export function expandableMilitary(input: PlanInputV2): PeriodInput | null {
+  return (
+    input.periods.find(
+      (p) => p.kind === "military" && p.timing === "flexible" && p.startDate === null && p.durationMonths !== null,
+    ) ?? null
+  );
+}
+
+/**
+ * 병역 시작 학기 후보: 학년을 마친 직후(인정 유효학기가 짝수가 되는 학기)부터 1년 간격으로 최대 max개.
+ * 학교·병무청 규정이 아니라 계획 비교용 서비스 규칙이다.
+ */
+export function militaryTimingTerms(input: PlanInputV2, max: number): Term[] {
+  if (!input.startTerm || max < 1) return [];
+  const first = (input.progress.completedTerms ?? 0) % 2 === 0 ? 0 : 1;
+  const out: Term[] = [];
+  let t = input.startTerm;
+  for (let offset = 0; out.length < max && offset < MAX_FUTURE_TERMS; offset++, t = nextTerm(t))
+    if (offset >= first && (offset - first) % 2 === 0) out.push(t);
+  return out;
+}
+
+/** 펼친 병역 시점을 고정 기간으로 채운 입력. 입대일은 그 학기 시작일로 가정한다. */
+export function withMilitaryStart(input: PlanInputV2, periodId: string, term: Term): PlanInputV2 {
+  return {
+    ...input,
+    periods: input.periods.map((p) =>
+      p.id === periodId ? { ...p, timing: "fixed" as const, startDate: termRange(term).start } : p,
+    ),
+  };
+}
+
 // ── 후보 하나 ────────────────────────────────────────────
 
 function buildCandidate(
@@ -126,6 +163,7 @@ function buildCandidate(
   dataset: DatasetV2,
   config: RecommendationConfig,
   missing: InputIssue[],
+  militaryStartTerm: Term | null = null,
 ): TrackCandidate | null {
   const engineInput = toEngineInput(input, career, pace);
   if (!engineInput) return null;
@@ -142,6 +180,15 @@ function buildCandidate(
   result.issues = missing;
   result.partial = result.partial || blocksCompletion;
   result.assumptions = [...result.assumptions, ...exchangeAssumptions(input)];
+  if (militaryStartTerm) {
+    const months = input.periods.find((p) => p.kind === "military" && p.timing === "fixed")?.durationMonths;
+    result.assumptions.push({
+      id: `military_timing:${termIndex(militaryStartTerm)}`,
+      kind: "period_user_estimate",
+      message: `입대일을 ${formatTerm(militaryStartTerm)} 시작일(${termRange(militaryStartTerm).start})로, 복무 기간을 입력한 ${months ?? "?"}개월로 가정했습니다.`,
+      status: "user_assumption",
+    });
+  }
 
   const conflicts: CandidateConflict[] = findPeriodConflicts(input).map(({ a, b }) => ({
     code: "PERIOD_OVERLAP",
@@ -165,8 +212,8 @@ function buildCandidate(
           : "computable";
 
   return {
-    id: candidateIdOf({ career, militaryStartTerm: null, paceCredits: pace }),
-    key: { career, militaryStartTerm: null, paceCredits: pace },
+    id: candidateIdOf({ career, militaryStartTerm, paceCredits: pace }),
+    key: { career, militaryStartTerm, paceCredits: pace },
     status,
     input: snapshot,
     result,
@@ -287,7 +334,7 @@ export function rankCandidates(candidates: TrackCandidate[], priorities: Priorit
 // ── 후보 집합 ────────────────────────────────────────────
 
 /**
- * 관심 진로(없으면 두 진로) × 학점 페이스(고정값 또는 비교값) 조합을 각각 계산하고 정렬한다.
+ * 관심 진로(없으면 전체 진로) × 병역 시점(펼칠 때만) × 학점 페이스(고정값 또는 비교값) 조합을 각각 계산하고 정렬한다.
  * 같은 입력·자료·설정이면 같은 결과를 돌려준다.
  */
 export function generateCandidates(
@@ -321,12 +368,18 @@ export function generateCandidates(
       ? [input.pace.credits]
       : [...new Set(input.pace.options ?? config.paceOptions)].sort((a, b) => a - b);
 
+  const flex = expandableMilitary(input);
+  const timings: Array<Term | null> = flex ? militaryTimingTerms(input, config.maxMilitaryTimings) : [];
+  if (timings.length === 0) timings.push(null);
+
   const built: TrackCandidate[] = [];
   for (const career of careers)
-    for (const pace of paces) {
-      const c = buildCandidate(input, career, pace, dataset, config, missing);
-      if (c) built.push(c);
-    }
+    for (const timing of timings)
+      for (const pace of paces) {
+        const snapshot = flex && timing ? withMilitaryStart(input, flex.id, timing) : input;
+        const c = buildCandidate(snapshot, career, pace, dataset, config, missing, timing);
+        if (c) built.push(c);
+      }
   if (built.length === 0) {
     const blocking = missing.filter((m) => m.field === "startTerm" || m.field.startsWith("progress"));
     return empty(
@@ -337,7 +390,7 @@ export function generateCandidates(
     );
   }
 
-  // 중복 제거: 생성 순서(진로 고정 순서 → 페이스 오름차순)의 첫 후보를 대표로 남긴다.
+  // 중복 제거: 생성 순서(진로 고정 순서 → 병역 시점 → 페이스 오름차순)의 첫 후보를 대표로 남긴다.
   const seen = new Map<string, string>();
   const dedupedInto: Record<string, string> = {};
   const unique: TrackCandidate[] = [];

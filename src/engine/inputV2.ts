@@ -1,4 +1,5 @@
 import type { BreakPeriod, CareerTrack, InputIssue, ISODate, PeriodInput, PlanInput, PlanInputV2 } from "@/contracts/types";
+import { isCareerTrack } from "@/contracts/careers";
 import { isValidDate, overlaps, termRange } from "./terms";
 
 /** [startDate, endDate) 형태로 확정할 수 있는 기간. 길이를 모르면 null(추측하지 않는다). */
@@ -22,7 +23,6 @@ export function addMonths(date: ISODate, months: number): ISODate {
 }
 
 const KIND_LABEL: Record<PeriodInput["kind"], string> = { military: "군 복무", leave: "휴학", exchange: "교환학생" };
-const CAREERS: CareerTrack[] = ["security", "data"];
 
 const isNonNegInt = (n: number) => Number.isInteger(n) && n >= 0;
 const isNonNeg = (n: number) => Number.isFinite(n) && n >= 0;
@@ -63,7 +63,7 @@ export function validatePlanInputV2(input: PlanInputV2): InputIssue[] {
     miss("target", "목표 총학점이 없습니다.", "예상 계획 완료 학기와 '빠른 완료' 비교를 하지 않습니다.");
   else if (!Number.isFinite(input.target.value) || input.target.value <= 0) err("target", "목표학점은 0보다 커야 합니다.");
 
-  if (input.careers.some((c) => !CAREERS.includes(c))) err("careers", "관심 진로를 확인해 주세요.");
+  if (input.careers.some((c) => !isCareerTrack(c))) err("careers", "관심 진로를 확인해 주세요.");
 
   const paces = input.pace.mode === "fixed" ? [input.pace.credits] : (input.pace.options ?? []);
   if (paces.some((c) => !Number.isInteger(c) || c < 1 || c > 30)) err("pace", "학기당 학점은 1~30 사이로 입력해 주세요.");
@@ -79,7 +79,9 @@ export function validatePlanInputV2(input: PlanInputV2): InputIssue[] {
     if (range && range.end <= range.start) return err(`${f}.endDate`, `${label} 종료일은 시작일 이후여야 합니다.`);
     if (p.timing === "fixed" && !p.startDate)
       return miss(`${f}.startDate`, `${label} 시작일이 없습니다.`, "이 기간을 반영하지 못해 완료 학기를 계산하지 않습니다.");
-    if (!range)
+    // 시작만 미정이고 길이가 있는 병역은 후보 생성에서 시점을 펼친다(정보 부족이 아니다).
+    const expandable = p.kind === "military" && p.timing === "flexible" && p.durationMonths !== null;
+    if (!range && !expandable)
       miss(
         p.timing === "flexible" ? `${f}.startDate` : `${f}.endDate`,
         `${label} 기간 확인이 필요합니다.`,

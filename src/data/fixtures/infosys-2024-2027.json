@@ -719,7 +719,7 @@
     {
       "courseCode": "CSE1002",
       "group": "common",
-      "reason": "두 진로가 함께 쓰는 전산 기초입니다."
+      "reason": "모든 진로가 함께 쓰는 전산 기초입니다."
     },
     {
       "courseCode": "ITE1012",
@@ -729,7 +729,7 @@
     {
       "courseCode": "ITE1009",
       "group": "common",
-      "reason": "두 진로 모두에 필요한 프로그래밍 기초입니다."
+      "reason": "모든 진로 모두에 필요한 프로그래밍 기초입니다."
     },
     {
       "courseCode": "APA2054",
@@ -744,7 +744,7 @@
     {
       "courseCode": "ITE1010",
       "group": "common",
-      "reason": "두 진로에서 활용하는 프로그래밍 기초를 보강합니다."
+      "reason": "모든 진로에서 활용하는 프로그래밍 기초를 보강합니다."
     },
     {
       "courseCode": "ACC2056",
@@ -754,7 +754,7 @@
     {
       "courseCode": "ITE3032",
       "group": "common",
-      "reason": "두 진로 모두에서 쓰는 객체지향 개발 기초입니다."
+      "reason": "모든 진로 모두에서 쓰는 객체지향 개발 기초입니다."
     },
     {
       "courseCode": "ITE2023",
@@ -815,6 +815,96 @@
       "courseCode": "ITE4087",
       "group": "data",
       "reason": "데이터 기반 의사결정을 직접 다룹니다."
+    },
+    {
+      "courseCode": "ITE2020",
+      "group": "software",
+      "reason": "웹 서비스의 화면과 서버를 직접 만들어 보는 첫 과목입니다."
+    },
+    {
+      "courseCode": "ITE2021",
+      "group": "software",
+      "reason": "웹 개발을 데이터·배포까지 넓혀 포트폴리오로 이어집니다."
+    },
+    {
+      "courseCode": "ITE3031",
+      "group": "software",
+      "reason": "운영체제 위에서 동작하는 시스템 프로그램 구조를 다룹니다."
+    },
+    {
+      "courseCode": "ENE4014",
+      "group": "software",
+      "reason": "언어 설계 원리를 이해해 새 언어·프레임워크를 빨리 익히게 합니다."
+    },
+    {
+      "courseCode": "CSE4006",
+      "group": "software",
+      "reason": "팀 단위 개발 절차와 요구사항·테스트 관리를 다룹니다."
+    },
+    {
+      "courseCode": "ITE3025",
+      "group": "data",
+      "reason": "기술·시장 데이터를 모아 해석하는 방법을 다룹니다."
+    },
+    {
+      "courseCode": "ITE2024",
+      "group": "consulting",
+      "reason": "업무 요구사항을 분석해 시스템으로 옮기는 출발점입니다."
+    },
+    {
+      "courseCode": "ITE2030",
+      "group": "consulting",
+      "reason": "분석한 요구사항을 시스템 구조로 설계합니다."
+    },
+    {
+      "courseCode": "ITE3035",
+      "group": "consulting",
+      "reason": "기업 핵심 업무를 묶는 ERP 구조를 다룹니다."
+    },
+    {
+      "courseCode": "ITE3026",
+      "group": "consulting",
+      "reason": "전사 시스템 간 연계와 도입을 다룹니다."
+    },
+    {
+      "courseCode": "ITE4050",
+      "group": "consulting",
+      "reason": "IT 투자를 경영 전략과 연결해 판단합니다."
+    },
+    {
+      "courseCode": "ITE4035",
+      "group": "consulting",
+      "reason": "정보시스템 감리·평가 관점을 익힙니다."
+    },
+    {
+      "courseCode": "ITE4037",
+      "group": "consulting",
+      "reason": "정보화 계획을 직접 수립해 보는 실습입니다."
+    },
+    {
+      "courseCode": "I-D3018",
+      "group": "business",
+      "reason": "서비스를 시장과 고객 관점에서 보는 기초입니다."
+    },
+    {
+      "courseCode": "PAD3003",
+      "group": "business",
+      "reason": "서비스를 운영하는 조직 구조를 이해합니다."
+    },
+    {
+      "courseCode": "BUS3002",
+      "group": "business",
+      "reason": "서비스·사업의 숫자를 읽는 재무 기초입니다."
+    },
+    {
+      "courseCode": "ITE4031",
+      "group": "business",
+      "reason": "온라인 서비스·플랫폼 비즈니스 모델을 다룹니다."
+    },
+    {
+      "courseCode": "GEN5026",
+      "group": "business",
+      "reason": "스타트업 아이디어를 사업계획으로 설계합니다."
     }
   ],
   "rules": [
@@ -1319,8 +1409,60 @@
     "HYP4002": "S1 표기: 2027-1 ~ 2030-2"
   },
   "recommendation": {
-    "configVersion": "rec-2026-11-07-v1",
+    "configVersion": "rec-2026-11-07-v2",
     "careers": [
+      {
+        "track": "software",
+        "label": "소프트웨어 개발",
+        "coreCourses": [
+          {
+            "courseCode": "ITE2020",
+            "reason": "웹 서비스의 화면과 서버를 직접 만들어 보는 첫 과목입니다."
+          },
+          {
+            "courseCode": "ITE2021",
+            "reason": "웹 개발을 데이터·배포까지 넓혀 포트폴리오로 이어집니다."
+          },
+          {
+            "courseCode": "ITE3031",
+            "reason": "운영체제 위에서 동작하는 시스템 프로그램 구조를 다룹니다."
+          },
+          {
+            "courseCode": "ENE4014",
+            "reason": "언어 설계 원리를 이해해 새 언어·프레임워크를 빨리 익히게 합니다."
+          },
+          {
+            "courseCode": "CSE4006",
+            "reason": "팀 단위 개발 절차와 요구사항·테스트 관리를 다룹니다."
+          }
+        ]
+      },
+      {
+        "track": "data",
+        "label": "데이터·AI",
+        "coreCourses": [
+          {
+            "courseCode": "MAT4015",
+            "reason": "데이터 분석의 통계 기초입니다."
+          },
+          {
+            "courseCode": "ITE3025",
+            "reason": "기술·시장 데이터를 모아 해석하는 방법을 다룹니다."
+          },
+          {
+            "courseCode": "ITE4086",
+            "reason": "인공지능을 실무 데이터에 적용합니다."
+          },
+          {
+            "courseCode": "ITE3051",
+            "reason": "인공지능 기법과 응용을 다룹니다."
+          },
+          {
+            "courseCode": "ITE4087",
+            "reason": "데이터 기반 의사결정을 직접 다룹니다."
+          }
+        ]
+      },
       {
         "track": "security",
         "label": "정보보안",
@@ -1348,24 +1490,62 @@
         ]
       },
       {
-        "track": "data",
-        "label": "데이터 분석",
+        "track": "consulting",
+        "label": "IT 컨설팅·기획",
         "coreCourses": [
           {
-            "courseCode": "MAT4015",
-            "reason": "데이터 분석의 통계 기초입니다."
+            "courseCode": "ITE2024",
+            "reason": "업무 요구사항을 분석해 시스템으로 옮기는 출발점입니다."
           },
           {
-            "courseCode": "ITE3051",
-            "reason": "인공지능 기법과 응용을 다룹니다."
+            "courseCode": "ITE2030",
+            "reason": "분석한 요구사항을 시스템 구조로 설계합니다."
           },
           {
-            "courseCode": "ITE4086",
-            "reason": "인공지능을 실무 데이터에 적용합니다."
+            "courseCode": "ITE3035",
+            "reason": "기업 핵심 업무를 묶는 ERP 구조를 다룹니다."
           },
           {
-            "courseCode": "ITE4087",
-            "reason": "데이터 기반 의사결정을 직접 다룹니다."
+            "courseCode": "ITE3026",
+            "reason": "전사 시스템 간 연계와 도입을 다룹니다."
+          },
+          {
+            "courseCode": "ITE4050",
+            "reason": "IT 투자를 경영 전략과 연결해 판단합니다."
+          },
+          {
+            "courseCode": "ITE4035",
+            "reason": "정보시스템 감리·평가 관점을 익힙니다."
+          },
+          {
+            "courseCode": "ITE4037",
+            "reason": "정보화 계획을 직접 수립해 보는 실습입니다."
+          }
+        ]
+      },
+      {
+        "track": "business",
+        "label": "IT 비즈니스·서비스",
+        "coreCourses": [
+          {
+            "courseCode": "I-D3018",
+            "reason": "서비스를 시장과 고객 관점에서 보는 기초입니다."
+          },
+          {
+            "courseCode": "PAD3003",
+            "reason": "서비스를 운영하는 조직 구조를 이해합니다."
+          },
+          {
+            "courseCode": "BUS3002",
+            "reason": "서비스·사업의 숫자를 읽는 재무 기초입니다."
+          },
+          {
+            "courseCode": "ITE4031",
+            "reason": "온라인 서비스·플랫폼 비즈니스 모델을 다룹니다."
+          },
+          {
+            "courseCode": "GEN5026",
+            "reason": "스타트업 아이디어를 사업계획으로 설계합니다."
           }
         ]
       }

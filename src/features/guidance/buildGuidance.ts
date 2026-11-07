@@ -1,6 +1,7 @@
+import { CAREER_LABEL } from "@/contracts/careers";
 import type { Dataset, GuidanceItem, GuidanceResult, PlanInput, PlanResult } from "@/contracts/types";
 
-const TRACK_NAME = { security: "정보보안", data: "데이터 분석" } as const;
+const TRACK_NAME = CAREER_LABEL;
 
 /**
  * 계산 결과를 다음 행동 3~5개로 바꾼다. 학점·날짜를 다시 계산하지 않는다.

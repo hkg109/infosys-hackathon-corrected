@@ -78,7 +78,7 @@ describe("buildGuidance", () => {
     const dataInput: PlanInput = { ...sampleInputNoBreak, track: "data" };
     const data = buildGuidance(dataInput, simulatePlan(dataInput, verifiedDataset), verifiedDataset);
     expect(sec.items.find((i) => i.id === "career")?.title).toContain("정보보안");
-    expect(data.items.find((i) => i.id === "career")?.title).toContain("데이터 분석");
+    expect(data.items.find((i) => i.id === "career")?.title).toContain("데이터·AI");
   });
 
   it("항목은 최대 5개이고 id는 겹치지 않는다", () => {

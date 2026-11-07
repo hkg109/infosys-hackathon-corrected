@@ -10,6 +10,7 @@ import type {
   PlanVersion,
   SavedPlan,
 } from "@/contracts/types";
+import { isCareerTrack } from "@/contracts/careers";
 import { resolvePeriodRange } from "./inputV2";
 import { termIndex, termRange, overlaps } from "./terms";
 
@@ -136,7 +137,7 @@ function looksLikeV1Input(x: unknown): x is PlanInput {
     typeof i.earnedMajorCredits === "number" &&
     typeof i.completedTerms === "number" &&
     (i.targetCredits === null || typeof i.targetCredits === "number") &&
-    (i.track === "security" || i.track === "data") &&
+    isCareerTrack(i.track) &&
     typeof i.creditCap === "number" &&
     Array.isArray(i.breaks)
   );

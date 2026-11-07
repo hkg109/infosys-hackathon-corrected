@@ -9,6 +9,7 @@ import type {
   Term,
   VersionDiff,
 } from "@/contracts/types";
+import { CAREER_LABEL } from "@/contracts/careers";
 import { generateCandidates } from "./candidates";
 import { diffPlans } from "./diff";
 import { resolvePeriodRange } from "./inputV2";
@@ -137,7 +138,7 @@ export function reviseVersion(
 
 // ── 버전 비교 ────────────────────────────────────────────
 
-const CAREER = { security: "정보보안", data: "데이터 분석" } as const;
+const CAREER = CAREER_LABEL;
 
 function periodText(p: PeriodInput | undefined): string {
   if (!p) return "없음";

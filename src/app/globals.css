@@ -1,127 +1,197 @@
 @import "tailwindcss";
 
-/* 색상 토큰: 차분한 학사 남색 + 진로 추천용 청록. 경고는 호박색. */
+/*
+ * 플래너(종이 다이어리) 톤. 책상 위 크림색 속지, 파란 펜, 빨간 도장, 노란 형광펜.
+ * 시연은 PC 브라우저 라이트 모드만 다룬다.
+ */
 :root {
-  --bg: #f1f4f8;
-  --panel: #ffffff;
-  --ink: #142238;
-  --muted: #5b6a80;
-  --line: #dbe2eb;
-  --brand: #1b4a86;
-  --brand-strong: #133a6c;
-  --accent: #0e8073;
-  --active: #e5edf8;
-  --warm: #fdf0d6;
-  --warm-ink: #7a4d0f;
-  --warm-line: #f0d7a4;
-  --ok: #e2f1e8;
-  --ok-ink: #22603e;
-  --contrast: #ffffff;
-  --break: #dfe5ed;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f151d;
-    --panel: #18212c;
-    --ink: #e3eaf4;
-    --muted: #9cabc0;
-    --line: #2e3b4c;
-    --brand: #9cc3ff;
-    --brand-strong: #b8d4ff;
-    --accent: #5fd0be;
-    --active: #22344d;
-    --warm: #3d3119;
-    --warm-ink: #f0cd8e;
-    --warm-line: #6b5426;
-    --ok: #1d3a2e;
-    --ok-ink: #97d5b1;
-    --contrast: #0f1b2d;
-    --break: #283240;
-  }
+  color-scheme: light;
+  --desk: #e6e0d2;
+  --paper: #fdfbf5;
+  --paper-2: #f6f1e5;
+  --ink: #26241f;
+  --ink-soft: #4a463e;
+  --muted: #8a8478;
+  --line: #e2dbc9;
+  --rule: #ebe4d3;
+  --dot: #e2dac7;
+  --pen: #2d4a85;
+  --red: #c4473a;
+  --red-soft: #f6dcd6;
+  --marker: #fbe382;
+  --sage: #dbe8d6;
+  --sage-ink: #3f6a45;
+  --tab-home: #f0d38e;
+  --tab-input: #efb9a4;
+  --tab-proc: #bcd8b8;
+  --tab-out: #a9c6e2;
+  --g-common: #a59d8c;
+  --g-software: #4f78bd;
+  --g-data: #3d9472;
+  --g-security: #c0544a;
+  --g-consulting: #cc8a2f;
+  --g-business: #9a5fa0;
 }
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-panel: var(--panel);
+  --color-desk: var(--desk);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
   --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
   --color-muted: var(--muted);
   --color-line: var(--line);
-  --color-brand: var(--brand);
-  --color-brand-strong: var(--brand-strong);
-  --color-accent: var(--accent);
-  --color-active: var(--active);
-  --color-warm: var(--warm);
-  --color-warm-ink: var(--warm-ink);
-  --color-warm-line: var(--warm-line);
-  --color-ok: var(--ok);
-  --color-ok-ink: var(--ok-ink);
-  --color-contrast: var(--contrast);
-  --color-break: var(--break);
-  --font-sans: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --color-rule: var(--rule);
+  --color-pen: var(--pen);
+  --color-red: var(--red);
+  --color-red-soft: var(--red-soft);
+  --color-marker: var(--marker);
+  --color-sage: var(--sage);
+  --color-sage-ink: var(--sage-ink);
+  --color-tab-home: var(--tab-home);
+  --color-tab-input: var(--tab-input);
+  --color-tab-proc: var(--tab-proc);
+  --color-tab-out: var(--tab-out);
+  --font-sans: "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-serif: "Gowun Batang", "AppleMyungjo", "Batang", serif;
+  --font-hand: "Nanum Pen Script", "Gowun Batang", cursive;
+}
+
+html,
+body {
+  background: var(--desk);
 }
 
 body {
-  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 14px;
-  line-height: 1.55;
+  line-height: 1.6;
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
 
-input,
-select {
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--panel);
+/* 속지: 옅은 점 격자 */
+.paper {
+  background-color: var(--paper);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.3px);
+  background-size: 22px 22px;
+  background-position: 11px 11px;
+}
+
+/* 줄 노트 */
+.ruled {
+  background-image: repeating-linear-gradient(to bottom, transparent 0 33px, var(--rule) 33px 34px);
+}
+
+/* 스프링 제본: 왼쪽 가장자리 구멍 */
+.binding {
+  background-color: #d8cfbb;
+  background-image:
+    radial-gradient(circle at 50% 50%, #3a362e 0 4px, #6d6658 4.5px 6px, transparent 6.5px),
+    linear-gradient(to right, rgba(0, 0, 0, 0.08), transparent 40%, rgba(0, 0, 0, 0.12));
+  background-size: 100% 34px, 100% 100%;
+  background-repeat: repeat-y, no-repeat;
+}
+
+.font-hand {
+  font-family: var(--font-hand);
+  letter-spacing: 0.01em;
+}
+
+/* 형광펜 밑줄 */
+.marker {
+  background: linear-gradient(transparent 58%, var(--marker) 58%, var(--marker) 92%, transparent 92%);
+  padding: 0 2px;
+}
+
+/* 마스킹 테이프 */
+.tape {
+  background: rgba(238, 214, 150, 0.78);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
+  clip-path: polygon(2% 0, 98% 4%, 100% 96%, 0 100%);
+}
+
+/* 도장 */
+.stamp {
+  border: 2.5px solid currentColor;
+  border-radius: 8px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  mix-blend-mode: multiply;
+}
+
+/* 메모지(Tailwind sticky와 이름이 겹치지 않게) */
+.memo-note {
+  background: #fff4b8;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04), 0 10px 18px -12px rgba(60, 50, 20, 0.45);
+}
+
+/* 군 복무·휴학 학기: 빗금 */
+.hatch {
+  background: repeating-linear-gradient(135deg, #e7e0cf 0 6px, transparent 6px 13px), var(--paper-2);
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  border: 0;
+  border-bottom: 1.5px solid #cfc6b1;
+  border-radius: 0;
+  background: transparent;
   color: var(--ink);
-  padding: 8px 10px;
-  min-height: 38px;
-  font-size: 13px;
+  padding: 6px 2px;
+  min-height: 36px;
+  font-size: 15px;
   width: 100%;
   min-width: 0;
 }
 
+textarea {
+  border: 1.5px dashed #cfc6b1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--pen);
+}
+
 input[type="checkbox"] {
   width: 16px;
-  min-height: 0;
   height: 16px;
-  accent-color: var(--brand);
-}
-
-input:disabled {
-  opacity: 0.5;
-}
-
-input:not([type="checkbox"]):focus-visible,
-select:focus-visible {
-  outline: none;
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px var(--active);
+  accent-color: var(--pen);
 }
 
 button:focus-visible,
-summary:focus-visible,
 a:focus-visible,
+summary:focus-visible,
 input[type="checkbox"]:focus-visible {
-  outline: 2px solid var(--brand);
+  outline: 2px solid var(--pen);
   outline-offset: 2px;
 }
 
-/* 전공 과목 화면에서 고른 학기를 잠깐 강조 */
-.flash {
-  transition: box-shadow 0.3s, border-color 0.3s;
+@keyframes stamp-in {
+  0% {
+    transform: scale(1.6) rotate(-14deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(0.95) rotate(-8deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-8deg);
+  }
 }
-.flash[data-flash="on"] {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 4px var(--active);
-}
-
-/* 군 복무·휴학 구간: 학기가 비어 있음을 빗금으로 표시 */
-.hatch {
-  background: repeating-linear-gradient(135deg, var(--break) 0 7px, transparent 7px 14px), var(--bg);
+.stamp-in {
+  animation: stamp-in 0.35s ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -133,27 +203,24 @@ input[type="checkbox"]:focus-visible {
   }
 }
 
-/* 인쇄·PDF: 화면 장식은 숨기고(print:hidden), 배경 빗금·색은 그대로 인쇄한다. */
+/* 인쇄·PDF: 책상·제본·탭·버튼은 숨기고 속지만 남긴다. */
 @page {
   size: A4;
-  margin: 14mm 12mm;
+  margin: 12mm;
 }
 
 @media print {
-  :root {
-    --bg: #ffffff;
-  }
   html,
   body {
     background: #ffffff;
-    font-size: 12px;
+    font-size: 11px;
+  }
+  .paper {
+    background: #ffffff;
   }
   * {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
-  }
-  details > summary {
-    list-style: none;
   }
   nextjs-portal {
     display: none;

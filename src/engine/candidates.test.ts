@@ -4,6 +4,7 @@ import {
   sampleInputV2Conflict,
   sampleInputV2ExchangeUnknown,
   sampleInputV2Invalid,
+  sampleInputV2MilitaryFlexible,
   sampleInputV2NoTarget,
   sampleInputV2PeriodUnknown,
   sampleInputV2Undecided,
@@ -22,7 +23,7 @@ describe("generateCandidates", () => {
   });
 
   it("진로 × 학점 페이스(15·18·20) 조합을 각각 계산한다", () => {
-    const set = gen({ ...sampleInputV2, careers: [] });
+    const set = gen({ ...sampleInputV2, careers: ["security", "data"] });
     expect(set.exploredCount).toBe(6);
     const ids = [...set.candidates.map((c) => c.id), ...Object.keys(set.dedupedInto)].sort();
     expect(ids).toEqual(["data|m-|p15", "data|m-|p18", "data|m-|p20", "security|m-|p15", "security|m-|p18", "security|m-|p20"]);
@@ -31,6 +32,28 @@ describe("generateCandidates", () => {
       expect(c.input.careers).toEqual([c.key.career]);
       expect(Math.max(...c.result!.terms.map((t) => t.plannedCredits))).toBeLessThanOrEqual(c.key.paceCredits);
     }
+  });
+
+  it("관심 진로가 비어 있으면 전체 진로를 탐색한다", () => {
+    const set = gen({ ...sampleInputV2, careers: [], pace: { mode: "fixed", credits: 18 } });
+    expect(set.exploredCount).toBe(5);
+  });
+
+  it("병역 시작만 미정이면 학년 경계 시점 최대 3개를 펼쳐 실제로 계산한다", () => {
+    const set = gen({ ...sampleInputV2MilitaryFlexible, pace: { mode: "fixed", credits: 18 } });
+    expect(set.exploredCount).toBe(3);
+    const starts = set.candidates.map((c) => c.key.militaryStartTerm);
+    expect(starts.every((t) => t !== null)).toBe(true);
+    for (const c of set.candidates) {
+      const mil = c.input.periods.find((p) => p.kind === "military")!;
+      expect(mil.timing).toBe("fixed");
+      expect(c.missing.map((m) => m.field)).not.toContain("periods[0].startDate");
+      expect(c.result!.terms.some((t) => t.status === "break")).toBe(true);
+      expect(c.id).toMatch(/\|m\d+\|p18$/);
+    }
+    // 시점이 다르면 중단 학기가 달라진다.
+    const firstBreak = set.candidates.map((c) => c.result!.terms.findIndex((t) => t.status === "break"));
+    expect(new Set(firstBreak).size).toBe(firstBreak.length);
   });
 
   it("고정 페이스·진로는 펼치지 않는다 → 후보 1개", () => {

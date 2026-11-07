@@ -1,5 +1,5 @@
-import { PlannerApp } from "@/features/planner/PlannerApp";
+import { HomeScreen } from "@/features/planner/components/HomeScreen";
 
 export default function Page() {
-  return <PlannerApp />;
+  return <HomeScreen />;
 }

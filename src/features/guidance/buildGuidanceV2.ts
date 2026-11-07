@@ -8,10 +8,11 @@ import type {
   RecommendationConfig,
   Term,
 } from "@/contracts/types";
+import { CAREER_LABEL } from "@/contracts/careers";
 import { resolvePeriodRange } from "@/engine";
 import { termIndex, termRange } from "@/engine/terms";
 
-const CAREER: Record<CareerTrack, string> = { security: "정보보안", data: "데이터 분석" };
+const CAREER: Record<CareerTrack, string> = CAREER_LABEL;
 const termKey = (t: Term | null) => (t ? String(termIndex(t)) : "-");
 
 /**

@@ -14,7 +14,7 @@ export interface Term {
 }
 
 /** 서비스가 정한 진로 분류. 학교 공식 트랙이 아니다. */
-export type CareerTrack = "security" | "data";
+export type CareerTrack = "software" | "data" | "security" | "consulting" | "business";
 export type CourseGroup = CareerTrack | "common";
 
 /** 정보의 확인 상태 */

@@ -1,11 +1,24 @@
 import type { PlanInput, SavedPlan } from "@/contracts/types";
-import type { Profile } from "./profile";
+import type { Draft } from "./plan";
 
-const INPUT_KEY = "infosys:planner:input:v1";
-const PLAN_A_KEY = "infosys:planner:plan-a:v1";
+const DRAFT_KEY = "infosys:planner:draft:v2";
+const PLAN_KEY = "infosys:planner:plan:v2";
 const CHECKED_KEY = "infosys:planner:checked:v1";
-const PROFILE_KEY = "infosys:planner:profile:v1";
-const STAGE_KEY = "infosys:planner:stage:v1";
+
+/**
+ * 로드맵 화면의 현재 계획. input은 추천에서 고른(또는 피드백으로 고친) 고정 입력이다.
+ * previous는 마지막 피드백 직전 계획(되돌리기·전후 비교용).
+ */
+export interface PlanState {
+  schemaVersion: 2;
+  input: PlanInput;
+  /** 처음 고른 후보 ID(엔진 형식) */
+  candidateId: string | null;
+  previous: SavedPlan | null;
+  /** 마지막 피드백에서 바꾼 것 */
+  lastChanges: string[];
+  confirmedAt: string | null;
+}
 
 /** 브라우저 시작 후(useEffect 안)에서만 호출한다. */
 function read<T>(key: string): T | null {
@@ -26,32 +39,17 @@ function write(key: string, value: unknown) {
   }
 }
 
-export const loadInput = () => read<PlanInput>(INPUT_KEY);
-export const saveInput = (input: PlanInput) => write(INPUT_KEY, input);
-export const clearInput = () => write(INPUT_KEY, null);
-
-export function loadPlanA(): SavedPlan | null {
-  const plan = read<SavedPlan>(PLAN_A_KEY);
-  return plan?.schemaVersion === 1 ? plan : null;
+export function loadDraft(): Draft | null {
+  const d = read<Draft>(DRAFT_KEY);
+  return d?.schemaVersion === 2 ? d : null;
 }
-export const savePlanA = (plan: SavedPlan | null) => write(PLAN_A_KEY, plan);
+export const saveDraft = (d: Draft | null) => write(DRAFT_KEY, d);
 
-export const loadChecked = () => read<Record<string, boolean>>(CHECKED_KEY);
-export const saveChecked = (checked: Record<string, boolean>) => write(CHECKED_KEY, checked);
+export function loadPlan(): PlanState | null {
+  const p = read<PlanState>(PLAN_KEY);
+  return p?.schemaVersion === 2 ? p : null;
+}
+export const savePlan = (p: PlanState | null) => write(PLAN_KEY, p);
 
-export function loadProfile(): Profile | null {
-  const p = read<Profile>(PROFILE_KEY);
-  return p?.schemaVersion === 1 ? p : null;
-}
-export const saveProfile = (profile: Profile | null) => write(PROFILE_KEY, profile);
-
-/** 아·맞·다 단계 위치와 "맞다!" 확정 여부. 새로고침 후 같은 단계로 돌아온다. */
-export interface StageState {
-  view: "mat" | "da" | "courses" | "sources";
-  confirmed: boolean;
-}
-export function loadStage(): StageState | null {
-  const v = read<StageState>(STAGE_KEY);
-  return v && ["mat", "da", "courses", "sources"].includes(v.view) ? v : null;
-}
-export const saveStage = (stage: StageState) => write(STAGE_KEY, stage);
+export const loadChecked = () => read<Record<string, boolean>>(CHECKED_KEY) ?? {};
+export const saveChecked = (c: Record<string, boolean> | null) => write(CHECKED_KEY, c);

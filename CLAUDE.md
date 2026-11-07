@@ -18,7 +18,8 @@ Next.js(App Router) + TypeScript + Tailwind v4 + Supabase. 별도 백엔드 서�
 | `src/contracts/types.ts` | 공통 타입. 바꾸면 mock·fixture·테스트도 같은 PR에서 수정 |
 | `src/contracts/mock-plan.ts` | 샘플 입력(정상·목표 미입력·입력 오류) |
 | `src/engine/**` | 순수 계산: `simulatePlan`, `diffPlans`. React·fetch·DB 금지 |
-| `src/features/planner/**` | 화면. 최상위 export는 `PlannerApp` |
+| `src/features/planner/**` | 화면. `PlannerApp`(루트 레이아웃의 상태·노트 틀) + `components/*Screen` |
+| `src/app/{page,input,processing,output,output/feedback}` | 표지 → 정보 입력 → 선택지로 구체화 → 로드맵 → 피드백. 각 page는 Screen 하나만 렌더 |
 | `src/features/guidance/**` | `buildGuidance` — 결과를 준비사항으로 변환. 학점·날짜 재계산 금지 |
 | `src/client/catalog.ts` | 화면이 자료를 받는 유일한 경로 `getCatalog()` |
 | `src/app/api/catalog/route.ts` | `GET /api/catalog` |
