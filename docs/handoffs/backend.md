@@ -86,3 +86,34 @@ const set = generateCandidates(inputV2, dataset, config);    // 설정을 직접
 - 목표학점이 없으면 현재 엔진이 과목 학점만 배치해 페이스별 결과가 같아지고, 후보가 1개로 합쳐질 수 있다(정상 동작).
 - 병역 시점 펼치기·학기별 학교 상한(`capRuleId`)은 이번 범위 밖(PLAN 9장). `militaryStartTerm`은 항상 `null`.
 - FE(한지석): 입력 오류 표시는 `validatePlanInputV2(input)`의 `field` 경로를 쓰면 된다.
+
+## BE-3 수정 비교·준비사항 (브랜치 `feat/be-3-version-diff`)
+
+### 화면에서 쓰는 흐름(FE-2)
+```ts
+import { generateCandidates, versionFromCandidate, reviseVersion, diffVersions } from "@/engine";
+import { buildGuidanceV2 } from "@/features/guidance/buildGuidanceV2";
+
+const set = generateCandidates(input, dataset);
+const v1 = versionFromCandidate(set, candidateId, { planId, versionId, createdAt });   // "이 트랙으로 시작"
+const v2 = reviseVersion(v1.version, { type: "pace", credits: 15 }, dataset, ids);      // 수정 → 다시 계산
+const diff = diffVersions(v1.version, v2.version);                                      // 수정 전 vs 후
+const guide = buildGuidanceV2(v2.version.input, v2.version.result, dataset);            // 다: 준비사항
+```
+- `versionFromCandidate`·`reviseVersion`은 `{ ok: true, version }` 또는 `{ ok: false, reason, fields }`. 실패하면 이전 버전을 그대로 쓰고 `reason`을 보여준다.
+- 지원 수정(`FeedbackChange`): `military_start`(periodId + 학기), `pace`, `career`, `return_term`.
+  - 입대 시점: 시작일을 그 학기 첫날(계획용 가정)로 옮기고 종료일도 같은 일수만큼 옮긴다. 개월 수로 길이를 정했으면 그대로 둔다.
+- `diffVersions` 결과(`VersionDiff`): `inputChanges`(field·before·after 문장), `movedCourses`(같은 과목의 학기 이동, 한쪽 `null` = 새로 배치/빠짐), `addedCourses`·`removedCourses`, `creditDiffByTerm`, `periodChanges`, `completion.deltaTerms`(+ 늦어짐, − 앞당김, `null` = 비교 불가), `newWarnings`, `versionMismatch`.
+- 버전은 스냅샷이다. `reviseVersion`은 이전 버전을 바꾸지 않는다.
+
+### 준비사항
+- v1 `buildGuidance`: 군 복무·휴학 안내 문구에 "복학 전 적용 교육과정 재확인(수강신청 안내문 16쪽)"을 넣었다(항목 수 그대로).
+- v2 `buildGuidanceV2`: 기간마다 `return-curriculum:{periodId}` 항목(복학 후 첫 수강 학기, `before_return`), 입영·전역일, 교환 인정, 개설 가정, 미배치, 졸업요건, 진로 준비. 모든 시점은 상대 시점(날짜 생성 없음). `checkKey`가 바뀌면 이전 체크를 재사용하지 않는다.
+- S2는 아직 fixture `sources`에 없어 `sourceIds`에 넣지 않고 문구에 쪽수만 적었다. DB 쪽에서 S2를 `sources`에 추가하면 자동으로 달린다.
+
+### 검증
+- `npm run check` 통과(테스트 103개, 신규 19개), `npm run build` 통과.
+
+### 남은 제한
+- 화면은 아직 v1(`simulatePlan`·`diffPlans`·`buildGuidance`)을 쓴다. FE-2에서 위 v2 흐름으로 바꾸면 된다.
+- 버전 목록 저장(`PlanVersionStore`)·localStorage는 FE 담당.
