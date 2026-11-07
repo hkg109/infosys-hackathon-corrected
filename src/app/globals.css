@@ -132,3 +132,30 @@ input[type="checkbox"]:focus-visible {
     transition: none !important;
   }
 }
+
+/* 인쇄·PDF: 화면 장식은 숨기고(print:hidden), 배경 빗금·색은 그대로 인쇄한다. */
+@page {
+  size: A4;
+  margin: 14mm 12mm;
+}
+
+@media print {
+  :root {
+    --bg: #ffffff;
+  }
+  html,
+  body {
+    background: #ffffff;
+    font-size: 12px;
+  }
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  details > summary {
+    list-style: none;
+  }
+  nextjs-portal {
+    display: none;
+  }
+}

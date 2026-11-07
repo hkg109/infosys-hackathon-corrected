@@ -1,6 +1,6 @@
 "use client";
 
-import { Save, UserRoundPen } from "lucide-react";
+import { Printer, Save, UserRoundPen } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { PlanInput, PlanResult, SavedPlan, Term } from "@/contracts/types";
 import { diffPlans, ENGINE_VERSION, formatTerm, simulatePlan, termIndex } from "@/engine";
@@ -10,10 +10,12 @@ import { CompareView } from "./components/CompareView";
 import { Controls } from "./components/Controls";
 import { CoursesView } from "./components/CoursesView";
 import { Onboarding } from "./components/Onboarding";
+import { PrintHeader } from "./components/PrintHeader";
 import { RoadmapView } from "./components/RoadmapView";
 import { Sidebar, type View } from "./components/Sidebar";
 import { SourcesView } from "./components/SourcesView";
 import { Button } from "./components/ui";
+import { todayISO } from "./defaults";
 import { completedTermsLabel, type Profile } from "./profile";
 import { clearInput, loadChecked, loadInput, loadPlanA, loadProfile, saveChecked, saveInput, savePlanA, saveProfile } from "./storage";
 import { useCatalog } from "./useCatalog";
@@ -119,11 +121,13 @@ export function PlannerApp() {
   const [title, desc] = TITLES[view];
 
   return (
-    <div className="mx-auto max-w-[1240px] sm:p-4">
-      <div className="grid min-h-dvh overflow-clip bg-bg sm:min-h-0 sm:rounded-2xl sm:border sm:border-line grid-cols-[200px_minmax(0,1fr)]">
+    <div className="mx-auto max-w-[1240px] sm:p-4 print:max-w-none print:p-0">
+      <div className="grid min-h-dvh overflow-clip bg-bg sm:min-h-0 sm:rounded-2xl sm:border sm:border-line grid-cols-[200px_minmax(0,1fr)] print:block print:min-h-0 print:border-0 print:bg-white">
         <Sidebar view={view} onChange={(v) => { setFocusTerm(null); setView(v); }} disabled={onboarding} profile={profile} input={input} onEditProfile={input ? () => setEditing(true) : undefined} onRestart={input ? restart : undefined} />
-        <main className="min-w-0 px-4 py-5 sm:px-7 sm:py-6">
-          <CatalogBar catalog={catalog} loading={loading} />
+        <main className="min-w-0 px-4 py-5 sm:px-7 sm:py-6 print:p-0">
+          <div className="print:hidden">
+            <CatalogBar catalog={catalog} loading={loading} />
+          </div>
 
           {!mounted ? (
             <Skeleton />
@@ -135,12 +139,18 @@ export function PlannerApp() {
           ) : (
             input && (
               <>
-                <header className="mt-4 mb-5 flex flex-wrap items-end justify-between gap-3.5">
+                <PrintHeader input={input} profile={profile} catalog={catalog} printedAt={mounted ? todayISO() : ""} />
+                <header className="mt-4 mb-5 flex flex-wrap items-end justify-between gap-3.5 print:hidden">
                   <div>
                     <h1 className="text-[28px] font-semibold tracking-tight text-ink">{profile?.name ? `${profile.name}님의 ${title}` : title}</h1>
                     <p className="mt-1 text-[13px] text-muted">{view === "roadmap" ? `${input.completedTerms === 0 ? "신입생으로" : `${completedTermsLabel(input.completedTerms)} 마친 상태에서`} ${formatTerm(input.startTerm)}부터 계획했어요` : desc}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    {view === "roadmap" && result && !result.error && (
+                      <Button onClick={() => window.print()}>
+                        <Printer size={15} aria-hidden /> 인쇄·PDF 저장
+                      </Button>
+                    )}
                     <Button onClick={() => setEditing(true)}>
                       <UserRoundPen size={15} aria-hidden /> 내 정보 수정
                     </Button>
@@ -150,7 +160,11 @@ export function PlannerApp() {
                   </div>
                 </header>
 
-                {view !== "sources" && <Controls input={input} revision={revision} onChange={updateInput} />}
+                {view !== "sources" && (
+                  <div className="print:hidden">
+                    <Controls input={input} revision={revision} onChange={updateInput} />
+                  </div>
+                )}
 
                 {!catalog ? (
                   <Skeleton />
@@ -172,7 +186,7 @@ export function PlannerApp() {
             )
           )}
 
-          <footer className="mt-10 border-t border-line pt-3 text-[11px] text-muted">
+          <footer className="mt-10 border-t border-line pt-3 text-[11px] text-muted print:mt-6">
             계획·추정 결과이며 졸업 확정 판정이 아닙니다. 과목 정보는 학과 공식 자료, 진로 분류는 서비스 추천입니다.
           </footer>
         </main>

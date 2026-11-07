@@ -55,7 +55,7 @@ export function RoadmapView({
   let lastYear: number | null = null;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] print:block">
       <section aria-label="학기별 로드맵">
         {!result.error && <WarningsPanel result={result} />}
         <SectionHeader
@@ -79,7 +79,7 @@ export function RoadmapView({
               const showYear = term.year !== lastYear;
               lastYear = b.kind === "study" ? b.t.term.year : b.to.year;
               return (
-                <li key={i} className="grid grid-cols-[52px_18px_minmax(0,1fr)] gap-x-2 sm:grid-cols-[64px_22px_minmax(0,1fr)]">
+                <li key={i} className="break-inside-avoid grid grid-cols-[52px_18px_minmax(0,1fr)] gap-x-2 sm:grid-cols-[64px_22px_minmax(0,1fr)]">
                   <div className="pt-3 text-right">
                     {showYear && <div className="text-[15px] font-semibold text-ink tabular-nums">{term.year}</div>}
                     <div className="text-[11px] text-muted">{term.season}학기</div>
@@ -128,7 +128,7 @@ export function RoadmapView({
         )}
       </section>
 
-      <aside className="lg:sticky lg:top-4 lg:self-start">
+      <aside className="break-inside-avoid lg:sticky lg:top-4 lg:self-start print:static print:mt-6">
         <Panel>
           <SectionHeader title="지금 준비할 일" />
           {guidance.items.length === 0 && <Sub>입력을 고치면 준비할 일이 여기 나타납니다.</Sub>}

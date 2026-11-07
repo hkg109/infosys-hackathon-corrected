@@ -30,7 +30,7 @@ export function Sidebar({
   onRestart?: () => void;
 }) {
   return (
-    <aside className="flex flex-col border-r border-line bg-panel px-4 py-7">
+    <aside className="flex flex-col border-r border-line bg-panel px-4 py-7 print:hidden">
       <div className="px-2 pb-7">
         <p className="text-[22px] leading-tight font-bold tracking-tight text-brand">
           아 맞다,
