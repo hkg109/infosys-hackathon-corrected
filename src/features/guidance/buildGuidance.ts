@@ -15,14 +15,15 @@ export function buildGuidance(input: PlanInput, result: PlanResult, dataset: Dat
     items.push({
       id: "military",
       title: "확정 입영·전역일과 복학 신청 일정 확인",
-      detail: "입력한 날짜는 가정입니다. 실제 복학 신청 기간과 승인 조건은 학사 공지에서 확인하세요.",
+      detail:
+        "입력한 날짜는 가정입니다. 실제 복학 신청 기간과 승인 조건은 학사 공지에서 확인하세요. 복학 후 적용 교육과정이 달라질 수 있어(수강신청 안내문 16쪽) 복학 전에 다시 확인하세요.",
       sourceIds: [],
     });
   else if (input.breaks.length > 0)
     items.push({
       id: "leave",
       title: "휴학·복학 신청 절차 확인",
-      detail: "복학 후 개설 과목과 적용 교육과정이 달라질 수 있습니다.",
+      detail: "복학 후 개설 과목과 적용 교육과정이 달라질 수 있어(수강신청 안내문 16쪽) 복학 전에 다시 확인하세요.",
       sourceIds: [],
     });
   else

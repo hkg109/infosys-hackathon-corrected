@@ -1,7 +1,12 @@
-import type { PlanDiff, PlanResult, PlanWarning, Term } from "@/contracts/types";
+import type { PlanDiff, PlannedTerm, PlanResult, PlanWarning, Term } from "@/contracts/types";
+
+/** v1·v2 결과 모두 비교할 수 있도록 필요한 필드만 받는다. */
+export type DiffablePlan = Pick<PlanResult, "unplaced" | "warnings" | "expectedCompletion"> & {
+  terms: Array<Pick<PlannedTerm, "term" | "courses" | "plannedCredits">>;
+};
 import { termFromIndex, termIndex } from "./terms";
 
-function courseCodes(result: PlanResult): Set<string> {
+function courseCodes(result: DiffablePlan): Set<string> {
   const codes = new Set<string>();
   result.terms.forEach((t) => t.courses.forEach((c) => codes.add(c.code)));
   result.unplaced.forEach((u) => codes.add(u.code));
@@ -11,7 +16,7 @@ function courseCodes(result: PlanResult): Set<string> {
 const warningKey = (w: PlanWarning) =>
   `${w.code}|${w.courseCode ?? ""}|${w.term ? termIndex(w.term) : ""}`;
 
-export function diffPlans(before: PlanResult, after: PlanResult): PlanDiff {
+export function diffPlans(before: DiffablePlan, after: DiffablePlan): PlanDiff {
   const a = courseCodes(before);
   const b = courseCodes(after);
 

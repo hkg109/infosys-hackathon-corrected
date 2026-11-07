@@ -12,3 +12,6 @@ export {
   CAREER_LABEL,
 } from "./candidates";
 export { validatePlanInputV2, toEngineInput, resolvePeriodRange, addMonths } from "./inputV2";
+export { versionFromCandidate, applyFeedback, reviseVersion, diffVersions } from "./versions";
+export type { VersionIds, VersionAttempt } from "./versions";
+export type { DiffablePlan } from "./diff";
