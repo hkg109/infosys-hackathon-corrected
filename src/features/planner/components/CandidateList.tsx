@@ -163,9 +163,8 @@ function CandidateCard({
   const [open, setOpen] = useState(false);
   const { result, key } = candidate;
   const status = STATUS[candidate.status];
+  // 진로·학점 페이스는 제목에 있으므로 태그에는 기간 조건만 둔다.
   const tags = [
-    TRACK_NAME[key.career],
-    `학기당 ${key.paceCredits}학점`,
     key.militaryStartTerm ? `${formatTerm(key.militaryStartTerm)} 입대` : null,
     candidate.input.periods.some((p) => p.kind === "military") && !key.militaryStartTerm ? "군 복무 포함" : null,
     candidate.input.periods.some((p) => p.kind === "leave") ? "휴학 포함" : null,
@@ -195,7 +194,7 @@ function CandidateCard({
               </Badge>
             )}
           </div>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className={`flex flex-wrap gap-1.5 ${tags.length ? "mt-2" : ""}`}>
             {tags.map((t) => (
               <Badge key={t} tone="muted">
                 {t}
