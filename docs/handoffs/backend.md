@@ -49,3 +49,40 @@
 - 손으로 만든 `CandidateSet` 예제는 넣지 않았다(입력과 무관한 결과를 만들지 않기 위해). FE-2는 BE-3 전까지 타입 모양만 맞추고, 실제 카드는 BE-3 결과로 연결한다.
 - DB(정재헌): `DatasetV2`의 `courseSourceRefs`·`creditCapRules`·`recommendation` 필드명을 검토본에 쓰면 된다. 필드가 더 필요하면 계약 카드로 요청.
 - FE(한지석): 입력 화면은 `PlanInputV2` + `InputIssue.field` 경로로 오류 위치를 표시. 저장 스키마 v2는 `PlanVersionStore`.
+
+## BE-2 후보 생성·정렬 (브랜치 `feat/be-2-candidates`)
+
+### 사용법
+```ts
+import { generateCandidates } from "@/engine";
+const set = generateCandidates(inputV2, dataset);            // 설정: dataset.recommendation ?? 기본 설정
+const set = generateCandidates(inputV2, dataset, config);    // 설정을 직접 넘길 때(개발: sampleRecommendationConfig)
+```
+- 결과 `CandidateSet`: `candidates`(중복 제거 후), `ranking.entries`(순위·추천 이유), `dedupedInto`, `exploredCount`, `emptyReason`.
+- 카드 표시는 `ranking.entries` 순서대로 앞에서 `config.initialVisible`(3)개. `entries[i].candidateId`로 `candidates`에서 찾는다.
+
+### 규칙(PLAN 5.1)
+- 후보 = 관심 진로(빈 배열이면 정보보안·데이터 분석 둘 다) × 학점 페이스(`pace.fixed`면 그 값 하나, `compare`면 `options ?? [15,18,20]`). 각각 `simulatePlan`으로 실제 계산.
+- 같은 진로에서 학기·과목·학점·완료 학기가 같으면 하나로 합친다. 대표는 생성 순서(진로 고정 순서 → 페이스 오름차순)의 첫 후보.
+- 정렬: 사용자 우선순위 → 빠른 완료 → 진로 과목 → 여유 순서의 사전식 비교, 끝까지 같으면 같은 순위 + ID 순서 + "평가 동률". 교환 경험은 우선순위로 고른 경우만 비교.
+- 한 후보라도 계산 못 한 지표는 비교 전체에서 제외하고 `excludedMetrics`에 이유를 남긴다. 모두 미확인이면 순위 없음(`unrankedReason`).
+- 지표: 빠른 완료 = 시작 학기부터 완료 학기까지 학기 수, 진로 과목 = 핵심 과목 평균 배치 학기(이수 완료 0, 첫 학기 1, 미배치 25), 여유 = 수강 학기 최대 학점(같으면 평균).
+
+### 후보 상태
+| 상태 | 언제 |
+|---|---|
+| `computable` | 필요한 정보가 모두 있고 배치 완료 |
+| `conditional` | 목표학점·기간·교환 인정 미정, 또는 미배치 과목 있음. 기간·교환 미정이면 완료 학기 `null` |
+| `search_limit` | 24학기 안에 못 끝냄 |
+| `conflict` | 고정 군 복무·교환 기간 겹침. 순위에서 제외, 모두 충돌이면 `emptyReason` |
+
+후보 0개: 입력 오류(`validatePlanInputV2`의 error) 또는 시작 학기·이수 현황 미입력 → `emptyReason.changeableFields`에 화면이 강조할 입력 경로.
+
+### 검증
+- `npm run check` 통과(테스트 84개, 신규 23개), `npm run build` 통과.
+
+### 남은 제한·다음 담당자 참고
+- 진로 핵심 과목 자료(DB-3)가 없으면 기본 설정(`default-1`)을 쓰고 "진로 과목 먼저"는 제외된다. DB-3가 `dataset.recommendation`을 채우면 그대로 연결된다.
+- 목표학점이 없으면 현재 엔진이 과목 학점만 배치해 페이스별 결과가 같아지고, 후보가 1개로 합쳐질 수 있다(정상 동작).
+- 병역 시점 펼치기·학기별 학교 상한(`capRuleId`)은 이번 범위 밖(PLAN 9장). `militaryStartTerm`은 항상 `null`.
+- FE(한지석): 입력 오류 표시는 `validatePlanInputV2(input)`의 `field` 경로를 쓰면 된다.
