@@ -1,58 +1,1307 @@
 {
-  "catalogVersion": "fixture-2026-11-07",
+  "catalogVersion": "fixture-2026-11-07-db2",
   "campus": "서울",
   "department": "정보시스템학과",
   "curriculum": "2024-2027",
   "collectedAt": "2026-11-07",
   "publishedAt": null,
   "courses": [
-    { "code": "CSE1002", "name": "전산학개론", "credits": 3, "recommendedYear": 1, "semester": 1, "offeringEndYear": 2027, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE1012", "name": "정보시스템개론", "credits": 3, "recommendedYear": 1, "semester": 2, "offeringEndYear": 2027, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE1009", "name": "C프로그래밍", "credits": 3, "recommendedYear": 2, "semester": 1, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "APA2054", "name": "데이터구조", "credits": 3, "recommendedYear": 2, "semester": 1, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE3032", "name": "객체지향프로그래밍-Java", "credits": 3, "recommendedYear": 2, "semester": 1, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ELE3019", "name": "컴퓨터구조1", "credits": 3, "recommendedYear": 2, "semester": 1, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE2023", "name": "알고리즘분석", "credits": 3, "recommendedYear": 2, "semester": 2, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "CSE3004", "name": "오퍼레이팅시스템", "credits": 3, "recommendedYear": 2, "semester": 2, "offeringEndYear": 2028, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE3016", "name": "데이터베이스시스템", "credits": 3, "recommendedYear": 3, "semester": 1, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ENE4019", "name": "컴퓨터네트워크", "credits": 3, "recommendedYear": 3, "semester": 2, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "MAT4015", "name": "확률및통계", "credits": 3, "recommendedYear": 3, "semester": 2, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE3051", "name": "인공지능및응용", "credits": 3, "recommendedYear": 3, "semester": 2, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE4086", "name": "인공지능실무응용", "credits": 3, "recommendedYear": 3, "semester": 1, "offeringEndYear": 2029, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE4023", "name": "정보보호", "credits": 3, "recommendedYear": 4, "semester": 1, "offeringEndYear": 2030, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE4087", "name": "데이터사이언스기반의사결정지원", "credits": 3, "recommendedYear": 4, "semester": 2, "offeringEndYear": 2030, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE4049", "name": "블록체인개론", "credits": 3, "recommendedYear": 4, "semester": 2, "offeringEndYear": 2030, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" },
-    { "code": "ITE4088", "name": "정보시스템학종합설계", "credits": 1, "recommendedYear": 4, "semester": null, "offeringEndYear": 2030, "category": null, "prerequisites": [], "prerequisiteStatus": "unknown", "sourceId": "hy-curriculum" }
+    {
+      "code": "CUL0203",
+      "name": "Ai시대쓰기의힘",
+      "credits": 2,
+      "recommendedYear": 1,
+      "semester": 1,
+      "offeringEndYear": 2027,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "COE2022",
+      "name": "공학입문설계",
+      "credits": 3,
+      "recommendedYear": 1,
+      "semester": 1,
+      "offeringEndYear": 2025,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "GEN4091",
+      "name": "과학기술의철학적이해",
+      "credits": 3,
+      "recommendedYear": 1,
+      "semester": 1,
+      "offeringEndYear": 2027,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "CUL0005",
+      "name": "말과글",
+      "credits": 3,
+      "recommendedYear": 1,
+      "semester": 1,
+      "offeringEndYear": 2027,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "SYH0001",
+      "name": "사랑의실천1(한양나눔)",
+      "credits": 2,
+      "recommendedYear": 1,
+      "semester": 1,
+      "offeringEndYear": 2027,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "CUL0201",
+      "name": "상상과학성찰",
+      "credits": 2,
+      "recommendedYear": 1,
+      "semester": 1,
+      "offeringEndYear": 2027,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "CSE1002",
+      "name": "전산학개론",
+      "credits": 3,
+      "recommendedYear": 1,
+      "semester": 1,
+      "offeringEndYear": 2027,
+      "category": "전공기초(필수)",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "GEN5029",
+      "name": "커리어개발Ⅰ:취.창업진로로드맵",
+      "credits": 1,
+      "recommendedYear": 1,
+      "semester": 1,
+      "offeringEndYear": 2027,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE1012",
+      "name": "정보시스템개론",
+      "credits": 3,
+      "recommendedYear": 1,
+      "semester": 2,
+      "offeringEndYear": 2027,
+      "category": "전공기초(필수)",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE1009",
+      "name": "C프로그래밍",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "전공기초(필수)",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "CUL0205",
+      "name": "Technology And Ai: Utopia Or Dystopia?",
+      "credits": 2,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE3032",
+      "name": "객체지향프로그래밍-Java",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "GEN0044",
+      "name": "경영학원론",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "전공기초(필수)",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "APA2054",
+      "name": "데이터구조",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "전공기초(필수)",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "I-D3018",
+      "name": "마케팅개론",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "CUL0207",
+      "name": "미래지능연결",
+      "credits": 2,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE2020",
+      "name": "웹시스템프로그래밍1",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2025,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "CUL1138",
+      "name": "인공지능과기계학습",
+      "credits": 2,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "GEN6032",
+      "name": "전문학술영어",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE2024",
+      "name": "정보시스템분석",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ELE3019",
+      "name": "컴퓨터구조1",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 1,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE1010",
+      "name": "C++프로그래밍",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2028,
+      "category": "전공기초(필수)",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "SYH0002",
+      "name": "사랑의실천2(스마트커뮤니케이션)",
+      "credits": 2,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2028,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE2023",
+      "name": "알고리즘분석",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "CSE3004",
+      "name": "오퍼레이팅시스템",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE2021",
+      "name": "웹시스템프로그래밍2",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2025,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "BUS3002",
+      "name": "재무관리",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE2030",
+      "name": "정보시스템설계",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "PAD3003",
+      "name": "조직론",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ELE3020",
+      "name": "컴퓨터구조2",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2028,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ACC2056",
+      "name": "회계학",
+      "credits": 3,
+      "recommendedYear": 2,
+      "semester": 2,
+      "offeringEndYear": 2028,
+      "category": "전공기초(필수)",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE3035",
+      "name": "Erp시스템",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 1,
+      "offeringEndYear": 2029,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE3025",
+      "name": "기술인텔리전스",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 1,
+      "offeringEndYear": 2029,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE3016",
+      "name": "데이터베이스시스템",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 1,
+      "offeringEndYear": 2029,
+      "category": "전공기초(필수)",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE3031",
+      "name": "시스템소프트웨어론",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 1,
+      "offeringEndYear": 2029,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE4086",
+      "name": "인공지능실무응용",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 1,
+      "offeringEndYear": 2029,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE3026",
+      "name": "전사적애플리케이션",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 1,
+      "offeringEndYear": 2029,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "HYP1002",
+      "name": "정보시스템Hy-Up(실용연구실습)1",
+      "credits": 1,
+      "recommendedYear": 3,
+      "semester": 1,
+      "offeringEndYear": 2029,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ENE4014",
+      "name": "프로그래밍언어론",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 1,
+      "offeringEndYear": 2029,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE4050",
+      "name": "It와경영전략",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "SYH0003",
+      "name": "사랑의실천3(기업가정신)",
+      "credits": 2,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "CSE4006",
+      "name": "소프트웨어공학",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "전공핵심",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE4035",
+      "name": "시스템감리론",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE3051",
+      "name": "인공지능및응용",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "HYP2002",
+      "name": "정보시스템Hy-Up(실용연구실습)2",
+      "credits": 1,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "GEN5100",
+      "name": "커리어개발Ⅱ:취.창업진로포트폴리오",
+      "credits": 1,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ENE4019",
+      "name": "컴퓨터네트워크",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "GEN5026",
+      "name": "테크노경영학(스타트업종합설계)",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "MAT4015",
+      "name": "확률및통계",
+      "credits": 3,
+      "recommendedYear": 3,
+      "semester": 2,
+      "offeringEndYear": 2029,
+      "category": "전공기초(필수)",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "HYR0004",
+      "name": "정보시스템Hy-Urop(실용연구심화)",
+      "credits": 3,
+      "recommendedYear": 4,
+      "semester": null,
+      "offeringEndYear": 2030,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE4088",
+      "name": "정보시스템학종합설계",
+      "credits": 1,
+      "recommendedYear": 4,
+      "semester": null,
+      "offeringEndYear": 2030,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "SYH0004",
+      "name": "사랑의실천4(미래실용인재)",
+      "credits": 2,
+      "recommendedYear": 4,
+      "semester": 1,
+      "offeringEndYear": 2030,
+      "category": "교양필수",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE4031",
+      "name": "전자상거래이론",
+      "credits": 3,
+      "recommendedYear": 4,
+      "semester": 1,
+      "offeringEndYear": 2030,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE4023",
+      "name": "정보보호",
+      "credits": 3,
+      "recommendedYear": 4,
+      "semester": 1,
+      "offeringEndYear": 2030,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "HYP3003",
+      "name": "정보시스템Hy-Up(실용연구실습)3",
+      "credits": 1,
+      "recommendedYear": 4,
+      "semester": 1,
+      "offeringEndYear": 2030,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE4087",
+      "name": "데이터사이언스기반의사결정지원",
+      "credits": 3,
+      "recommendedYear": 4,
+      "semester": 2,
+      "offeringEndYear": 2030,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE4049",
+      "name": "블록체인개론",
+      "credits": 3,
+      "recommendedYear": 4,
+      "semester": 2,
+      "offeringEndYear": 2030,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "ITE4037",
+      "name": "시스템플래닝실습",
+      "credits": 3,
+      "recommendedYear": 4,
+      "semester": 2,
+      "offeringEndYear": 2030,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    },
+    {
+      "code": "HYP4002",
+      "name": "정보시스템Hy-Up(실용연구실습)4",
+      "credits": 1,
+      "recommendedYear": 4,
+      "semester": 2,
+      "offeringEndYear": 2030,
+      "category": "전공심화",
+      "prerequisites": [],
+      "prerequisiteStatus": "unknown",
+      "sourceId": "hy-curriculum"
+    }
   ],
   "careerTags": [
-    { "courseCode": "CSE1002", "group": "common", "reason": "두 진로가 함께 쓰는 전산 기초입니다." },
-    { "courseCode": "ITE1012", "group": "common", "reason": "정보시스템 전반을 이해하는 기초입니다." },
-    { "courseCode": "ITE1009", "group": "common", "reason": "두 진로 모두에 필요한 프로그래밍 기초입니다." },
-    { "courseCode": "APA2054", "group": "common", "reason": "자료 처리와 알고리즘의 공통 기초입니다." },
-    { "courseCode": "ITE3032", "group": "common", "reason": "두 진로 모두에서 쓰는 객체지향 개발 기초입니다." },
-    { "courseCode": "ITE2023", "group": "common", "reason": "문제 해결과 성능 분석의 공통 기초입니다." },
-    { "courseCode": "ITE3016", "group": "common", "reason": "데이터 저장·관리의 공통 기초입니다." },
-    { "courseCode": "ITE4088", "group": "common", "reason": "전공 종합 프로젝트 과목입니다." },
-    { "courseCode": "ELE3019", "group": "security", "reason": "시스템 보안에 필요한 하드웨어 동작 이해와 연결됩니다." },
-    { "courseCode": "CSE3004", "group": "security", "reason": "운영체제 보안·권한 구조 이해와 연결됩니다." },
-    { "courseCode": "ENE4019", "group": "security", "reason": "네트워크 보안의 기반이 되는 통신 구조를 다룹니다." },
-    { "courseCode": "ITE4023", "group": "security", "reason": "정보보호의 핵심 개념을 직접 다룹니다." },
-    { "courseCode": "ITE4049", "group": "security", "reason": "암호·분산 신뢰 구조와 연결됩니다." },
-    { "courseCode": "MAT4015", "group": "data", "reason": "데이터 분석의 통계 기초입니다." },
-    { "courseCode": "ITE3051", "group": "data", "reason": "인공지능 기법과 응용을 다룹니다." },
-    { "courseCode": "ITE4086", "group": "data", "reason": "인공지능을 실무 데이터에 적용합니다." },
-    { "courseCode": "ITE4087", "group": "data", "reason": "데이터 기반 의사결정을 직접 다룹니다." }
+    {
+      "courseCode": "CSE1002",
+      "group": "common",
+      "reason": "두 진로가 함께 쓰는 전산 기초입니다."
+    },
+    {
+      "courseCode": "ITE1012",
+      "group": "common",
+      "reason": "정보시스템 전반을 이해하는 기초입니다."
+    },
+    {
+      "courseCode": "ITE1009",
+      "group": "common",
+      "reason": "두 진로 모두에 필요한 프로그래밍 기초입니다."
+    },
+    {
+      "courseCode": "APA2054",
+      "group": "common",
+      "reason": "자료 처리와 알고리즘의 공통 기초입니다."
+    },
+    {
+      "courseCode": "ITE3032",
+      "group": "common",
+      "reason": "두 진로 모두에서 쓰는 객체지향 개발 기초입니다."
+    },
+    {
+      "courseCode": "ITE2023",
+      "group": "common",
+      "reason": "문제 해결과 성능 분석의 공통 기초입니다."
+    },
+    {
+      "courseCode": "ITE3016",
+      "group": "common",
+      "reason": "데이터 저장·관리의 공통 기초입니다."
+    },
+    {
+      "courseCode": "ITE4088",
+      "group": "common",
+      "reason": "전공 종합 프로젝트 과목입니다."
+    },
+    {
+      "courseCode": "ELE3019",
+      "group": "security",
+      "reason": "시스템 보안에 필요한 하드웨어 동작 이해와 연결됩니다."
+    },
+    {
+      "courseCode": "CSE3004",
+      "group": "security",
+      "reason": "운영체제 보안·권한 구조 이해와 연결됩니다."
+    },
+    {
+      "courseCode": "ENE4019",
+      "group": "security",
+      "reason": "네트워크 보안의 기반이 되는 통신 구조를 다룹니다."
+    },
+    {
+      "courseCode": "ITE4023",
+      "group": "security",
+      "reason": "정보보호의 핵심 개념을 직접 다룹니다."
+    },
+    {
+      "courseCode": "ITE4049",
+      "group": "security",
+      "reason": "암호·분산 신뢰 구조와 연결됩니다."
+    },
+    {
+      "courseCode": "MAT4015",
+      "group": "data",
+      "reason": "데이터 분석의 통계 기초입니다."
+    },
+    {
+      "courseCode": "ITE3051",
+      "group": "data",
+      "reason": "인공지능 기법과 응용을 다룹니다."
+    },
+    {
+      "courseCode": "ITE4086",
+      "group": "data",
+      "reason": "인공지능을 실무 데이터에 적용합니다."
+    },
+    {
+      "courseCode": "ITE4087",
+      "group": "data",
+      "reason": "데이터 기반 의사결정을 직접 다룹니다."
+    }
   ],
   "rules": [
-    { "key": "graduation.totalCredits", "value": "unknown", "status": "unknown", "sourceId": null, "note": "적용 교육과정의 졸업 총학점은 학사안내와 대조 전입니다." }
+    {
+      "key": "graduation.totalCredits",
+      "value": "unknown",
+      "status": "unknown",
+      "sourceId": null,
+      "note": "적용 교육과정의 졸업 총학점은 학사안내와 대조 전입니다."
+    }
   ],
   "sources": [
-    { "id": "hy-curriculum", "title": "2024-2027 공과대학 정보시스템학과 개설과목", "url": "https://m.hanyang.ac.kr/v3/hy_curriculum.page", "kind": "public_page", "checkedAt": "2026-11-07" }
+    {
+      "id": "hy-curriculum",
+      "title": "2024-2027 공과대학 정보시스템학과 개설과목",
+      "url": "https://m.hanyang.ac.kr/v3/hy_curriculum.page",
+      "kind": "public_page",
+      "checkedAt": "2026-11-07"
+    }
   ],
   "unknowns": [
     "2026학년도 입학생에게 실제 적용되는 교육과정 코드",
     "공식 선수요건",
     "졸업 총학점·전공학점 요건",
-    "ITE4088 이수학기"
-  ]
+    "미래 학기의 실제 개설 여부",
+    "HYR0004·ITE4088 이수학기(원문 공란)"
+  ],
+  "courseSourceRefs": {
+    "CUL0203": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        1
+      ],
+      "note": "S1 1쪽 표 1행"
+    },
+    "COE2022": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        1
+      ],
+      "note": "S1 1쪽 표 2행"
+    },
+    "GEN4091": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        1
+      ],
+      "note": "S1 1쪽 표 3행"
+    },
+    "CUL0005": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        1
+      ],
+      "note": "S1 1쪽 표 4행"
+    },
+    "SYH0001": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        1
+      ],
+      "note": "S1 1쪽 표 5행"
+    },
+    "CUL0201": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 1행"
+    },
+    "CSE1002": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 2행"
+    },
+    "GEN5029": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 3행"
+    },
+    "ITE1012": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 4행"
+    },
+    "ITE1009": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 5행"
+    },
+    "CUL0205": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 6행"
+    },
+    "ITE3032": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 7행"
+    },
+    "GEN0044": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 8행"
+    },
+    "APA2054": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 9행"
+    },
+    "I-D3018": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 10행"
+    },
+    "CUL0207": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        2
+      ],
+      "note": "S1 2쪽 표 11행"
+    },
+    "ITE2020": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 1행"
+    },
+    "CUL1138": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 2행"
+    },
+    "GEN6032": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 3행"
+    },
+    "ITE2024": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 4행"
+    },
+    "ELE3019": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 5행"
+    },
+    "ITE1010": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 6행"
+    },
+    "SYH0002": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 7행"
+    },
+    "ITE2023": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 8행"
+    },
+    "CSE3004": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 9행"
+    },
+    "ITE2021": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 10행"
+    },
+    "BUS3002": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 11행"
+    },
+    "ITE2030": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 12행"
+    },
+    "PAD3003": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 13행"
+    },
+    "ELE3020": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        3
+      ],
+      "note": "S1 3쪽 표 14행"
+    },
+    "ACC2056": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 1행"
+    },
+    "ITE3035": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 2행"
+    },
+    "ITE3025": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 3행"
+    },
+    "ITE3016": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 4행"
+    },
+    "ITE3031": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 5행"
+    },
+    "ITE4086": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 6행"
+    },
+    "ITE3026": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 7행"
+    },
+    "HYP1002": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 8행"
+    },
+    "ENE4014": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 9행"
+    },
+    "ITE4050": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 10행"
+    },
+    "SYH0003": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 11행"
+    },
+    "CSE4006": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 12행"
+    },
+    "ITE4035": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        4
+      ],
+      "note": "S1 4쪽 표 13행"
+    },
+    "ITE3051": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 1행"
+    },
+    "HYP2002": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 2행"
+    },
+    "GEN5100": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 3행"
+    },
+    "ENE4019": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 4행"
+    },
+    "GEN5026": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 5행"
+    },
+    "MAT4015": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 6행"
+    },
+    "HYR0004": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 7행"
+    },
+    "ITE4088": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 8행"
+    },
+    "SYH0004": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 9행"
+    },
+    "ITE4031": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 10행"
+    },
+    "ITE4023": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        5
+      ],
+      "note": "S1 5쪽 표 11행"
+    },
+    "HYP3003": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        6
+      ],
+      "note": "S1 6쪽 표 1행"
+    },
+    "ITE4087": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        6
+      ],
+      "note": "S1 6쪽 표 2행"
+    },
+    "ITE4049": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        6
+      ],
+      "note": "S1 6쪽 표 3행"
+    },
+    "ITE4037": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        6
+      ],
+      "note": "S1 6쪽 표 4행"
+    },
+    "HYP4002": {
+      "sourceId": "hy-curriculum",
+      "pages": [
+        6
+      ],
+      "note": "S1 6쪽 표 5행"
+    }
+  },
+  "courseOfferingNotes": {
+    "CUL0203": "S1 표기: 2025-1 ~ 2027-2",
+    "COE2022": "S1 표기: 2024-1 ~ 2025-2",
+    "GEN4091": "S1 표기: 2024-1 ~ 2027-2",
+    "CUL0005": "S1 표기: 2024-1 ~ 2027-2",
+    "SYH0001": "S1 표기: 2024-1 ~ 2027-2",
+    "CUL0201": "S1 표기: 2025-1 ~ 2027-2",
+    "CSE1002": "S1 표기: 2024-1 ~ 2027-2",
+    "GEN5029": "S1 표기: 2024-1 ~ 2027-2",
+    "ITE1012": "S1 표기: 2024-1 ~ 2027-2",
+    "ITE1009": "S1 표기: 2024-1 ~ 2028-2",
+    "CUL0205": "S1 표기: 2026-1 ~ 2028-2",
+    "ITE3032": "S1 표기: 2025-1 ~ 2028-2",
+    "GEN0044": "S1 표기: 2024-1 ~ 2028-2",
+    "APA2054": "S1 표기: 2024-1 ~ 2028-2",
+    "I-D3018": "S1 표기: 2025-1 ~ 2028-2",
+    "CUL0207": "S1 표기: 2026-1 ~ 2028-2",
+    "ITE2020": "S1 표기: 2025-1 ~ 2025-2",
+    "CUL1138": "S1 표기: 2025-1 ~ 2028-2",
+    "GEN6032": "S1 표기: 2025-1 ~ 2028-2",
+    "ITE2024": "S1 표기: 2025-1 ~ 2028-2",
+    "ELE3019": "S1 표기: 2025-1 ~ 2028-2",
+    "ITE1010": "S1 표기: 2024-1 ~ 2028-2",
+    "SYH0002": "S1 표기: 2025-1 ~ 2028-2",
+    "ITE2023": "S1 표기: 2025-1 ~ 2028-2",
+    "CSE3004": "S1 표기: 2025-1 ~ 2028-2",
+    "ITE2021": "S1 표기: 2025-1 ~ 2025-2",
+    "BUS3002": "S1 표기: 2025-1 ~ 2028-2",
+    "ITE2030": "S1 표기: 2025-1 ~ 2028-2",
+    "PAD3003": "S1 표기: 2024-1 ~ 2028-2",
+    "ELE3020": "S1 표기: 2025-1 ~ 2028-2",
+    "ACC2056": "S1 표기: 2024-1 ~ 2028-2",
+    "ITE3035": "S1 표기: 2026-1 ~ 2029-2",
+    "ITE3025": "S1 표기: 2026-1 ~ 2029-2",
+    "ITE3016": "S1 표기: 2024-1 ~ 2029-2",
+    "ITE3031": "S1 표기: 2026-1 ~ 2029-2",
+    "ITE4086": "S1 표기: 2026-1 ~ 2029-2",
+    "ITE3026": "S1 표기: 2026-1 ~ 2029-2",
+    "HYP1002": "S1 표기: 2026-1 ~ 2029-2",
+    "ENE4014": "S1 표기: 2026-1 ~ 2029-2",
+    "ITE4050": "S1 표기: 2026-1 ~ 2029-2",
+    "SYH0003": "S1 표기: 2026-1 ~ 2029-2",
+    "CSE4006": "S1 표기: 2026-1 ~ 2029-2",
+    "ITE4035": "S1 표기: 2026-1 ~ 2029-2",
+    "ITE3051": "S1 표기: 2026-1 ~ 2029-2",
+    "HYP2002": "S1 표기: 2026-1 ~ 2029-2",
+    "GEN5100": "S1 표기: 2026-1 ~ 2029-2",
+    "ENE4019": "S1 표기: 2026-1 ~ 2029-2",
+    "GEN5026": "S1 표기: 2026-1 ~ 2029-2",
+    "MAT4015": "S1 표기: 2025-1 ~ 2029-2",
+    "HYR0004": "S1 표기: 2027-1 ~ 2030-2",
+    "ITE4088": "S1 표기: 2027-1 ~ 2030-2",
+    "SYH0004": "S1 표기: 2027-1 ~ 2030-2",
+    "ITE4031": "S1 표기: 2027-1 ~ 2030-2",
+    "ITE4023": "S1 표기: 2027-1 ~ 2030-2",
+    "HYP3003": "S1 표기: 2027-1 ~ 2030-2",
+    "ITE4087": "S1 표기: 2027-1 ~ 2030-2",
+    "ITE4049": "S1 표기: 2027-1 ~ 2030-2",
+    "ITE4037": "S1 표기: 2027-1 ~ 2030-2",
+    "HYP4002": "S1 표기: 2027-1 ~ 2030-2"
+  },
+  "reviewedAt": "2026-11-07"
 }
