@@ -8,10 +8,11 @@ import type {
   PlannedTerm,
   PlanResult,
   PlanWarning,
+  UnplacedCourse,
 } from "@/contracts/types";
 import { formatTerm, isBlocked, isValidDate, nextTerm } from "./terms";
 
-export const ENGINE_VERSION = "0.1.0";
+export const ENGINE_VERSION = "0.1.1";
 export const MAX_FUTURE_TERMS = 24;
 
 export function groupOf(code: string, dataset: Dataset): CourseGroup | null {
@@ -36,13 +37,23 @@ export function recommendedCourses(dataset: Dataset, track: CareerTrack): Course
 }
 
 export function validatePlanInput(input: PlanInput): string | null {
+  const { startTerm } = input;
+  if (!startTerm || !Number.isInteger(startTerm.year) || (startTerm.season !== 1 && startTerm.season !== 2))
+    return "시작 학기를 확인해 주세요.";
   if (!Number.isInteger(input.creditCap) || input.creditCap < 1 || input.creditCap > 30)
     return "학기당 학점 상한은 1~30 사이로 입력해 주세요.";
-  if (input.earnedCredits < 0) return "이수학점은 0 이상이어야 합니다.";
-  if (input.earnedMajorCredits < 0 || input.earnedMajorCredits > input.earnedCredits)
+  // NaN·Infinity는 비교식을 모두 통과하므로 먼저 거른다.
+  if (!Number.isFinite(input.earnedCredits) || input.earnedCredits < 0)
+    return "이수학점은 0 이상이어야 합니다.";
+  if (
+    !Number.isFinite(input.earnedMajorCredits) ||
+    input.earnedMajorCredits < 0 ||
+    input.earnedMajorCredits > input.earnedCredits
+  )
     return "전공 이수학점은 총 이수학점 안에 포함되어야 합니다.";
-  if (input.completedTerms < 0) return "인정 유효학기는 0 이상이어야 합니다.";
-  if (input.targetCredits !== null && input.targetCredits <= 0)
+  if (!Number.isInteger(input.completedTerms) || input.completedTerms < 0)
+    return "인정 유효학기는 0 이상의 정수여야 합니다.";
+  if (input.targetCredits !== null && (!Number.isFinite(input.targetCredits) || input.targetCredits <= 0))
     return "목표학점은 0보다 커야 합니다.";
   for (const b of input.breaks) {
     if (!isValidDate(b.startDate) || !isValidDate(b.endDate))
@@ -50,6 +61,41 @@ export function validatePlanInput(input: PlanInput): string | null {
     if (b.endDate <= b.startDate) return "중단 종료일은 시작일 이후여야 합니다.";
   }
   return null;
+}
+
+/**
+ * 어떤 학기에도 놓을 수 없는 과목을 미리 걸러낸다.
+ * - 학점이 학기당 상한보다 큰 과목
+ * - 선수과목이 이수 완료도, 이번 계획 대상도 아닌 과목(연쇄로 막히는 과목 포함)
+ * 걸러내지 않으면 빈 학기를 최대 학기 수까지 쌓다가 SEARCH_LIMIT로 끝난다.
+ */
+function pruneUnplaceable(
+  queue: Course[],
+  done: ReadonlySet<string>,
+  creditCap: number,
+): { queue: Course[]; unplaced: UnplacedCourse[] } {
+  const unplaced: UnplacedCourse[] = [];
+  let rest = queue;
+  for (let changed = true; changed; ) {
+    changed = false;
+    const reachable = new Set([...done, ...rest.map((c) => c.code)]);
+    const keep: Course[] = [];
+    for (const c of rest) {
+      const missing = c.prerequisites.filter((p) => !reachable.has(p));
+      const reason =
+        c.credits > creditCap
+          ? `학점(${c.credits})이 학기당 상한(${creditCap})보다 큽니다.`
+          : missing.length > 0
+            ? `선수과목(${missing.join(", ")})이 이수 완료나 계획 대상에 없습니다.`
+            : null;
+      if (reason) {
+        unplaced.push({ code: c.code, name: c.name, reason });
+        changed = true;
+      } else keep.push(c);
+    }
+    rest = keep;
+  }
+  return { queue: rest, unplaced };
 }
 
 /**
@@ -73,7 +119,13 @@ export function simulatePlan(input: PlanInput, dataset: Dataset): PlanResult {
   }
 
   const done = new Set(input.completedCourseCodes);
-  let queue = recommendedCourses(dataset, input.track).filter((c) => !done.has(c.code));
+  const recommended = recommendedCourses(dataset, input.track);
+  const pruned = pruneUnplaceable(
+    recommended.filter((c) => !done.has(c.code)),
+    done,
+    input.creditCap,
+  );
+  let queue = pruned.queue;
   let remaining =
     input.targetCredits === null ? null : Math.max(0, input.targetCredits - input.earnedCredits);
   const terms: PlannedTerm[] = [];
@@ -144,13 +196,16 @@ export function simulatePlan(input: PlanInput, dataset: Dataset): PlanResult {
     finished = queue.length === 0 && (remaining === null || remaining === 0);
   }
 
-  const unplaced = queue.map((c) => ({
+  const unplaced: UnplacedCourse[] = [
+    ...pruned.unplaced,
+    ...queue.map((c) => ({
     code: c.code,
     name: c.name,
     reason: c.prerequisites.some((p) => !done.has(p))
       ? "공식 선수과목이 충족되지 않았습니다."
       : `${MAX_FUTURE_TERMS}개 학기 안에 배치하지 못했습니다.`,
-  }));
+    })),
+  ];
   for (const u of unplaced)
     warnings.push({ code: "UNPLACED_COURSE", message: `${u.name}: ${u.reason}`, courseCode: u.code });
   if (!finished)
@@ -163,13 +218,15 @@ export function simulatePlan(input: PlanInput, dataset: Dataset): PlanResult {
       code: "TARGET_UNKNOWN",
       message: "목표 총학점이 없어 예상 완료 학기를 계산하지 않았습니다.",
     });
-  if (dataset.courses.some((c) => c.prerequisiteStatus !== "verified"))
+  // 이 계획에 쓰는 과목만 본다(다른 진로 과목은 영향을 주지 않는다).
+  if (recommended.some((c) => c.prerequisiteStatus !== "verified"))
     warnings.push({
       code: "PREREQ_UNKNOWN",
       message: "일부 과목의 공식 선수요건을 확인하지 못했습니다.",
     });
 
-  const canEstimate = finished && input.targetCredits !== null;
+  // 배치하지 못한 과목이 있으면 완료 시점을 추정하지 않는다.
+  const canEstimate = finished && unplaced.length === 0 && input.targetCredits !== null;
   return {
     ...base,
     error: null,
