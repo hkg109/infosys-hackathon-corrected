@@ -1,8 +1,8 @@
 import type { Dataset, PlanInput } from "@/contracts/types";
 import { groupOf, recommendedCourses } from "@/engine";
+import { TRACK_NAME } from "../labels";
 import { Badge, SectionHeader } from "./ui";
 
-const TRACK_NAME = { security: "정보보안", data: "데이터 분석" } as const;
 
 export function CoursesView({
   input,

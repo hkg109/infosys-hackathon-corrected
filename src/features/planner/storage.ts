@@ -25,6 +25,7 @@ function write(key: string, value: unknown) {
 
 export const loadInput = () => read<PlanInput>(INPUT_KEY);
 export const saveInput = (input: PlanInput) => write(INPUT_KEY, input);
+export const clearInput = () => write(INPUT_KEY, null);
 
 export function loadPlanA(): SavedPlan | null {
   const plan = read<SavedPlan>(PLAN_A_KEY);

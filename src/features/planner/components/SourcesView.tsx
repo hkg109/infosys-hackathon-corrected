@@ -8,14 +8,14 @@ const STEPS = [
   ["계획 재계산", "현재 학생 조건 반영"],
 ];
 
-export function SourcesView({ catalog, onReload }: { catalog: CatalogResponse; onReload: () => void }) {
+export function SourcesView({ catalog, onReload, loading }: { catalog: CatalogResponse; onReload: () => void; loading: boolean }) {
   const ds = catalog.dataset;
   return (
     <>
       <Panel className="mb-3.5">
         <SectionHeader
           title="데이터가 들어오는 방식"
-          aside={<Badge tone={catalog.origin === "db" ? "ok" : "warm"}>{catalog.origin === "db" ? "DB 게시본" : catalog.origin === "fixture" ? "개발용 fixture" : catalog.origin === "cache" ? "저장된 이전 자료" : "자료 없음"}</Badge>}
+          aside={<Badge tone={catalog.origin === "db" ? "ok" : "warm"}>{catalog.origin === "db" ? "게시된 자료" : catalog.origin === "fixture" ? "개발용 fixture" : catalog.origin === "cache" ? "저장된 이전 자료" : "자료 없음"}</Badge>}
         />
         <div className="my-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {STEPS.map(([t, s]) => (
@@ -36,7 +36,7 @@ export function SourcesView({ catalog, onReload }: { catalog: CatalogResponse; o
           </>
         )}
         <div className="mt-4">
-          <Button onClick={onReload}>최신 자료 다시 불러오기</Button>
+          <Button onClick={onReload} disabled={loading}>{loading ? "불러오는 중…" : "최신 자료 다시 불러오기"}</Button>
         </div>
       </Panel>
 

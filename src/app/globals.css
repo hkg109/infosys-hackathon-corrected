@@ -1,37 +1,41 @@
 @import "tailwindcss";
 
-/* 시안(infosys-mvp-preview) 색상 토큰 */
+/* 색상 토큰: 차분한 학사 남색 + 진로 추천용 청록. 경고는 호박색. */
 :root {
-  --bg: #f3f5f7;
+  --bg: #f1f4f8;
   --panel: #ffffff;
-  --ink: #17283e;
-  --muted: #64758b;
-  --line: #e2e8f0;
-  --brand: #173f73;
-  --active: #e9f0fa;
-  --warm: #fff3d9;
-  --warm-ink: #805519;
-  --ok: #e6f2eb;
-  --ok-ink: #286445;
+  --ink: #142238;
+  --muted: #5b6a80;
+  --line: #dbe2eb;
+  --brand: #1b4a86;
+  --brand-strong: #133a6c;
+  --accent: #0e8073;
+  --active: #e5edf8;
+  --warm: #fdf0d6;
+  --warm-ink: #7a4d0f;
+  --ok: #e2f1e8;
+  --ok-ink: #22603e;
   --contrast: #ffffff;
-  --break: #e8edf1;
+  --break: #dfe5ed;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #10161d;
-    --panel: #1a222d;
-    --ink: #e4ebf5;
-    --muted: #a0aec2;
-    --line: #344254;
-    --brand: #a6caff;
-    --active: #273c58;
-    --warm: #42351c;
-    --warm-ink: #f0ce91;
-    --ok: #203e32;
-    --ok-ink: #9ad6b4;
-    --contrast: #142238;
-    --break: #29323e;
+    --bg: #0f151d;
+    --panel: #18212c;
+    --ink: #e3eaf4;
+    --muted: #9cabc0;
+    --line: #2e3b4c;
+    --brand: #9cc3ff;
+    --brand-strong: #b8d4ff;
+    --accent: #5fd0be;
+    --active: #22344d;
+    --warm: #3d3119;
+    --warm-ink: #f0cd8e;
+    --ok: #1d3a2e;
+    --ok-ink: #97d5b1;
+    --contrast: #0f1b2d;
+    --break: #283240;
   }
 }
 
@@ -42,6 +46,8 @@
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-accent: var(--accent);
   --color-active: var(--active);
   --color-warm: var(--warm);
   --color-warm-ink: var(--warm-ink);
@@ -58,6 +64,8 @@ body {
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.55;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 input,
@@ -66,9 +74,9 @@ select {
   border-radius: 6px;
   background: var(--panel);
   color: var(--ink);
-  padding: 7px 8px;
-  min-height: 35px;
-  font-size: 12px;
+  padding: 8px 10px;
+  min-height: 38px;
+  font-size: 13px;
   width: 100%;
   min-width: 0;
 }
@@ -82,4 +90,33 @@ input[type="checkbox"] {
 
 input:disabled {
   opacity: 0.5;
+}
+
+input:not([type="checkbox"]):focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--active);
+}
+
+button:focus-visible,
+summary:focus-visible,
+a:focus-visible,
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* 군 복무·휴학 구간: 학기가 비어 있음을 빗금으로 표시 */
+.hatch {
+  background: repeating-linear-gradient(135deg, var(--break) 0 7px, transparent 7px 14px), var(--bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

@@ -1,8 +1,9 @@
 import type { PlanDiff, PlanInput, PlanResult, SavedPlan } from "@/contracts/types";
 import { formatTerm } from "@/engine";
+import { endDateToMonth, startDateToMonth } from "../dates";
+import { breakLabel, TRACK_NAME } from "../labels";
 import { Badge, Button, Panel, Sub } from "./ui";
 
-const TRACK_NAME = { security: "정보보안", data: "데이터 분석" } as const;
 
 export function CompareView({
   planA,
@@ -79,12 +80,12 @@ function PlanCard({
     <section className={`min-w-0 rounded-[11px] border bg-panel p-4 ${current ? "border-brand" : "border-line"}`}>
       <Badge>{label}</Badge>
       <h3 className="mt-3 text-sm font-medium">
-        {TRACK_NAME[input.track]} · {brk ? "군 복무·휴학 포함" : "학업 유지"}
+        {TRACK_NAME[input.track]} · {brk ? `${breakLabel(input.breaks)} 포함` : "쉬는 기간 없음"}
       </h3>
       <strong className="my-3 block text-2xl font-medium tracking-tight">{formatTerm(result.expectedCompletion)}</strong>
       <dl className="text-xs">
         <Row k="학기당 상한" v={`${input.creditCap}학점`} />
-        <Row k="중단 기간" v={brk ? `${brk.startDate} ~ ${brk.endDate}` : "없음"} />
+        <Row k="중단 기간" v={brk ? `${monthLabel(startDateToMonth(brk.startDate))} ~ ${monthLabel(endDateToMonth(brk.endDate))}` : "없음"} />
         <Row k="목표학점" v={input.targetCredits === null ? "미입력" : `${input.targetCredits}학점`} />
         <Row k="자료 버전" v={version} />
       </dl>
@@ -99,4 +100,10 @@ function Row({ k, v }: { k: string; v: string }) {
       <dd className="text-right">{v}</dd>
     </div>
   );
+}
+
+/** "2028-04" → "2028년 4월". 종료 월은 포함 기준으로 보여준다. */
+function monthLabel(month: string): string {
+  const [y, m] = month.split("-").map(Number);
+  return `${y}년 ${m}월`;
 }

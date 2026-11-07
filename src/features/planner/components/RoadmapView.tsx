@@ -1,9 +1,24 @@
-import { Pause } from "lucide-react";
-import type { GuidanceResult, PlanInput, PlannedTerm, PlanResult } from "@/contracts/types";
+import { Flag } from "lucide-react";
+import type { GuidanceResult, PlanInput, PlannedTerm, PlanResult, Term } from "@/contracts/types";
 import { formatTerm } from "@/engine";
+import { breakLabel, TRACK_NAME } from "../labels";
 import { Badge, Panel, SectionHeader, Sub } from "./ui";
 
-const TRACK_NAME = { security: "정보보안", data: "데이터 분석" } as const;
+type Block = { kind: "study"; t: PlannedTerm } | { kind: "break"; from: Term; to: Term; count: number };
+
+/** 연속된 중단 학기를 하나의 띠로 묶는다(표시만, 계산 결과는 그대로). */
+function toBlocks(terms: PlannedTerm[]): Block[] {
+  const blocks: Block[] = [];
+  for (const t of terms) {
+    const last = blocks[blocks.length - 1];
+    if (t.status === "break" && last?.kind === "break") {
+      last.to = t.term;
+      last.count++;
+    } else if (t.status === "break") blocks.push({ kind: "break", from: t.term, to: t.term, count: 1 });
+    else blocks.push({ kind: "study", t });
+  }
+  return blocks;
+}
 
 export function RoadmapView({
   input,
@@ -18,90 +33,142 @@ export function RoadmapView({
   checked: Record<string, boolean>;
   onToggle: (id: string) => void;
 }) {
-  const years = [...new Set(result.terms.map((t) => t.term.year))];
+  const blocks = toBlocks(result.terms);
+  let lastYear: number | null = null;
 
   return (
-    <>
-      <SectionHeader
-        title="학기별 로드맵"
-        aside={<Badge>{formatTerm(input.startTerm)}부터 · {TRACK_NAME[input.track]}</Badge>}
-      />
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <section aria-label="학기별 로드맵">
+        <SectionHeader
+          title="학기별 로드맵"
+          aside={
+            <span className="flex items-center gap-3 text-[11px] text-muted">
+              <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-muted" />공통 기반</span>
+              <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-accent" />{TRACK_NAME[input.track]} 추천</span>
+            </span>
+          }
+        />
 
-      {result.error ? (
-        <div className="mb-4 rounded-lg bg-warm px-3 py-2.5 text-xs text-warm-ink">{result.error}</div>
-      ) : (
-        years.map((year) => (
-          <div key={year} className="mb-3 grid gap-1 sm:grid-cols-[45px_minmax(0,1fr)] sm:gap-3.5">
-            <div className="text-[13px] font-medium tabular-nums sm:pt-3.5">{year}</div>
-            <div className="grid gap-2.5 sm:grid-cols-2">
-              {result.terms.filter((t) => t.term.year === year).map((t) => (
-                <TermCard key={`${t.term.year}-${t.term.season}`} t={t} />
-              ))}
-            </div>
+        {result.error ? (
+          <div role="alert" className="rounded-lg bg-warm px-3.5 py-3 text-[13px] text-warm-ink">
+            {result.error} 위의 입력을 고치면 바로 다시 계산됩니다.
           </div>
-        ))
-      )}
+        ) : (
+          <ol className="relative">
+            {blocks.map((b, i) => {
+              const term = b.kind === "study" ? b.t.term : b.from;
+              const showYear = term.year !== lastYear;
+              lastYear = b.kind === "study" ? b.t.term.year : b.to.year;
+              return (
+                <li key={i} className="grid grid-cols-[52px_18px_minmax(0,1fr)] gap-x-2 sm:grid-cols-[64px_22px_minmax(0,1fr)]">
+                  <div className="pt-3 text-right">
+                    {showYear && <div className="text-[15px] font-semibold text-ink tabular-nums">{term.year}</div>}
+                    <div className="text-[11px] text-muted">{term.season}학기</div>
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="absolute inset-y-0 w-px bg-line" aria-hidden />
+                    <span
+                      className={`relative mt-[17px] size-2.5 rounded-full ring-4 ring-bg ${b.kind === "break" ? "bg-line" : "bg-brand"}`}
+                      aria-hidden
+                    />
+                  </div>
+                  <div className="min-w-0 pb-3">
+                    {b.kind === "break" ? (
+                      <BreakBand from={b.from} to={b.to} count={b.count} label={breakLabel(input.breaks)} />
+                    ) : (
+                      <TermCard t={b.t} />
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+            <li className="grid grid-cols-[52px_18px_minmax(0,1fr)] gap-x-2 sm:grid-cols-[64px_22px_minmax(0,1fr)]">
+              <span />
+              <div className="flex justify-center">
+                <span className="mt-2 grid size-[22px] place-items-center rounded-full bg-brand text-contrast">
+                  <Flag size={12} aria-hidden />
+                </span>
+              </div>
+              <div className="pt-2.5 text-[13px]">
+                {result.expectedCompletion ? (
+                  <>
+                    <strong className="font-semibold">{formatTerm(result.expectedCompletion)}</strong>에 계획한 과목과 목표학점을 모두 채워요.
+                  </>
+                ) : (
+                  <span className="text-muted">목표 총학점을 입력하면 예상 완료 학기를 보여줍니다.</span>
+                )}
+              </div>
+            </li>
+          </ol>
+        )}
 
-      {result.unplaced.length > 0 && (
-        <Panel className="mt-3">
-          <SectionHeader title="배치하지 못한 과목" />
-          {result.unplaced.map((u) => (
-            <p key={u.code} className="text-xs">
-              {u.name} <span className="text-muted">— {u.reason}</span>
-            </p>
+        {result.unplaced.length > 0 && (
+          <Panel className="mt-4">
+            <SectionHeader title="배치하지 못한 과목" />
+            {result.unplaced.map((u) => (
+              <p key={u.code} className="text-[13px]">
+                {u.name} <span className="text-muted">({u.reason})</span>
+              </p>
+            ))}
+          </Panel>
+        )}
+
+        {!result.error && (
+          <Sub className="mt-4">
+            미배정 학점은 실제 과목이 아닌 학점 자리입니다. 과목이 앞으로도 개설된다는 가정을 포함하며, 졸업요건·복학 승인은 따로 확인해야 합니다.
+          </Sub>
+        )}
+      </section>
+
+      <aside className="lg:sticky lg:top-4 lg:self-start">
+        <Panel>
+          <SectionHeader title="지금 준비할 일" />
+          {guidance.items.length === 0 && <Sub>입력을 고치면 준비할 일이 여기 나타납니다.</Sub>}
+          {guidance.items.map((g) => (
+            <label key={g.id} className="flex cursor-pointer items-start gap-3 border-b border-line py-3 text-[13px] first:pt-0 last:border-0 last:pb-0">
+              <input type="checkbox" className="mt-0.5 shrink-0" checked={!!checked[g.id]} onChange={() => onToggle(g.id)} />
+              <span className={`grid gap-1 ${checked[g.id] ? "text-muted line-through" : ""}`}>
+                {g.title}
+                <small className="text-xs text-muted no-underline">{g.detail}</small>
+              </span>
+            </label>
           ))}
         </Panel>
-      )}
+      </aside>
+    </div>
+  );
+}
 
-      {!result.error && (
-        <Sub className="mt-3 mb-6">
-          미배정 학점은 실제 과목이 아닌 학점 슬롯입니다. 미래 개설 유지 가정을 포함하며, 졸업요건·복학 승인은 별도로 확인해야 합니다.
-        </Sub>
-      )}
-      {result.error && <div className="mb-6" />}
-
-      <Panel>
-        <SectionHeader title="지금 준비할 일" aside={<span className="text-xs text-muted">선택과 일정에 맞춰 갱신</span>} />
-        {guidance.items.map((g) => (
-          <label key={g.id} className="flex items-start gap-3 border-b border-line py-3 text-xs last:border-0 last:pb-0">
-            <input type="checkbox" checked={!!checked[g.id]} onChange={() => onToggle(g.id)} />
-            <span className={`grid gap-0.5 ${checked[g.id] ? "line-through opacity-60" : ""}`}>
-              {g.title}
-              <small className="text-[11px] text-muted">{g.detail}</small>
-            </span>
-          </label>
-        ))}
-      </Panel>
-    </>
+function BreakBand({ from, to, count, label }: { from: Term; to: Term; count: number; label: string }) {
+  return (
+    <div className="hatch flex min-h-[52px] flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-line px-3.5 py-3 text-[13px]">
+      <strong className="font-semibold">{label}</strong>
+      <span className="text-xs text-muted">
+        {count > 1 ? `${formatTerm(from)} ~ ${formatTerm(to)} · ${count}개 학기` : formatTerm(from)}
+      </span>
+    </div>
   );
 }
 
 function TermCard({ t }: { t: PlannedTerm }) {
-  if (t.status === "break")
-    return (
-      <div className="flex min-h-[65px] items-center justify-between gap-2 rounded-[9px] bg-break p-3 text-xs">
-        <span>{t.term.season}학기</span>
-        <span>군 복무·휴학</span>
-        <Pause size={16} aria-hidden />
-      </div>
-    );
-
   const assumed = t.courses.some((c) => c.assumptions.length > 0);
   return (
-    <article className="min-w-0 rounded-[9px] border border-line bg-panel p-3">
-      <div className="mb-2.5 flex items-center justify-between gap-2 text-xs">
-        <strong className="font-medium">{t.term.season}학기</strong>
-        <Badge>{t.plannedCredits}학점 계획</Badge>
+    <article className="rounded-lg border border-line bg-panel px-3.5 py-3">
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <span className="text-xs text-muted">{t.courses.length > 0 ? `${t.courses.length}과목` : "전공 과목 없음"}</span>
+        <Badge tone="muted">{t.plannedCredits}학점</Badge>
       </div>
-      {t.courses.map((c) => (
-        <div key={c.code} className="my-1 flex items-center justify-between gap-2 text-xs">
-          <span className="break-words">{c.name}</span>
-          <em className="text-[11px] whitespace-nowrap text-muted not-italic">{c.credits}학점</em>
-        </div>
-      ))}
-      {t.slotCredits > 0 && <p className="mt-2 text-[11px] text-muted">미배정 전공·교양 {t.slotCredits}학점</p>}
-      {t.courses.length === 0 && t.slotCredits === 0 && <Sub>학업 계획 검토</Sub>}
-      {assumed && <p className="mt-2 text-[11px] text-warm-ink">개설 학기·종료연도 확인 필요</p>}
+      <ul className="grid gap-1">
+        {t.courses.map((c) => (
+          <li key={c.code} className="flex items-center gap-2 text-[13px]">
+            <i className={`size-1.5 shrink-0 rounded-full ${c.group === "common" ? "bg-muted" : "bg-accent"}`} aria-hidden />
+            <span className="min-w-0 break-words">{c.name}</span>
+            <span className="ml-auto text-[11px] whitespace-nowrap text-muted tabular-nums">{c.credits}학점</span>
+          </li>
+        ))}
+      </ul>
+      {t.slotCredits > 0 && <p className="mt-2 text-xs text-muted">그 밖의 전공·교양 {t.slotCredits}학점</p>}
+      {assumed && <p className="mt-2 text-xs text-warm-ink">개설 학기·종료연도를 확인해야 하는 과목이 있어요.</p>}
     </article>
   );
 }
