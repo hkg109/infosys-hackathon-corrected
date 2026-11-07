@@ -10,6 +10,7 @@ import type {
   PlanVersion,
   SavedPlan,
 } from "@/contracts/types";
+import { resolvePeriodRange } from "./inputV2";
 import { termIndex, termRange, overlaps } from "./terms";
 
 /** v1 → v2 변환 기준(BE-1). 변환 결과도 사용자에게 "가져온 값"으로 보여 준다. */
@@ -75,20 +76,33 @@ export function planInputFromV1(
 
 /** v1 결과에 v2 학기 정보를 붙인다. 재계산하지 않는다(스냅샷 보존). */
 export function planResultFromV1(result: PlanResult, input: PlanInputV2, completedTerms: number): PlanResultV2 {
-  let ordinal = completedTerms;
+  let ordinal: number | null = completedTerms;
   const cap = input.pace.mode === "fixed" ? input.pace.credits : null;
+  const ranges = input.periods.flatMap((p) => {
+    const r = resolvePeriodRange(p);
+    return r ? [{ p, r }] : [];
+  });
   const terms: PlannedTermV2[] = result.terms.map((t) => {
     const range = termRange(t.term);
-    const periodIds = input.periods
-      .filter((p) => p.startDate && p.endDate && overlaps(range, { start: p.startDate, end: p.endDate }))
-      .map((p) => p.id);
-    if (t.status === "study") ordinal++;
+    const hits = ranges.filter(({ r }) => overlaps(range, r)).map(({ p }) => p);
+    const exchange = t.status === "break" ? hits.find((p) => p.kind === "exchange") : undefined;
+    let termOrdinal: number | null = null;
+    if (t.status === "study") {
+      if (ordinal !== null) ordinal++;
+      termOrdinal = ordinal;
+    } else if (exchange) {
+      // 교환 학기가 유효학기로 인정되는지 모르면 이후 학년 진행을 확정하지 않는다.
+      const counts = exchange.exchange?.countsAsTerm ?? null;
+      if (counts === null) ordinal = null;
+      else if (counts && ordinal !== null) termOrdinal = ++ordinal;
+    }
     return {
       ...t,
-      periodIds,
+      status: exchange ? "exchange" : t.status,
+      periodIds: hits.map((p) => p.id),
       capCredits: t.status === "study" ? cap : null,
       capRuleId: null,
-      termOrdinal: t.status === "study" ? ordinal : null,
+      termOrdinal,
     };
   });
   return {
