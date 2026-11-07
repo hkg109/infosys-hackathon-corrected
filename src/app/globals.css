@@ -13,6 +13,7 @@
   --active: #e5edf8;
   --warm: #fdf0d6;
   --warm-ink: #7a4d0f;
+  --warm-line: #f0d7a4;
   --ok: #e2f1e8;
   --ok-ink: #22603e;
   --contrast: #ffffff;
@@ -32,6 +33,7 @@
     --active: #22344d;
     --warm: #3d3119;
     --warm-ink: #f0cd8e;
+    --warm-line: #6b5426;
     --ok: #1d3a2e;
     --ok-ink: #97d5b1;
     --contrast: #0f1b2d;
@@ -51,6 +53,7 @@
   --color-active: var(--active);
   --color-warm: var(--warm);
   --color-warm-ink: var(--warm-ink);
+  --color-warm-line: var(--warm-line);
   --color-ok: var(--ok);
   --color-ok-ink: var(--ok-ink);
   --color-contrast: var(--contrast);
@@ -105,6 +108,15 @@ a:focus-visible,
 input[type="checkbox"]:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
+}
+
+/* 전공 과목 화면에서 고른 학기를 잠깐 강조 */
+.flash {
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+.flash[data-flash="on"] {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px var(--active);
 }
 
 /* 군 복무·휴학 구간: 학기가 비어 있음을 빗금으로 표시 */

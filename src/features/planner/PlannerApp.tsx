@@ -2,7 +2,7 @@
 
 import { Save, UserRoundPen } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { PlanInput, PlanResult, SavedPlan } from "@/contracts/types";
+import type { PlanInput, PlanResult, SavedPlan, Term } from "@/contracts/types";
 import { diffPlans, ENGINE_VERSION, formatTerm, simulatePlan, termIndex } from "@/engine";
 import { buildGuidance } from "@/features/guidance/buildGuidance";
 import { CatalogBar, CatalogNotice, CatalogProblem } from "./components/CatalogStatus";
@@ -32,6 +32,7 @@ export function PlannerApp() {
   const [revision, setRevision] = useState(0);
   const [planA, setPlanA] = useState<SavedPlan | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [focusTerm, setFocusTerm] = useState<Term | null>(null);
 
   // localStorage는 브라우저 시작 후에만 읽는다.
   useEffect(() => {
@@ -76,6 +77,11 @@ export function PlannerApp() {
     savePlanA(snapshot);
   };
 
+  const jumpTo = (term: Term) => {
+    setView("roadmap");
+    setFocusTerm({ ...term }); // 같은 학기를 다시 눌러도 이동하도록 새 객체로 둔다.
+  };
+
   const toggleChecked = (id: string) => {
     const next = { ...checked, [id]: !checked[id] };
     setChecked(next);
@@ -99,7 +105,7 @@ export function PlannerApp() {
   return (
     <div className="mx-auto max-w-[1240px] sm:p-4">
       <div className="grid min-h-dvh overflow-clip bg-bg sm:min-h-0 sm:rounded-2xl sm:border sm:border-line md:grid-cols-[188px_minmax(0,1fr)]">
-        <Sidebar view={view} onChange={setView} disabled={onboarding} />
+        <Sidebar view={view} onChange={(v) => { setFocusTerm(null); setView(v); }} disabled={onboarding} />
         <main className="min-w-0 px-4 py-5 sm:px-7 sm:py-6">
           <CatalogBar catalog={catalog} loading={loading} />
 
@@ -137,11 +143,11 @@ export function PlannerApp() {
                 ) : (
                   <>
                     <CatalogNotice catalog={catalog} />
-                    {view !== "sources" && <Summary result={result} input={input} planA={planA} />}
+                    {(view === "roadmap" || view === "courses") && <Summary result={result} input={input} planA={planA} />}
                     {view === "roadmap" && (
-                      <RoadmapView input={input} result={result} guidance={guidance} checked={checked} onToggle={toggleChecked} />
+                      <RoadmapView input={input} result={result} guidance={guidance} checked={checked} onToggle={toggleChecked} focusTerm={focusTerm} />
                     )}
-                    {view === "courses" && <CoursesView input={input} dataset={dataset} onToggleCompleted={toggleCompleted} />}
+                    {view === "courses" && <CoursesView input={input} dataset={dataset} result={result} onToggleCompleted={toggleCompleted} onJump={jumpTo} />}
                     {view === "compare" && <CompareView planA={planA} input={input} result={result} diff={diff} onSaveA={saveA} />}
                   </>
                 )}

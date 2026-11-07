@@ -1,8 +1,12 @@
 import { Flag } from "lucide-react";
+import { useEffect, useRef } from "react";
 import type { GuidanceResult, PlanInput, PlannedTerm, PlanResult, Term } from "@/contracts/types";
 import { formatTerm } from "@/engine";
-import { breakLabel, TRACK_NAME } from "../labels";
+import { breakLabelFor, TRACK_NAME } from "../labels";
 import { Badge, Panel, SectionHeader, Sub } from "./ui";
+import { WarningsPanel } from "./WarningsPanel";
+
+export const termAnchor = (t: Term) => `term-${t.year}-${t.season}`;
 
 type Block = { kind: "study"; t: PlannedTerm } | { kind: "break"; from: Term; to: Term; count: number };
 
@@ -26,19 +30,34 @@ export function RoadmapView({
   guidance,
   checked,
   onToggle,
+  focusTerm,
 }: {
   input: PlanInput;
   result: PlanResult;
   guidance: GuidanceResult;
   checked: Record<string, boolean>;
   onToggle: (id: string) => void;
+  /** 전공 과목 화면에서 고른 학기. 그 학기로 스크롤하고 잠깐 강조한다. */
+  focusTerm: Term | null;
 }) {
   const blocks = toBlocks(result.terms);
+  const listRef = useRef<HTMLOListElement>(null);
+
+  useEffect(() => {
+    if (!focusTerm) return;
+    const el = listRef.current?.querySelector<HTMLElement>(`#${termAnchor(focusTerm)}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.dataset.flash = "on";
+    const timer = setTimeout(() => delete el.dataset.flash, 1800);
+    return () => clearTimeout(timer);
+  }, [focusTerm]);
   let lastYear: number | null = null;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
       <section aria-label="학기별 로드맵">
+        {!result.error && <WarningsPanel result={result} />}
         <SectionHeader
           title="학기별 로드맵"
           aside={
@@ -54,7 +73,7 @@ export function RoadmapView({
             {result.error} 위의 입력을 고치면 바로 다시 계산됩니다.
           </div>
         ) : (
-          <ol className="relative">
+          <ol ref={listRef} className="relative">
             {blocks.map((b, i) => {
               const term = b.kind === "study" ? b.t.term : b.from;
               const showYear = term.year !== lastYear;
@@ -74,7 +93,7 @@ export function RoadmapView({
                   </div>
                   <div className="min-w-0 pb-3">
                     {b.kind === "break" ? (
-                      <BreakBand from={b.from} to={b.to} count={b.count} label={breakLabel(input.breaks)} />
+                      <BreakBand from={b.from} to={b.to} count={b.count} label={breakLabelFor(b.from, input.breaks)} />
                     ) : (
                       <TermCard t={b.t} />
                     )}
@@ -100,17 +119,6 @@ export function RoadmapView({
               </div>
             </li>
           </ol>
-        )}
-
-        {result.unplaced.length > 0 && (
-          <Panel className="mt-4">
-            <SectionHeader title="배치하지 못한 과목" />
-            {result.unplaced.map((u) => (
-              <p key={u.code} className="text-[13px]">
-                {u.name} <span className="text-muted">({u.reason})</span>
-              </p>
-            ))}
-          </Panel>
         )}
 
         {!result.error && (
@@ -150,10 +158,14 @@ function BreakBand({ from, to, count, label }: { from: Term; to: Term; count: nu
   );
 }
 
+const ASSUMPTION_TEXT = {
+  semester_unknown: "이수학기가 확인되지 않아 이 학기에 가정 배치",
+  offering_after_end_year: "자료상 종료연도 이후라 개설 유지를 가정",
+} as const;
+
 function TermCard({ t }: { t: PlannedTerm }) {
-  const assumed = t.courses.some((c) => c.assumptions.length > 0);
   return (
-    <article className="rounded-lg border border-line bg-panel px-3.5 py-3">
+    <article id={termAnchor(t.term)} className="flash scroll-mt-24 rounded-lg border border-line bg-panel px-3.5 py-3">
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <span className="text-xs text-muted">{t.courses.length > 0 ? `${t.courses.length}과목` : "전공 과목 없음"}</span>
         <Badge tone="muted">{t.plannedCredits}학점</Badge>
@@ -163,12 +175,19 @@ function TermCard({ t }: { t: PlannedTerm }) {
           <li key={c.code} className="flex items-center gap-2 text-[13px]">
             <i className={`size-1.5 shrink-0 rounded-full ${c.group === "common" ? "bg-muted" : "bg-accent"}`} aria-hidden />
             <span className="min-w-0 break-words">{c.name}</span>
+            {c.assumptions.length > 0 && (
+              <span
+                className="cursor-help rounded border border-warm-line bg-warm px-1 text-[10px] leading-4 text-warm-ink"
+                title={c.assumptions.map((a) => ASSUMPTION_TEXT[a]).join(" / ")}
+              >
+                가정<span className="sr-only">: {c.assumptions.map((a) => ASSUMPTION_TEXT[a]).join(", ")}</span>
+              </span>
+            )}
             <span className="ml-auto text-[11px] whitespace-nowrap text-muted tabular-nums">{c.credits}학점</span>
           </li>
         ))}
       </ul>
       {t.slotCredits > 0 && <p className="mt-2 text-xs text-muted">그 밖의 전공·교양 {t.slotCredits}학점</p>}
-      {assumed && <p className="mt-2 text-xs text-warm-ink">개설 학기·종료연도를 확인해야 하는 과목이 있어요.</p>}
     </article>
   );
 }
