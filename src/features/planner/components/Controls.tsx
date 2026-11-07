@@ -3,7 +3,13 @@ import { TRACKS } from "../labels";
 import { BreakEditor } from "./BreakEditor";
 import { Field, Panel, Segmented } from "./ui";
 
-/** 계획 조건 수정. revision이 바뀌면(입력 초기화 등) 쉬는 기간 입력을 다시 그린다. */
+/** 학점 페이스 버튼. 후보 비교와 같은 서비스 설정(15·18·20)이며 학교 승인값이 아니다. */
+const PACES = [15, 18, 20];
+
+/**
+ * 맞 단계의 조건 고치기(FE-2). 자주 바꾸는 진로·학점 페이스·군 복무/휴학만 보이고,
+ * 나머지 계획 조건은 접어 둔다. revision이 바뀌면(후보 선택 등) 쉬는 기간 입력을 다시 그린다.
+ */
 export function Controls({
   input,
   revision,
@@ -15,19 +21,30 @@ export function Controls({
 }) {
   const set = (patch: Partial<PlanInput>) => onChange({ ...input, ...patch });
   const num = (v: string) => (v === "" ? 0 : Number(v));
+  const paces = PACES.includes(input.creditCap) ? PACES : [...PACES, input.creditCap].sort((a, b) => a - b);
 
   return (
-    <Panel className="mb-5">
-      <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+    <Panel>
+      <h3 className="mb-4 text-[15px] font-semibold">조건 고치기</h3>
+      <div className="grid gap-4">
         <div>
-          <p className="mb-2 text-xs text-muted">희망 진로</p>
-          <Segmented label="희망 진로" options={TRACKS} value={input.track} onChange={(track) => set({ track })} />
+          <p className="mb-1.5 text-xs text-muted">진로</p>
+          <Segmented label="진로" options={TRACKS} value={input.track} onChange={(track) => set({ track })} />
+        </div>
+        <div>
+          <p className="mb-1.5 text-xs text-muted">학기당 학점</p>
+          <Segmented
+            label="학기당 학점"
+            options={paces.map((n) => [String(n), `${n}학점`] as [string, string])}
+            value={String(input.creditCap)}
+            onChange={(v) => set({ creditCap: Number(v) })}
+          />
         </div>
         <BreakEditor key={revision} breaks={input.breaks} onChange={(breaks) => set({ breaks })} />
       </div>
 
       <details className="mt-4 border-t border-line pt-3">
-        <summary className="cursor-pointer text-xs text-muted">학점과 계획 조건 수정</summary>
+        <summary className="cursor-pointer text-xs text-muted">시작 학기·이수학점·목표 고치기</summary>
         <div className="my-3 grid gap-2.5 sm:grid-cols-3">
           <Field label="계획 시작 연도">
             <input type="number" inputMode="numeric" min={2024} max={2040} value={input.startTerm.year} onChange={(e) => set({ startTerm: { ...input.startTerm, year: num(e.target.value) } })} />
@@ -57,17 +74,8 @@ export function Controls({
               onChange={(e) => set({ targetCredits: e.target.value === "" ? null : Number(e.target.value) })}
             />
           </Field>
-          <Field label="학기당 상한">
-            <select value={input.creditCap} onChange={(e) => set({ creditCap: Number(e.target.value) })}>
-              {[9, 12, 15, 18, 21].map((n) => (
-                <option key={n} value={n}>
-                  {n}학점
-                </option>
-              ))}
-            </select>
-          </Field>
         </div>
-        <p className="text-xs text-muted">목표학점·상한은 직접 입력한 값이며 학교 공식 요건이 아닙니다.</p>
+        <p className="text-xs text-muted">목표학점·학기당 학점은 직접 정한 값이며 학교 공식 요건이 아닙니다.</p>
       </details>
     </Panel>
   );
