@@ -137,6 +137,10 @@ export interface PlanInput {
   paceStyle?: PaceStyle;
   /** 입학연도. 확인된 학교 상한(CreditCapRule) 적용 범위를 고를 때만 쓴다. 모르면 null(학교 상한 미적용) */
   admissionYear?: number | null;
+  /** 특정 학기만 계획 학점을 낮춘다(사용자 요청). 다른 상한과 함께 가장 작은 값을 쓴다 */
+  termCaps?: Array<{ term: Term; credits: number }>;
+  /** 과목별 사용자 요청: exclude = 이 계획에서 빼기, not_before = 그 학기 전에는 배치하지 않기 */
+  courseRules?: Array<{ code: string; action: "exclude" | "not_before"; term?: Term }>;
 }
 
 // ── 학점 페이스(후반 여유형) ─────────────────────────────
@@ -159,7 +163,8 @@ export type WarningCode =
   | "SEMESTER_UNKNOWN"
   | "PREREQ_UNKNOWN"
   | "UNPLACED_COURSE"
-  | "SEARCH_LIMIT";
+  | "SEARCH_LIMIT"
+  | "USER_EXCLUDED";
 
 export interface PlanWarning {
   code: WarningCode;
@@ -1330,4 +1335,27 @@ export interface ExchangeCandidateSet {
   emptyReason: string | null;
   branches: ExchangeOutcomeBranch[];
   actions: ExchangeAction[];
+}
+
+// ── 피드백 채팅 → 계획 수정 ─────────────────────────────
+// 채팅(Claude 또는 규칙)은 이 편집만 제안하고, 학점·학기는 엔진이 다시 계산한다.
+
+export type PlanEdit =
+  | { type: "set_credit_cap"; credits: number }
+  | { type: "set_pace_style"; style: "balanced" | "late_light" }
+  | { type: "set_term_cap"; term: Term; credits: number }
+  | { type: "clear_term_cap"; term: Term }
+  | { type: "add_leave"; term: Term }
+  | { type: "remove_leave"; term: Term }
+  | { type: "exclude_course"; code: string }
+  | { type: "restore_course"; code: string }
+  | { type: "defer_course"; code: string; term: Term }
+  | { type: "set_target_credits"; credits: number };
+
+/** /api/feedback 응답 */
+export interface FeedbackApiReply {
+  reply: string;
+  edits: PlanEdit[];
+  /** 지금 계획 모델로는 할 수 없는 요청(계절학기, 교수 선택 등) */
+  notSupported: string[];
 }

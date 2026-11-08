@@ -263,3 +263,37 @@ describe("simulatePlan 경계 상황", () => {
     ).toContain("PREREQ_UNKNOWN");
   });
 });
+
+describe("사용자 요청: 학기별 학점 제한·과목 빼기·미루기", () => {
+  it("특정 학기만 학점 상한을 낮춘다", async () => {
+    const { simulatePlan } = await import("./simulate");
+    const { sampleInputNoBreak } = await import("@/contracts/mock-plan");
+    const { fixtureDataset } = await import("@/data/fixtures");
+    const t = sampleInputNoBreak.startTerm;
+    const r = simulatePlan({ ...sampleInputNoBreak, termCaps: [{ term: t, credits: 6 }] }, fixtureDataset);
+    expect(r.terms[0].plannedCredits).toBeLessThanOrEqual(6);
+    expect(r.terms[1].capCredits).toBe(sampleInputNoBreak.creditCap);
+  });
+  it("과목을 빼면 배치하지 않고 경고를 남긴다", async () => {
+    const { simulatePlan } = await import("./simulate");
+    const { sampleInputNoBreak } = await import("@/contracts/mock-plan");
+    const { fixtureDataset } = await import("@/data/fixtures");
+    const base = simulatePlan(sampleInputNoBreak, fixtureDataset);
+    const code = base.terms.flatMap((t) => t.courses)[0].code;
+    const r = simulatePlan({ ...sampleInputNoBreak, courseRules: [{ code, action: "exclude" }] }, fixtureDataset);
+    expect(r.terms.flatMap((t) => t.courses).some((c) => c.code === code)).toBe(false);
+    expect(r.warnings.some((w) => w.code === "USER_EXCLUDED" && w.courseCode === code)).toBe(true);
+  });
+  it("not_before 학기 전에는 배치하지 않는다", async () => {
+    const { simulatePlan } = await import("./simulate");
+    const { termIndex } = await import("./terms");
+    const { sampleInputNoBreak } = await import("@/contracts/mock-plan");
+    const { fixtureDataset } = await import("@/data/fixtures");
+    const base = simulatePlan(sampleInputNoBreak, fixtureDataset);
+    const first = base.terms[0].courses[0];
+    const later = base.terms[2].term;
+    const r = simulatePlan({ ...sampleInputNoBreak, courseRules: [{ code: first.code, action: "not_before", term: later }] }, fixtureDataset);
+    const at = r.terms.find((t) => t.courses.some((c) => c.code === first.code));
+    expect(at && termIndex(at.term) >= termIndex(later)).toBe(true);
+  });
+});

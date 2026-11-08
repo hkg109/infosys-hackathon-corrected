@@ -6,7 +6,7 @@ import { applyTranscriptImport, importProblem, parseTranscriptRows, rowsFromTabl
 // 모두 가상 자료. 실제 학생 성적표가 아니다.
 const courses = fixtureDataset.courses;
 const withHyphen: Course[] = [...courses, { ...courses[0], code: "I-D3018", name: "가상디자인과목" }];
-const parse = (text: string, cs: Course[] = courses, src: "clipboard_text" | "image_file" = "clipboard_text") => parseTranscriptRows(rowsFromText(text), cs, src);
+const parse = (text: string, cs: Course[] = courses, src: "clipboard_text" | "clipboard_html" = "clipboard_text") => parseTranscriptRows(rowsFromText(text), cs, src);
 const codes = (rows: { matchedCourseCode: string | null }[]) => rows.map((r) => r.matchedCourseCode).sort();
 
 describe("rowsFromText", () => {
@@ -78,8 +78,8 @@ describe("parseTranscriptRows — 과목", () => {
     expect(d.ambiguous).toHaveLength(1);
   });
 
-  it("14. OCR 유사 매칭(0/O, 1/I)은 자동 확정하지 않는다", () => {
-    const d = parse("CSEIOO2\t3\tA0", courses, "image_file");
+  it("14. 글자 혼동(O/0, I/1) 유사 매칭(0/O, 1/I)은 자동 확정하지 않는다", () => {
+    const d = parse("CSEIOO2\t3\tA0", courses);
     expect(d.completed).toHaveLength(0);
     expect(d.ambiguous).toHaveLength(1);
     expect(d.ambiguous[0].matchKind).toBe("ocr_suggestion");
@@ -180,5 +180,24 @@ describe("applyTranscriptImport", () => {
     expect(importProblem({ earnedCredits: 10, earnedMajorCredits: 12, targetCredits: null, completedCodes: [], mode: "merge" }, current)).toContain("포함");
     expect(importProblem({ earnedCredits: null, earnedMajorCredits: 40, targetCredits: null, completedCodes: [], mode: "merge" }, current)).toContain("포함");
     expect(importProblem({ earnedCredits: 36, earnedMajorCredits: 9, targetCredits: 130, completedCodes: [], mode: "merge" }, current)).toBeNull();
+  });
+});
+
+describe("붙여넣기 형식 견고성", () => {
+  it("한 줄에 셀 하나씩 나온 포털 복사도 학수번호 기준으로 묶어 읽는다", () => {
+    const text = ["2025", "1학기", "CSE1002", "전산학개론", "전공기초", "3.0", "A+", "2025", "1학기", "ITE1012", "정보시스템개론", "전공핵심", "3.0", "B0", "2025", "2학기", "ITE1009", "C프로그래밍", "전공", "3.0", "F", "총 취득학점", "36", "전공 취득학점", "12", "평점평균", "3.91"].join("\n");
+    const d = parse(text);
+    expect(d.earnedCredits.map((v) => v.value)).toEqual([36]);
+    expect(d.earnedMajorCredits.map((v) => v.value)).toEqual([12]);
+    expect(d.layout).toBe("vertical");
+    expect(codes(d.completed)).toEqual(["CSE1002", "ITE1012"]);
+    expect(codes(d.notCompleted)).toEqual(["ITE1009"]);
+  });
+  it("전각 문자·nbsp·학수번호와 과목명이 붙은 셀", () => {
+    const d = parse("ＣＳＥ１００２전산학개론  ３  Ａ＋");
+    expect(codes(d.completed)).toEqual(["CSE1002"]);
+  });
+  it("한 셀에 성적과 평점이 같이 있어도 성적을 읽는다", () => {
+    expect(codes(parse("CSE1002\t전산학개론\t3\tA+ / 4.5").completed)).toEqual(["CSE1002"]);
   });
 });

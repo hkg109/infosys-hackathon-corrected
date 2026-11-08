@@ -1,20 +1,20 @@
-import type { DatasetV2, PlanInput } from "@/contracts/types";
+import type { DatasetV2, FeedbackApiReply, PlanInput } from "@/contracts/types";
+import { postFeedback } from "@/client/feedback";
+import { simulatePlan } from "@/engine";
+import { applyEdits, parseFeedbackRules, planContext } from "./feedbackEdits";
 import type { PlanState } from "./storage";
 
 /**
  * 피드백 채팅 → 개인 맞춤 트랙. 화면(FeedbackChat — 03 다 로드맵 옆 채팅)은 이 함수만 부른다.
- *
- * TODO(피드백 담당): 아직 구현하지 않았다. 시연에서는 정해진 입력 → 정해진 결과로 채운다.
- *  - 예: "계절학기 듣고 싶어요" → nextInput의 학기 배치를 바꾼 계획 + changes 문구
- *  - 학점·학기는 엔진(simulatePlan)으로 다시 계산하고, 화면이 diffPlans로 전후를 비교한다.
- *  - 나중에 Claude API를 붙인다면 화면에서 직접 부르지 말고 src/app/api/** 라우트를 거친다(CLAUDE.md 규칙).
+ * 1) /api/feedback(Claude)이 바라는 점을 편집(PlanEdit)으로 바꾼다. 키가 없거나 실패하면 2) 규칙 해석.
+ * 3) 편집을 검증해 PlanInput에 반영하고, 화면이 엔진으로 다시 계산한다(숫자를 AI가 만들지 않는다).
  */
 
 export interface ChatMessage {
   role: "user" | "assistant";
   text: string;
-  /** 시연용 예시 응답이면 true(화면에 표시) */
-  demo?: boolean;
+  /** 규칙 해석으로 답했으면 true(화면에 표시) */
+  rules?: boolean;
 }
 
 export interface FeedbackRequest {
@@ -25,25 +25,34 @@ export interface FeedbackRequest {
 }
 
 export interface FeedbackReply {
-  /** agent = 실제 개인화 로직(다른 담당자가 연결), scripted_demo = 시연용 예시 응답, none = 미연결 */
-  origin: "agent" | "scripted_demo" | "none";
+  /** agent = Claude 해석, rules = 규칙 기반 해석(키 없음·호출 실패) */
+  origin: "agent" | "rules";
   /** 채팅에 보여 줄 답 */
   message: string;
-  /** 바꾼 계획 입력. 바꿀 게 없거나 아직 처리하지 못하면 null */
+  /** 바꾼 계획 입력. 바꿀 게 없으면 null */
   nextInput: PlanInput | null;
-  /** "계절학기 1번 추가"처럼 바뀐 점 요약. 로드맵의 "방금 고친 것"에 쓰인다. */
+  /** "2028년 2학기 최대 12학점"처럼 바뀐 점 요약. 로드맵의 "방금 고친 것"에 쓰인다. */
   changes: string[];
 }
 
-/** 화면이 주입받는 응답 함수 경계. 개인화 담당자는 이 모양의 함수를 넘기면 된다. */
+/** 화면이 주입받는 응답 함수 경계 */
 export type FeedbackResponder = (req: FeedbackRequest) => Promise<FeedbackReply>;
 
-export async function requestTrackFeedback(req: FeedbackRequest): Promise<FeedbackReply> {
-  void req;
+export async function requestTrackFeedback(req: FeedbackRequest, post: typeof postFeedback = postFeedback): Promise<FeedbackReply> {
+  const input = req.plan.input;
+  const ctx = planContext(input, simulatePlan(input, req.dataset), req.dataset);
+  const history = req.history.slice(0, -1).map((h) => ({ role: h.role, text: h.text }));
+  const ai: FeedbackApiReply | null = await post({ message: req.message, history, context: ctx });
+  const interp = ai ?? (() => {
+    const r = parseFeedbackRules(req.message, ctx, req.dataset);
+    return { reply: r.reply, edits: r.edits, notSupported: r.notSupported };
+  })();
+  const { next, changes, rejected } = applyEdits(input, interp.edits, req.dataset);
+  const parts = [interp.reply, ...interp.notSupported, ...rejected].filter((x) => x && x.trim());
   return {
-    origin: "none",
-    message: "피드백 반영 기능은 아직 연결 중이에요. 적어 주신 내용은 이 대화에 남겨 둘게요.",
-    nextInput: null,
-    changes: [],
+    origin: ai ? "agent" : "rules",
+    message: parts.join(" ") || "바꿀 내용을 찾지 못했어요. 학기나 과목을 콕 집어 말씀해 주세요.",
+    nextInput: changes.length > 0 ? next : null,
+    changes,
   };
 }

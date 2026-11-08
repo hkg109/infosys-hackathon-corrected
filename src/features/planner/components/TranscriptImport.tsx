@@ -1,9 +1,9 @@
 "use client";
 
-import { AlertTriangle, ClipboardPaste, ImageUp, PencilLine, RotateCw, X } from "lucide-react";
+import { ClipboardPaste, PencilLine, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Course, DatasetV2 } from "@/contracts/types";
-import { imageProblem, LOW_RES_WIDTH, type OcrJob, prepareImage, readClipboard, runOcr } from "../importSources";
+import { readClipboard } from "../importSources";
 import type { Draft } from "../plan";
 import {
   applyTranscriptImport,
@@ -20,10 +20,10 @@ import {
 } from "../transcriptImport";
 import { Button, Tag } from "./ui";
 
-type Mode = "paste" | "image" | null;
+type Mode = "paste" | null;
 
 /**
- * 01 아 — 이수 현황 가져오기. 붙여넣기·스크린샷 → 인식 → 검토 → 확인하면 한 번에 반영.
+ * 01 아 — 이수 현황 가져오기. 붙여넣기 → 인식 → 검토 → 확인하면 한 번에 반영.
  * 검토에서 확인하기 전에는 입력값을 바꾸지 않는다(브라우저 저장도 확인 뒤에만).
  */
 export function TranscriptImport({
@@ -62,13 +62,11 @@ export function TranscriptImport({
       )}
       <div role="radiogroup" aria-label="이수 현황 가져오기 방법" className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
         <BigOption icon={<ClipboardPaste size={22} />} selected={mode === "paste"} onClick={() => setMode("paste")} title="복사한 성적표 붙여넣기" desc="포털 성적·졸업사정 화면에서 Ctrl+A → Ctrl+C" />
-        <BigOption icon={<ImageUp size={22} />} selected={mode === "image"} onClick={() => setMode("image")} title="스크린샷으로 가져오기" desc="캡처를 붙여넣거나 이미지 파일 올리기" />
         <BigOption icon={<PencilLine size={22} />} selected={false} onClick={onManual} title="직접 수정하기" desc="학점·과목을 하나씩 고치기" />
       </div>
-      <p className="mt-3 text-[13px] text-muted">이 브라우저 안에서만 읽어요. 성적표 원문과 이미지는 저장하거나 어디로도 보내지 않고, 확인한 숫자와 과목만 저장해요.</p>
+      <p className="mt-3 text-[13px] text-muted">이 브라우저 안에서만 읽어요. 성적표 원문은 저장하거나 어디로도 보내지 않고, 확인한 숫자와 과목만 저장해요.</p>
 
-      {mode === "paste" && <PastePanel onRows={analyze} onImage={() => setMode("image")} />}
-      {mode === "image" && <ImagePanel onRows={analyze} onFallback={() => setMode("paste")} />}
+      {mode === "paste" && <PastePanel onRows={analyze} />}
 
       {review && (
         <ReviewDialog
@@ -110,7 +108,7 @@ function BigOption({ icon, title, desc, selected, onClick }: { icon: ReactNode; 
 
 // ── 붙여넣기 ─────────────────────────────────────────────
 
-function PastePanel({ onRows, onImage }: { onRows: (rows: SourceRow[], s: TranscriptImportSource) => void; onImage: () => void }) {
+function PastePanel({ onRows }: { onRows: (rows: SourceRow[], s: TranscriptImportSource) => void }) {
   const [text, setText] = useState("");
   const [note, setNote] = useState<string | null>(null);
   return (
@@ -120,14 +118,19 @@ function PastePanel({ onRows, onImage }: { onRows: (rows: SourceRow[], s: Transc
         value={text}
         rows={7}
         aria-label="성적표 붙여넣기"
-        placeholder={"여기를 누르고 Ctrl+V — 포털 표를 그대로 붙여넣으면 바로 읽어요.\n예)  학수번호  과목명  학점  성적\n     CSE1002  전산학개론  3  A+"}
+        placeholder={"포털 성적 조회·졸업사정 화면에서 Ctrl+A → Ctrl+C 한 뒤, 여기를 누르고 Ctrl+V — 붙여넣으면 바로 읽어요.\n예)  학수번호  과목명  학점  성적\n     CSE1002  전산학개론  3  A+"}
         onChange={(e) => setText(e.target.value)}
         onPaste={(e) => {
           const c = readClipboard(e.clipboardData);
           if (c.kind === "image") {
             e.preventDefault();
-            setNote("이미지를 붙여넣었어요. 스크린샷 가져오기로 넘어가요.");
-            onImage();
+            setNote("이미지는 읽지 않아요. 포털 화면에서 Ctrl+A → Ctrl+C로 글자를 복사해 붙여넣어 주세요.");
+            return;
+          }
+          if (c.kind === "text") {
+            // 글자로 붙여넣으면 바로 읽어서 확인 창을 연다(입력칸에는 원문을 남긴다)
+            onRows(c.rows, "clipboard_text");
+            setNote(`${c.rows.length}줄을 읽었어요. 확인 창에서 검토하세요.`);
             return;
           }
           if (c.kind === "html") {
@@ -146,156 +149,6 @@ function PastePanel({ onRows, onImage }: { onRows: (rows: SourceRow[], s: Transc
           읽어서 확인하기
         </Button>
         {note && <span className="text-[13px] text-ink-soft">{note}</span>}
-      </div>
-    </div>
-  );
-}
-
-// ── 스크린샷 ─────────────────────────────────────────────
-
-function ImagePanel({ onRows, onFallback }: { onRows: (rows: SourceRow[], s: TranscriptImportSource) => void; onFallback: () => void }) {
-  const [file, setFile] = useState<{ f: File; source: TranscriptImportSource } | null>(null);
-  const [url, setUrl] = useState<string | null>(null);
-  const [rotation, setRotation] = useState<0 | 90 | 180 | 270>(0);
-  const [problem, setProblem] = useState<string | null>(null);
-  const [lowRes, setLowRes] = useState(false);
-  const [progress, setProgress] = useState<{ ratio: number; label: string } | null>(null);
-  const job = useRef<OcrJob | null>(null);
-  const zone = useRef<HTMLDivElement>(null);
-
-  // 미리보기 URL은 바뀌거나 닫힐 때 해제한다
-  useEffect(() => {
-    if (!file) return;
-    const u = URL.createObjectURL(file.f);
-    setUrl(u);
-    const img = new Image();
-    img.onload = () => setLowRes(Math.max(img.width, img.height) < LOW_RES_WIDTH);
-    img.src = u;
-    return () => URL.revokeObjectURL(u);
-  }, [file]);
-  useEffect(() => () => job.current?.cancel(), []);
-  useEffect(() => zone.current?.focus(), []);
-
-  const pick = (f: File | null, source: TranscriptImportSource) => {
-    if (!f) return;
-    const p = imageProblem(f);
-    setProblem(p);
-    if (!p) {
-      setRotation(0);
-      setFile({ f, source });
-    }
-  };
-
-  const start = async () => {
-    if (!file) return;
-    setProblem(null);
-    try {
-      const { canvas } = await prepareImage(file.f, rotation);
-      const j = runOcr(canvas, (ratio, label) => setProgress({ ratio, label }));
-      job.current = j;
-      const rows = await j.done;
-      setProgress(null);
-      if (rows.length === 0) {
-        setProblem("글자를 찾지 못했어요. 더 선명한 캡처를 쓰거나 텍스트로 붙여넣어 주세요.");
-        return;
-      }
-      onRows(rows, file.source);
-    } catch (e) {
-      setProgress(null);
-      if (e instanceof DOMException && e.name === "AbortError") return;
-      setProblem("이미지를 읽지 못했어요. 텍스트 붙여넣기로 해 보세요.");
-    } finally {
-      job.current = null;
-    }
-  };
-
-  const cancel = () => {
-    job.current?.cancel();
-    job.current = null;
-    setProgress(null);
-  };
-
-  return (
-    <div className="mt-6 grid max-w-[980px] grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
-      <div
-        ref={zone}
-        tabIndex={0}
-        onPaste={(e) => {
-          const c = readClipboard(e.clipboardData);
-          if (c.image) {
-            e.preventDefault();
-            pick(c.image, "clipboard_image");
-          } else if (c.rows.length > 0) {
-            e.preventDefault();
-            onRows(c.rows, c.kind === "html" ? "clipboard_html" : "clipboard_text");
-          }
-        }}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          pick(e.dataTransfer.files[0] ?? null, "image_file");
-        }}
-        className="grid min-h-[220px] place-items-center rounded-[10px] border-2 border-dashed border-pen/50 bg-pen/[0.03] p-5 text-center outline-none focus-visible:border-pen"
-        aria-label="스크린샷 붙여넣기 영역"
-      >
-        {url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={url} alt="가져온 성적표 미리보기" className="max-h-[300px] max-w-full rounded border border-line object-contain transition-transform" style={{ transform: `rotate(${rotation}deg)` }} />
-        ) : (
-          <div className="text-[14px] text-ink-soft">
-            <ImageUp size={28} className="mx-auto mb-2 text-pen" aria-hidden />
-            여기를 누르고 <b>Ctrl+V</b>로 캡처를 붙여넣거나,
-            <br />
-            이미지 파일을 끌어다 놓으세요.
-          </div>
-        )}
-      </div>
-      <div className="min-w-0 text-[14px]">
-        <label className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-[6px] border-[1.5px] border-ink/70 px-4 py-2 font-medium focus-within:ring-2 focus-within:ring-pen hover:bg-paper-2">
-          <ImageUp size={16} aria-hidden /> 이미지 파일 고르기
-          <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(e) => pick(e.target.files?.[0] ?? null, "image_file")} />
-        </label>
-        <p className="mt-2 text-[12px] text-muted">PNG·JPEG·WebP, 10MB 이하. 이름·학번 부분은 잘라내도 돼요.</p>
-        {file && (
-          <div className="mt-4 grid gap-3">
-            <div className="flex items-center gap-2">
-              <Button onClick={() => setRotation((r) => ((r + 90) % 360) as 0 | 90 | 180 | 270)} disabled={!!progress}>
-                <RotateCw size={15} aria-hidden /> 90° 돌리기
-              </Button>
-              <span className="text-[12px] text-muted">{rotation}°</span>
-            </div>
-            {lowRes && (
-              <p className="flex items-start gap-1.5 text-[13px] text-red">
-                <AlertTriangle size={15} className="mt-0.5 shrink-0" aria-hidden /> 해상도가 낮아 글자를 잘못 읽을 수 있어요. 확대해서 다시 캡처하면 더 정확해요.
-              </p>
-            )}
-            {progress ? (
-              <div aria-live="polite">
-                <p className="mb-1 text-[13px] text-ink-soft">
-                  {progress.label} · {Math.round(progress.ratio * 100)}%
-                </p>
-                <div className="h-2 overflow-hidden rounded-full bg-paper-2" role="progressbar" aria-valuenow={Math.round(progress.ratio * 100)} aria-valuemin={0} aria-valuemax={100} aria-label="이미지 읽기 진행률">
-                  <div className="h-full bg-pen transition-[width]" style={{ width: `${progress.ratio * 100}%` }} />
-                </div>
-                <Button kind="ghost" className="mt-2" onClick={cancel}>
-                  <X size={15} aria-hidden /> 취소
-                </Button>
-              </div>
-            ) : (
-              <Button kind="ink" onClick={start}>
-                이미지에서 읽기
-              </Button>
-            )}
-          </div>
-        )}
-        {problem && (
-          <p role="alert" className="mt-3 text-[13px] text-red">
-            {problem}{" "}
-            <button type="button" className="cursor-pointer font-semibold underline underline-offset-2" onClick={onFallback}>
-              텍스트로 붙여넣기
-            </button>
-          </p>
-        )}
       </div>
     </div>
   );
@@ -526,7 +379,7 @@ function ReviewDialog({
           <div className="flex items-center gap-2">
             {tried && (problem || unresolved > 0) && (
               <span role="alert" className="text-[13px] text-red">
-                {problem ?? "OCR로 읽은 과목을 골라 주세요."}
+                {problem ?? "글자가 헷갈리는 과목을 골라 주세요."}
               </span>
             )}
             <Button kind="ghost" onClick={onCancel}>

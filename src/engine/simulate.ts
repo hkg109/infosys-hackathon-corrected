@@ -12,7 +12,7 @@ import type {
   UnplacedCourse,
 } from "@/contracts/types";
 import { maxUserCap, termCapFor } from "./pace";
-import { formatTerm, isBlocked, isValidDate, nextTerm } from "./terms";
+import { formatTerm, isBlocked, isValidDate, nextTerm, termIndex } from "./terms";
 
 export const ENGINE_VERSION = "0.2.0";
 export const MAX_FUTURE_TERMS = 24;
@@ -47,6 +47,8 @@ export function validatePlanInput(input: PlanInput): string | null {
   for (const b of input.paceBands ?? [])
     if (!Number.isInteger(b.credits) || b.credits < 1 || b.credits > 30 || !Number.isInteger(b.fromOrdinal) || b.fromOrdinal < 1)
       return "학기별 계획 학점은 1~30 사이로 입력해 주세요.";
+  for (const t of input.termCaps ?? [])
+    if (!Number.isInteger(t.credits) || t.credits < 0 || t.credits > 30) return "학기별 학점 제한은 0~30 사이로 입력해 주세요.";
   // NaN·Infinity는 비교식을 모두 통과하므로 먼저 거른다.
   if (!Number.isFinite(input.earnedCredits) || input.earnedCredits < 0)
     return "이수학점은 0 이상이어야 합니다.";
@@ -125,8 +127,10 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
 
   const done = new Set(input.completedCourseCodes);
   const recommended = recommendedCourses(dataset, input.track);
+  const excluded = new Set((input.courseRules ?? []).filter((r) => r.action === "exclude").map((r) => r.code));
+  const notBefore = new Map((input.courseRules ?? []).filter((r) => r.action === "not_before" && r.term).map((r) => [r.code, termIndex(r.term!)]));
   const pruned = pruneUnplaceable(
-    recommended.filter((c) => !done.has(c.code)),
+    recommended.filter((c) => !done.has(c.code) && !excluded.has(c.code)),
     done,
     maxUserCap(input),
   );
@@ -148,7 +152,10 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
 
     const studentYear = Math.floor((input.completedTerms + activeTerms) / 2) + 1;
     // 유효학기 순번(1부터)에 맞는 계획 상한: 후반 여유형 구간·확인된 학교 상한 중 작은 값
-    const { cap, ruleId } = termCapFor(input, dataset, input.completedTerms + activeTerms + 1);
+    const base = termCapFor(input, dataset, input.completedTerms + activeTerms + 1);
+    const userTermCap = (input.termCaps ?? []).find((t) => t.term.year === term.year && t.term.season === term.season)?.credits ?? null;
+    const cap = userTermCap === null ? base.cap : Math.min(base.cap, userTermCap);
+    const ruleId = base.ruleId;
     const placed: PlacedCourse[] = [];
     let used = 0;
 
@@ -156,6 +163,7 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
       if ((c.recommendedYear ?? 1) > studentYear) continue;
       if ((c.semester === 1 || c.semester === 2) && c.semester !== term.season) continue;
       if (!c.prerequisites.every((p) => done.has(p))) continue;
+      if ((notBefore.get(c.code) ?? -Infinity) > termIndex(term)) continue;
       if (used + c.credits > cap) continue;
 
       const assumptions: PlacedCourse["assumptions"] = [];
@@ -215,6 +223,15 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
   ];
   for (const u of unplaced)
     warnings.push({ code: "UNPLACED_COURSE", message: `${u.name}: ${u.reason}`, courseCode: u.code });
+  for (const code of excluded) {
+    const c = recommended.find((x) => x.code === code);
+    if (c && !done.has(code))
+      warnings.push({
+        code: "USER_EXCLUDED",
+        message: `${c.name}을(를) 요청에 따라 계획에서 뺐어요.${c.category?.includes("필수") ? " 이수구분이 필수라 졸업요건을 포털에서 꼭 확인하세요." : ""}`,
+        courseCode: code,
+      });
+  }
   if (!finished)
     warnings.push({
       code: "SEARCH_LIMIT",
