@@ -365,7 +365,7 @@ export interface OfficialSource {
 }
 
 export type MilitaryBranch = "army" | "navy" | "air_force" | "marine";
-export type MilitaryRecruitType = "general_enlistment" | "technical_admin" | "katusa";
+export type MilitaryRecruitType = "general_enlistment" | "technical_admin" | "katusa" | "air_technical";
 
 export interface MilitaryTrackInfo {
   /** 안정적인 ID(예: "army-general", "katusa") */
@@ -462,6 +462,183 @@ export interface MilitaryCatalog {
   relations: MilitaryCertificateRelation[];
   scoringRules: MilitaryScoringRule[];
   careerCertificates: CareerCertificateRecommendation[];
+  /** 모집회차. 공고가 없는 미래 회차는 날짜 없이 publicationStatus "unknown"으로 둔다 */
+  recruitmentCycles?: RecruitmentCycle[];
+  /** 같은 회차 중복지원 규칙. 회차를 명시하지 않은 규칙을 다른 연도에 쓰지 않는다 */
+  concurrentRules?: ConcurrentApplicationRule[];
+  /** 한 곳에 선발되면 다른 지원·입영일자를 어떻게 처리하는지 */
+  selectionRules?: SelectionResolutionRule[];
+  supplementalRules?: SupplementalRecruitmentRule[];
+}
+
+// ── 군 복무 모집 규칙(검토 자료) ─────────────────────────
+
+/** 모집 프로그램 ID. MilitaryTrackInfo.id와 같은 값을 쓴다(예: "katusa", "army-technical") */
+export type MilitaryProgramId = string;
+
+export interface RecruitmentCycle {
+  id: string;
+  programId: MilitaryProgramId;
+  /** 사람이 읽는 회차 이름. 예: "2026년 카투사 모집(2027년 입영)" */
+  label: string;
+  applicationStart: ISODate | null;
+  applicationEnd: ISODate | null;
+  resultDate: ISODate | null;
+  /** 입영일 또는 입영월(YYYY-MM-01). 모르면 null */
+  enlistment: ISODate | null;
+  /** official = 공고 확인, expected = 과거 일정 등으로 추정(확정 아님), unknown = 공고 미발표 */
+  publicationStatus: "official" | "expected" | "unknown";
+  /** expected일 때 추정 근거, unknown일 때 확인할 곳 */
+  note: string;
+  source: OfficialSource | null;
+}
+
+export interface ConcurrentApplicationRule {
+  id: string;
+  leftProgramId: MilitaryProgramId;
+  /** "*"는 다른 모든 현역 모집병 */
+  rightProgramId: MilitaryProgramId | "*";
+  relation: "allowed" | "forbidden" | "conditional" | "unknown";
+  /** 이 규칙이 적용되는 회차 ID. 비어 있으면 어떤 회차에도 적용하지 않는다(일반화 금지) */
+  appliesToCycleIds: string[];
+  conditions: string[];
+  source: OfficialSource;
+}
+
+export interface SelectionResolutionRule {
+  id: string;
+  whenSelectedProgramId: MilitaryProgramId;
+  affectedProgramId: MilitaryProgramId;
+  action: "cancel" | "keep" | "user_priority_order" | "unknown";
+  /** 비어 있으면 회차와 무관한 상시 규칙(원문이 회차를 정하지 않은 경우만) */
+  appliesToCycleIds: string[];
+  note: string;
+  source: OfficialSource;
+}
+
+export interface SupplementalRecruitmentRule {
+  id: string;
+  programId: MilitaryProgramId;
+  applicationMethod: "first_come" | "scored" | "lottery" | "unknown";
+  /** 추가모집에 나오는 특기. 원문에서 확인하지 못하면 null */
+  availablePrograms: string[] | null;
+  /** 특정 특기가 나온다고 보장하지 않는다 */
+  guaranteeSpecificProgram: false;
+  conditions: string[];
+  /** 확인한 공고의 적용 범위(예: "2026년 11~12월 입영") */
+  observedIn: string;
+  source: OfficialSource;
+}
+
+// ── 군 복무 전략(최소 입력 → 분기형 전략) ───────────────
+
+export type TriState = "yes" | "no" | "unknown";
+export type MilitaryGoal = "fast_stable" | "it_experience" | "katusa" | "return_predictable" | "unknown";
+
+/** 사용자가 알려주는 최소 정보. 복무개월·입영일·중복지원 규칙은 묻지 않는다 */
+export interface MilitaryPlanningInput {
+  serviceNeeded: TriState;
+  /** 빈 배열 = 상관없음/모름 */
+  preferredBranches: MilitaryBranch[];
+  generalArmyAcceptedAsFallback: TriState;
+  itRolePriority: "high" | "medium" | "none" | "unknown";
+  katusaPreference: "first_priority" | "consider" | "exclude" | "unknown";
+  goal: MilitaryGoal;
+  /** 반드시 복학해야 하는 학기. 없으면 null */
+  mustReturnBy: Term | null;
+  katusaEvidence: {
+    priorApplication: "none" | "cancelled" | "medical_disqualified" | "other_application" | "unknown";
+    /** 인정 가능한 영어 정기시험 성적 보유 여부(점수·응시일은 선택) */
+    hasLanguageScore: TriState;
+  } | null;
+  qualificationCodes: string[];
+}
+
+export interface PlannedApplication {
+  id: string;
+  programId: MilitaryProgramId;
+  /** 지원 순서(1부터) */
+  order: number;
+  /** 이 지원이 겨냥하는 회차. 공고가 없으면 null */
+  cycleId: string | null;
+  role: "primary" | "parallel_fallback" | "sequential_fallback" | "safety_net" | "supplemental";
+  note: string;
+}
+
+export interface EligibilityResult {
+  programId: MilitaryProgramId;
+  status: "eligible" | "ineligible" | "unknown";
+  reasons: string[];
+  /** unknown일 때 물어볼 한 가지 */
+  question: string | null;
+}
+
+export type MilitaryBranchCondition = "katusa_selected" | "katusa_not_selected" | "fallback_selected" | "none_selected";
+export type MilitaryBranchLabel = "confirmed" | "official_schedule" | "user_assumption" | "awaiting_result" | "check_notice" | "not_computable";
+
+export interface MilitaryOutcomeBranch {
+  id: string;
+  condition: MilitaryBranchCondition;
+  title: string;
+  selectedProgramId: MilitaryProgramId | null;
+  cancelledApplicationIds: string[];
+  /** 이 분기의 복무기간(공식 확인값만). 모르면 null */
+  serviceMonths: number | null;
+  label: MilitaryBranchLabel;
+  nextActions: string[];
+}
+
+export interface MilitaryStrategyCandidate {
+  /** 결정적 ID(입력·카탈로그가 같으면 같음) */
+  id: string;
+  title: string;
+  summary: string;
+  /** 비교표 열: 카투사 제외 / 카투사 우선·동시지원 / 카투사 우선·순차 */
+  scenario: "katusa_excluded" | "katusa_parallel" | "katusa_sequential";
+  applications: PlannedApplication[];
+  eligibility: EligibilityResult[];
+  /** 대상 카투사 회차의 중복지원 규칙 평가 */
+  concurrency: { relation: ConcurrentApplicationRule["relation"]; cycleId: string | null; ruleId: string | null; note: string } | null;
+  branches: MilitaryOutcomeBranch[];
+  status: "computable" | "conditional" | "ineligible" | "conflict";
+  /** 정렬에 쓴 실제 지표 */
+  metrics: {
+    goalMet: boolean;
+    hasFallback: boolean;
+    itMatch: boolean;
+    /** 확인 필요 항목 수 */
+    uncertainty: number;
+    /** 가장 긴 분기의 복무개월. 모르면 null */
+    worstServiceMonths: number | null;
+  };
+  reasons: string[];
+  warnings: string[];
+  sources: OfficialSource[];
+}
+
+export interface MilitaryStrategySet {
+  strategies: MilitaryStrategyCandidate[];
+  /** 개인 최적 전략 ID. 군 복무 계획이 필요 없으면 null */
+  bestId: string | null;
+  /** 정보가 부족할 때 물어볼 질문 한 개 */
+  followUpQuestion: string | null;
+  catalogVersion: string | null;
+}
+
+// ── 인기 순위(개인화와 분리) ─────────────────────────────
+
+export interface PopularitySnapshot {
+  available: boolean;
+  metric: "service_user_selection" | "official_applications";
+  scope: string;
+  from: ISODate | null;
+  to: ISODate | null;
+  sampleSize: number | null;
+  source: OfficialSource | null;
+  /** 시연용 예시면 true(화면에 배지, production 비노출) */
+  demo: boolean;
+  entries: Array<{ trackKey: string; label: string; rank: 1 | 2 | 3; value: number }>;
+  unavailableReason: string | null;
 }
 
 /** 카투사 지원·선발 상태 */
