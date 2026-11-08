@@ -189,10 +189,13 @@ export function buildTracks(draft: Draft, dataset: DatasetV2, today = ""): Track
 
   const careerOrder = new Map(matches.map((m, i) => [m.track, i]));
   const roleOrder = { primary: 0, normal: 1, conditional: 2, fallback: 3 } as const;
+  // 교환 전략을 고른 경우: 그 학기 교환 트랙을 먼저(고른 계획이 기본 로드맵이 되도록). 아니면 교환 없는 트랙을 먼저.
+  const chosenExc = draft.exchangeChoice ? termIndex(draft.exchangeChoice.term) : null;
+  const excRank = (r: Raw) => (chosenExc === null ? Number(r.exc !== null) : r.exc && termIndex(r.exc) === chosenExc ? 0 : 1);
   raws.sort(
     (a, b) =>
       careerOrder.get(a.career)! - careerOrder.get(b.career)! ||
-      Number(a.exc !== null) - Number(b.exc !== null) ||
+      excRank(a) - excRank(b) ||
       // 기간을 확정하지 못한 트랙(복무기간 미확인 등)은 일정이 빠진 채 계산돼 지표가 공정하지 않으므로 뒤로
       Number(periodUnresolved(a.candidate)) - Number(periodUnresolved(b.candidate)) ||
       (a.entry.rank ?? 99) - (b.entry.rank ?? 99) ||

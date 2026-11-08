@@ -7,6 +7,7 @@ import { getPopularitySnapshot } from "@/client/popularity";
 import { CAREER_LABEL } from "@/contracts/careers";
 import type { DatasetV2, MilitaryOutcomeBranch, MilitaryStrategyCandidate, MilitaryStrategySet } from "@/contracts/types";
 import { BRANCH_LABEL, formatTerm, GOAL_LABEL } from "@/engine";
+import { wantsExchange } from "../exchangePrefs";
 import { prefsOf, strategiesFor } from "../militaryPrefs";
 import { usePlanner } from "../PlannerApp";
 import { type Draft, needsMilitary } from "../plan";
@@ -51,6 +52,14 @@ export function MatchResults() {
         <PopularTop3 />
       </div>
       <p className="mt-10 border-t border-dashed border-line pt-4 text-[14px] text-ink-soft">
+        {wantsExchange(draft) && (
+          <>
+            <Link href="/exchange" className="font-semibold text-pen underline-offset-4 hover:underline">
+              교환학생 전략(1순위·백업·준비 로드맵) 보기
+            </Link>
+            {draft.exchangeChoice ? ` — 고른 전략: ${draft.exchangeChoice.universityName} ${formatTerm(draft.exchangeChoice.term)}(학점 인정 미정)` : ""} ·{" "}
+          </>
+        )}
         다른 진로·입대 시기 조합이 궁금하면{" "}
         <Link href="/match/all" className="font-semibold text-pen underline-offset-4 hover:underline">
           전체 트랙 {tracks.tracks.length}개 살펴보기

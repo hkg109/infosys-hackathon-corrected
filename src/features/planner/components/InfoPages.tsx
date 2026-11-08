@@ -330,7 +330,7 @@ export function ExchangeInfo() {
       <Part no="02" title="준비는 보통 이렇게 흘러가요" tag={<Tip />}>
         <ol className="grid gap-2">
           <li>
-            <b className="text-ink">1.</b> 가고 싶은 학기 1년쯤 전부터 학교·지역·과목을 알아봐요.
+            <b className="text-ink">1.</b> 가고 싶은 학기의 모집 공고를 확인해요. 2027-1 본모집 공고는 2026-07-03에 게시됐어요 — 다음 회차 일정은 아직 확인되지 않았어요.
           </li>
           <li>
             <b className="text-ink">2.</b> 지원에 필요한 어학 성적을 미리 준비해요.

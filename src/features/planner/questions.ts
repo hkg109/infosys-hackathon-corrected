@@ -1,4 +1,5 @@
 import { INPUT_STEPS, type StepId } from "./inputSteps";
+import { exPrefsOf, wantsExchange } from "./exchangePrefs";
 import { katusaOn, prefsOf } from "./militaryPrefs";
 import { type Draft, MIN_ANSWERS, needsMilitary } from "./plan";
 import { answeredCount } from "./recommend";
@@ -19,6 +20,12 @@ export function visibleSteps(d: Draft): StepId[] {
         return needsMilitary(d);
       case "katusa-evidence":
         return needsMilitary(d) && katusaOn(prefsOf(d));
+      case "exchange-when":
+      case "exchange-length":
+      case "exchange-goal":
+      case "exchange-language":
+      case "exchange-life":
+        return wantsExchange(d);
       default:
         return true;
     }
@@ -75,8 +82,26 @@ export function stepProblem(step: StepId, d: Draft): string | null {
       if (d.leave.mode === null) return "휴학 계획을 골라 주세요.";
       return d.leave.mode === "pick" && d.leave.ordinal === null ? "휴학할 시점을 골라 주세요." : null;
     case "exchange":
-      if (d.exchange.mode === null) return "교환학생 계획을 골라 주세요.";
-      return d.exchange.mode === "pick" && d.exchange.ordinal === null ? "가고 싶은 학기를 골라 주세요." : null;
+      return exPrefsOf(d).intent === null && d.exchange.mode === null ? "교환학생 생각을 골라 주세요." : null;
+    case "exchange-when": {
+      const p = exPrefsOf(d);
+      if (p.when === null) return "가고 싶은 시기를 고르거나 ‘아직 모르겠어요’를 눌러 주세요.";
+      return p.when === "fixed" && !p.fixedTerm ? "학기를 하나 골라 주세요." : null;
+    }
+    case "exchange-length":
+      return exPrefsOf(d).duration === null ? "기간을 골라 주세요." : null;
+    case "exchange-goal":
+      return exPrefsOf(d).priorities.length === 0 ? "가장 중요한 것을 하나 이상(최대 2개) 골라 주세요." : null;
+    case "exchange-language": {
+      const p = exPrefsOf(d);
+      if (p.languageStatus === null) return "어학 준비 상태를 골라 주세요.";
+      if (p.gpa !== null && (p.gpa < 0 || p.gpa > 4.5)) return "누적 평점은 0~4.5 사이로 적어 주세요.";
+      return null;
+    }
+    case "exchange-life": {
+      const p = exPrefsOf(d);
+      return p.budget === null || p.housing === null ? "예산과 주거를 하나씩 골라 주세요(모르면 ‘아직 모르겠어요’)." : null;
+    }
     case "priority":
       return d.priority === null ? "가장 중요한 것을 하나 골라 주세요." : null;
     default:

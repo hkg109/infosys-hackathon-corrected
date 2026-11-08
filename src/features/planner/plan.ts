@@ -1,3 +1,4 @@
+import type { ExchangePrefs } from "./exchangePrefs";
 import { militaryPlanFor, type MilitaryPrefs } from "./militaryPrefs";
 import type {
   CareerTrack,
@@ -51,6 +52,10 @@ export interface Draft {
   customPace: { early: number; year3: number; year4: number } | null;
   /** 군 복무 최소 질문의 답(선호 군·중요한 것·카투사). 있으면 군 전략 엔진으로 모집 분야를 정한다 */
   militaryPrefs?: MilitaryPrefs | null;
+  /** 교환학생 최소 질문의 답 */
+  exchangePrefs?: ExchangePrefs | null;
+  /** 고른 교환 전략(선택 당시 스냅샷). 인정학점·유효학기는 미정 그대로 보존한다 */
+  exchangeChoice?: ExchangeChoice | null;
   military: {
     /** done = 마침, planned = 다녀올 예정, undecided = 고민 중, none = 해당 없음 */
     status: "done" | "planned" | "undecided" | "none" | null;
@@ -81,6 +86,23 @@ export interface Draft {
   priority: PriorityKey | null;
   /** 테스트 프로필로 불러온 경우(가상 데이터) */
   demo: { profileId: string; label: string; genEd: Array<{ studyIndex: number; credits: 2 | 3 }> } | null;
+}
+
+/** 교환학생 결과에서 고른 전략. 다시 계산하지 않고 이 값을 로드맵·출력이 함께 쓴다 */
+export interface ExchangeChoice {
+  candidateId: string;
+  offeringId: string;
+  universityName: string;
+  country: string;
+  term: Term;
+  duration: "one_term" | "one_year";
+  status: string;
+  staleCycle: boolean;
+  backupNames: string[];
+  catalogVersion: string;
+  inputFingerprint: string;
+  recognition: { credits: null; countsAsTerm: null; status: "unknown" };
+  selectedAt: string;
 }
 
 /** 오늘 기준으로 처음 계획할 학기(사용자가 바꿀 수 있는 기본값). */
