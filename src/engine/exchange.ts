@@ -187,8 +187,8 @@ function evalHost(o: PartnerOffering, input: ExchangePlanningInput, catalog: Exc
       ruleId: `${o.id}-gpa`,
       owner: "host",
       label: "파견교 GPA",
-      result: noOwn ? "pass" : "unknown",
-      reason: noOwn ? "파견교 별도 GPA 기준 없이 한양대 선발 기준을 따라요(엑셀)." : `숫자 기준으로 읽을 수 없는 원문이에요: “${o.gpaRaw.slice(0, 80)}”`,
+      result: noOwn && !stale ? "pass" : "unknown",
+      reason: noOwn ? `파견교 별도 GPA 기준 없이 한양대 선발 기준을 따라요(엑셀)${stale ? " — 지난 회차 기준" : ""}.` : `숫자 기준으로 읽을 수 없는 원문이에요: “${o.gpaRaw.slice(0, 80)}”`,
       missingInputIds: [],
       truth: t(o.gpa),
       sourceRefs: o.gpa.sourceRefs,
@@ -268,6 +268,8 @@ function candidateFor(o: PartnerOffering, term: Term, input: ExchangePlanningInp
   const duration: "one_term" | "one_year" = input.duration === "one_year" ? "one_year" : "one_term";
   if (duration === "one_year" && !opts.includes("one_year")) return null; // 1년이 확인된 offering만
   const host = evalHost(o, input, catalog, stale);
+  // 위험 신호는 지난 회차 기준 비교도 함께 본다(판정은 확정하지 않되, 비교 가능한 차이는 순위·백업 구성에 쓴다)
+  const soft = stale ? evalHost(o, input, catalog, false) : host;
   const eligibility = [...common.evaluations, ...host];
   const access = o.courseAccess[0];
   const accessStatus: "limited" | "unknown" | "closed" = access?.access === "limited" ? "limited" : access?.access === "closed" ? "closed" : "unknown";
@@ -281,21 +283,22 @@ function candidateFor(o: PartnerOffering, term: Term, input: ExchangePlanningInp
   else if (mil.some((c) => c.kind === "hard")) status = "schedule_conflict";
   else if (stale || common.status === "conditional" || host.some((e) => e.result === "unknown") || mil.length > 0) status = "conditional";
 
-  const lang = host.find((e) => e.ruleId.endsWith("-lang"))!;
+  const lang = soft.find((e) => e.ruleId.endsWith("-lang"))!;
   const ieltsReq = o.language.find((l) => l.test === "IELTS_ACADEMIC")?.total ?? null;
   const riskKeys: ExchangeMatchCandidate["riskKeys"] = [];
   if (accessStatus !== "unknown") riskKeys.push("course_access");
-  if (lang.result === "fail" || (ieltsReq !== null && ieltsReq >= 6.5) || o.language.some((l) => l.subscoresRequired)) riskKeys.push("language");
+  if (lang.result !== "pass" || o.language.some((l) => l.subscoresRequired)) riskKeys.push("language");
   if (o.housing.onCampus === "unavailable") riskKeys.push("housing");
-  if (host.find((e) => e.ruleId.endsWith("-gpa"))?.result !== "pass") riskKeys.push("gpa");
+  if (soft.find((e) => e.ruleId.endsWith("-gpa"))?.result !== "pass") riskKeys.push("gpa");
   if (o.quota.value === 1) riskKeys.push("quota_small");
   if (mil.length > 0) riskKeys.push("schedule");
   if (stale) riskKeys.push("stale");
 
   const reasons: string[] = [];
   if (accessStatus === "unknown") reasons.push("엑셀 수강불가 목록에 컴퓨터·정보시스템 계열이 없어요(수강 가능은 과목 목록으로 따로 확인).");
-  if (host.find((e) => e.ruleId.endsWith("-gpa"))?.result === "pass") reasons.push("파견교 GPA 조건을 충족하거나 별도 기준이 없어요.");
-  if (ieltsReq !== null && ieltsReq <= 6) reasons.push(`IELTS 기준이 ${ieltsReq}로 비교적 낮아요(엑셀).`);
+  if (soft.find((e) => e.ruleId.endsWith("-gpa"))?.result === "pass") reasons.push(stale ? "지난 회차 기준으로 파견교 GPA 조건을 충족해요." : "파견교 GPA 조건을 충족하거나 별도 기준이 없어요.");
+  if (lang.result === "pass") reasons.push(stale ? "지난 회차 기준으로 내 어학 점수가 파견교 기준을 넘어요." : "내 어학 점수가 파견교 기준을 넘어요.");
+  else if (ieltsReq !== null && ieltsReq <= 6) reasons.push(`IELTS 기준이 ${ieltsReq}로 비교적 낮아요(엑셀).`);
   if (o.housing.onCampus === "available_not_guaranteed") reasons.push("교내 기숙사를 신청할 수 있어요(배정 보장 아님).");
   if (opts.includes("one_year")) reasons.push("1년 파견 옵션도 있어요.");
 

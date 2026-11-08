@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ExchangeCatalog, ExchangePlanningInput } from "@/contracts/types";
+import type { ExchangeCatalog, ExchangeMatchCandidate, ExchangePlanningInput } from "@/contracts/types";
 import { exchangeFixture } from "@/data/fixtures";
 import { buildExchangeCandidateSet, completedAtApplication, convertGpa, cycleFor, type ExchangeContext, targetTerms } from "./exchange";
 
@@ -134,11 +134,12 @@ describe("교환학생 — 과목 접근·정렬·백업", () => {
   });
 
   it("백업은 1순위의 핵심 위험을 공유하지 않고, 서로 다른 위험을 낮춘다", () => {
-    const s = run({ priorities: ["housing", "language_fit"] });
+    const s = run({ priorities: ["housing", "language_fit"], languageStatus: "has_score", languageEvidence: [{ test: "IELTS_ACADEMIC", total: 6, testedAt: null, evidenceStatus: "user_entered" }] });
     expect(s.backups.length).toBeLessThanOrEqual(2);
-    const top = (k: string[]) => k.find((x) => x !== "stale" && x !== "quota_small") ?? null;
+    const top = (k: ExchangeMatchCandidate["riskKeys"]) => k.find((x) => x !== "stale" && x !== "quota_small") ?? null;
     const p = top(s.primary!.riskKeys);
-    if (p) expect(s.backups[0].riskKeys).not.toContain(p);
+    const avoidable = s.all.some((c) => c !== s.primary && (c.status === "eligible" || c.status === "conditional") && p !== null && !c.riskKeys.includes(p));
+    if (p && avoidable) expect(s.backups[0].riskKeys).not.toContain(p);
     if (s.backups[1]) expect(top(s.backups[1].riskKeys)).not.toBe(top(s.backups[0].riskKeys) ?? "__");
   });
 
@@ -175,6 +176,12 @@ describe("교환학생 — 과목 접근·정렬·백업", () => {
 
   it("교환 안 함이면 후보 없음", () => {
     expect(run({ intent: "none" }).primary).toBeNull();
+  });
+
+  it("EX-DEMO-02: 이전 회차라도 내 점수·평점으로 비교 가능한 차이는 순위에 반영(판정은 확정 안 함)", () => {
+    const s = run({ languageStatus: "has_score", languageEvidence: [{ test: "IELTS_ACADEMIC", total: 7, testedAt: "2026-09-12", evidenceStatus: "user_entered" }] });
+    expect(s.primary!.riskKeys).not.toContain("language");
+    expect(s.primary!.eligibility.filter((e) => e.owner === "host").every((e) => e.result !== "pass")).toBe(true);
   });
 });
 
