@@ -189,7 +189,7 @@ function Notebook({ children }: { children: ReactNode }) {
             </div>
           </header>
           {children}
-          <footer className="mt-14 border-t border-dashed border-line pt-3 text-[11px] text-muted print:mt-6">
+          <footer className="mt-14 border-t border-dashed border-line pt-3 text-[11px] text-muted print:hidden">
             계획·추정 결과이며 졸업 확정 판정이 아닙니다. 과목 정보는 학과 교육과정표(S1), 진로·트랙 분류와 추천은 서비스가 정한 것입니다.
           </footer>
         </div>
