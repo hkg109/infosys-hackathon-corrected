@@ -105,6 +105,14 @@ function Output({ plan, dataset, initialChat }: { plan: PlanState; dataset: Data
     prev && setPlan({ ...plan, input: prev.input, previous: null, lastChanges: [], confirmedAt: null, genEd: plan.previousGenEd ?? plan.genEd, previousGenEd: null });
 
   const warnings = dedupe(result.warnings.filter((w) => w.code !== "UNPLACED_COURSE").map((w) => w.message));
+  const printPlan = async () => {
+    await Promise.allSettled([
+      document.fonts.load("700 18px 'Gowun Batang'"),
+      document.fonts.load("18px 'Nanum Pen Script'"),
+    ]);
+    await document.fonts.ready;
+    window.print();
+  };
 
   return (
     <div>
@@ -288,7 +296,7 @@ function Output({ plan, dataset, initialChat }: { plan: PlanState; dataset: Data
               <Button kind="ghost" onClick={reopen}>
                 다시 고치기
               </Button>
-              <Button kind="ink" onClick={() => window.print()}>
+              <Button kind="ink" onClick={() => void printPlan()}>
                 <Printer size={16} aria-hidden /> 인쇄 · PDF 저장
               </Button>
             </div>

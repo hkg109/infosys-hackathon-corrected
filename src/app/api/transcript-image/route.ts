@@ -61,6 +61,7 @@ const PROMPT = `이 이미지는 한국 대학교(한양대학교) 포털의 성
 - category: 이수구분(예: 교양필수, 전공핵심). 없으면 null.
 - code: 학수번호(예: CUL0203, I-D3018). 글자가 불확실하면 보이는 대로 쓰고 추측해서 고치지 마.
 - name: 교과목명. credits: 학점(숫자, 예: 2.00 → 2). grade: 등급(A+, B0, F, P, W 등). 점수·평점(96.7, 4.50)은 credits·grade에 넣지 마.
+- name의 로마숫자(Ⅰ, Ⅱ, I, II)는 과목명에 그대로 남겨. grade는 반드시 성적 열에서 읽은 값만 넣고 과목명 속 글자를 성적으로 추측하지 마.
 - summary: 화면에 숫자로 분명히 보일 때만 그 값, 아니면 null. 과목 학점을 직접 더하지 마.
   - earnedCredits: 총 취득(이수)학점. majorCredits: 전공 취득(이수)학점. targetCredits: 졸업학점 기준(요건).
   - majorRequiredCredits: 졸업요건의 "전공학점" 기준값. majorLowerRequiredCredits: "전공 100~300단위" 기준값. majorUpperRequiredCredits: "전공 400단위" 기준값. majorUpperEarnedCredits: 전공 400단위 취득학점.

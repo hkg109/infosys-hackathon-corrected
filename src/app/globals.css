@@ -265,10 +265,10 @@ input[type="checkbox"]:focus-visible {
 
   .print-doc {
     display: block;
-    color: #1a1f2b;
+    color: var(--ink);
     font-family: var(--font-sans);
-    font-size: 9pt;
-    line-height: 1.4;
+    font-size: 9.25pt;
+    line-height: 1.42;
     word-break: keep-all;
     overflow-wrap: anywhere;
   }
@@ -281,18 +281,22 @@ input[type="checkbox"]:focus-visible {
     opacity: 1 !important;
   }
   /* 색 칸만 배경을 살린다(전체 exact 금지) */
-  .print-doc .pd-pill,
   .print-doc .pd-no,
-  .print-doc th,
-  .print-doc .pd-off td,
-  .print-doc .pd-final td,
+  .print-doc .pd-stamp,
+  .print-doc .pd-break-stamp,
+  .print-doc .pd-course-dot,
+  .print-doc .pd-legend-dot,
+  .print-doc .pd-overview,
+  .print-doc .pd-sem-card-break,
+  .print-doc .pd-sem-card-final,
+  .print-doc .pd-grid thead th,
+  .print-doc .pd-grid tfoot th,
   .print-doc .pd-final-row td,
   .print-doc .pd-big,
   .print-doc .pd-box-sec,
   .print-doc .pd-ok,
   .print-doc .pd-bad,
   .print-doc .pd-unknown,
-  .print-doc .pd-flag,
   .print-doc .pd-muted td {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -302,101 +306,129 @@ input[type="checkbox"]:focus-visible {
     font-weight: 700;
   }
 
-  /* 머리 */
+  /* 화면의 종이 다이어리와 같은 명조 제목·파란 펜·빨간 도장. */
+  .print-doc .pd-intro {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+    margin-bottom: 12pt;
+  }
+  .print-doc .pd-eyebrow {
+    margin: 0 0 2pt;
+    color: var(--pen);
+    font-family: var(--font-hand);
+    font-size: 15pt;
+    line-height: 1.1;
+  }
   .print-doc .pd-top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 12pt;
-    padding-bottom: 8pt;
-    margin-bottom: 10pt;
-    border-bottom: 2pt solid #2d4a85;
+    padding-bottom: 7pt;
+    border-bottom: 1.5pt solid var(--ink);
     break-inside: avoid;
   }
   .print-doc .pd-title {
     flex: 1;
     min-width: 0;
   }
-  .print-doc h1 {
-    font-size: 19pt;
-    font-weight: 800;
-    color: #1d3566;
-    line-height: 1.2;
-    margin: 0 0 5pt;
-  }
-  .print-doc .pd-pill {
-    display: inline-block;
-    background: #e3ecfa;
-    color: #1d3566;
-    border: 0.75pt solid #9db6e0;
-    border-radius: 10pt;
-    padding: 1.5pt 8pt;
+  .print-doc .pd-kicker {
     font-size: 8.5pt;
-    font-weight: 600;
-    margin: 0 0 5pt;
-  }
-  .print-doc .pd-track {
-    font-size: 10.5pt;
     font-weight: 700;
+    color: var(--ink-soft);
     margin: 0 0 2pt;
   }
+  .print-doc h1 {
+    font-family: var(--font-serif);
+    font-size: 19pt;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin: 0 0 3pt;
+  }
   .print-doc .pd-meta {
-    font-size: 7.5pt;
-    color: #5a6273;
+    font-size: 8pt;
+    color: var(--ink-soft);
     margin: 0;
   }
-  .print-doc .pd-yearbox {
-    width: auto;
-    min-width: 46mm;
-    font-size: 8.5pt;
-    border: 1pt solid #2d4a85;
+  .print-doc .pd-disclaimer {
+    margin: 2pt 0 0;
+    font-size: 7.8pt;
+    color: var(--muted);
   }
-  .print-doc .pd-yearbox thead th {
-    background: #2d4a85;
-    color: #ffffff;
-    text-align: center;
-    padding: 2.5pt 6pt;
-    font-size: 8.5pt;
-  }
-  .print-doc .pd-yearbox tbody th {
-    background: #e3ecfa;
-    color: #1d3566;
-    text-align: left;
-    font-weight: 600;
-    padding: 1.5pt 6pt;
-    border-top: 0.5pt solid #c6d4ec;
+  .print-doc .pd-stamp {
+    display: inline-block;
+    flex: none;
+    padding: 2pt 7pt;
+    border: 1.6pt solid var(--red);
+    border-radius: 5pt;
+    color: var(--red);
+    font-family: var(--font-serif);
+    font-size: 12pt;
+    font-weight: 700;
+    letter-spacing: 0.12em;
     white-space: nowrap;
   }
-  .print-doc .pd-yearbox td {
-    padding: 1.5pt 6pt;
-    border-top: 0.5pt solid #c6d4ec;
-    text-align: right;
-    font-weight: 600;
-    white-space: nowrap;
+  .print-doc .pd-overview {
+    display: flex;
+    border-top: 0.5pt solid var(--ink);
+    border-bottom: 1pt solid var(--ink);
+    margin: 7pt 0 6pt;
+    background: var(--paper);
   }
+  .print-doc .pd-overview > div {
+    width: 25%;
+    min-width: 0;
+    padding: 5pt 7pt;
+    border-right: 0.5pt solid var(--line);
+  }
+  .print-doc .pd-overview > div:last-child { border-right: 0; }
+  .print-doc .pd-overview dt { color: var(--muted); font-size: 7.5pt; }
+  .print-doc .pd-overview dd {
+    margin: 2pt 0 0;
+    color: var(--ink);
+    font-family: var(--font-serif);
+    font-size: 11pt;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .print-doc .pd-overview .pd-emphasis { color: var(--red); font-size: 12pt; }
+  .print-doc .pd-milestones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3pt 10pt;
+    padding: 1pt 0;
+    font-size: 8pt;
+    color: var(--ink-soft);
+  }
+  .print-doc .pd-milestones b { color: var(--pen); margin-right: 2pt; }
+  .print-doc .pd-milestones span { white-space: nowrap; }
 
   /* 구역 제목 */
   .print-doc .pd-sec {
-    margin-bottom: 10pt;
+    margin-bottom: 8pt;
   }
   .print-doc h2 {
     display: flex;
     align-items: center;
     gap: 5pt;
-    font-size: 11.5pt;
-    font-weight: 800;
-    color: #1d3566;
-    margin: 0 0 5pt;
-    break-after: avoid;
+    font-family: var(--font-serif);
+    font-size: 13pt;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 6pt;
+    break-after: avoid-page;
+    page-break-after: avoid;
   }
   .print-doc .pd-no {
     display: inline-block;
-    width: 13pt;
-    height: 13pt;
-    line-height: 13pt;
-    border-radius: 7pt;
-    background: #2d4a85;
-    color: #ffffff;
+    width: 15pt;
+    height: 15pt;
+    line-height: 14pt;
+    border-radius: 50%;
+    border: 1pt solid var(--pen);
+    background: var(--pen);
+    color: var(--paper);
     text-align: center;
     font-size: 8pt;
     font-weight: 700;
@@ -408,6 +440,129 @@ input[type="checkbox"]:focus-visible {
     line-height: 11pt;
     font-size: 7pt;
     margin-right: 3pt;
+  }
+
+  /* 로드맵은 연도 한 줄에 학기 카드 둘. Grid를 피하고 한 연도를 페이지 안에 묶는다. */
+  .print-doc .pd-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2pt 8pt;
+    margin: 0 0 7pt;
+    color: var(--ink-soft);
+    font-size: 8pt;
+  }
+  .print-doc .pd-legend > span { display: inline-flex; align-items: center; gap: 3pt; }
+  .print-doc .pd-legend-dot,
+  .print-doc .pd-course-dot {
+    display: inline-block;
+    flex: none;
+    width: 5pt;
+    height: 5pt;
+    border-radius: 1pt;
+    background-color: var(--g-common);
+  }
+  .print-doc .pd-legend-outline,
+  .print-doc .pd-course-dot-outline,
+  .print-doc .pd-course-dot-general {
+    border: 0.8pt dashed var(--pen);
+    background-color: var(--paper);
+  }
+  .print-doc .pd-legend-break { border: 0.6pt solid var(--line); background: var(--paper-2); }
+  .print-doc .pd-year-row {
+    display: block;
+    margin-bottom: 7pt;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+  .print-doc .pd-year-label {
+    display: inline-block;
+    width: 11%;
+    vertical-align: top;
+    margin: 4pt 0 0;
+    color: var(--ink-soft);
+    font-family: var(--font-serif);
+    font-size: 14pt;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .print-doc .pd-year-cards {
+    display: inline-block;
+    width: 89%;
+    vertical-align: top;
+    font-size: 0;
+  }
+  .print-doc .pd-sem-card,
+  .print-doc .pd-sem-spacer {
+    display: inline-block;
+    vertical-align: top;
+    width: 49%;
+    margin-right: 2%;
+    font-size: 8.5pt;
+  }
+  .print-doc .pd-sem-card:nth-child(2),
+  .print-doc .pd-sem-spacer:nth-child(2) { margin-right: 0; }
+  .print-doc .pd-sem-card {
+    overflow: visible;
+    border: 0.75pt solid var(--line);
+    border-radius: 5pt;
+    background: var(--paper);
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+  .print-doc .pd-sem-card-final { border: 1pt solid var(--red); }
+  .print-doc .pd-sem-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4pt;
+    padding: 4pt 6pt 3pt;
+    border-bottom: 1pt solid var(--ink);
+  }
+  .print-doc .pd-sem-head b { font-family: var(--font-serif); font-size: 10.5pt; }
+  .print-doc .pd-sem-head small { font-size: 7.5pt; color: var(--muted); }
+  .print-doc .pd-sem-ordinal { color: var(--ink-soft); font-size: 7.5pt; text-align: right; }
+  .print-doc .pd-course-list { padding: 0 6pt; }
+  .print-doc .pd-course-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 3pt;
+    padding: 3pt 0;
+    border-bottom: 0.5pt solid var(--rule);
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+  .print-doc .pd-course-line .pd-course-dot { margin-top: 3pt; }
+  .print-doc .pd-course-name { flex: 1; min-width: 0; line-height: 1.25; overflow-wrap: anywhere; }
+  .print-doc .pd-course-name em { font-size: 7pt; font-style: normal; color: var(--red); white-space: nowrap; }
+  .print-doc .pd-course-category { flex: none; max-width: 23%; font-size: 7pt; color: var(--ink-soft); text-align: right; }
+  .print-doc .pd-course-credit { flex: none; width: 12pt; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .print-doc .pd-course-line-general .pd-course-name { color: var(--pen); font-weight: 700; }
+  .print-doc .pd-empty { margin: 5pt 0; color: var(--muted); }
+  .print-doc .pd-sem-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 1pt 3pt;
+    padding: 3pt 6pt 4pt;
+    color: var(--ink-soft);
+    font-size: 7.5pt;
+  }
+  .print-doc .pd-sem-total { margin-left: auto; text-align: right; }
+  .print-doc .pd-sem-total b { color: var(--ink); font-family: var(--font-serif); font-size: 9.5pt; }
+  .print-doc .pd-finish { color: var(--red); font-family: var(--font-hand); font-size: 12pt; }
+  .print-doc .pd-sem-card-break { background: var(--paper-2); }
+  .print-doc .pd-break-body { min-height: 27pt; padding: 5pt; text-align: center; }
+  .print-doc .pd-break-stamp {
+    display: inline-block;
+    padding: 2pt 8pt;
+    border: 1.2pt solid var(--ink-soft);
+    border-radius: 5pt;
+    color: var(--ink-soft);
+    background: var(--paper-2);
+    font-family: var(--font-serif);
+    font-size: 10.5pt;
+    font-weight: 700;
   }
 
   /* 표 공통 */
@@ -422,30 +577,32 @@ input[type="checkbox"]:focus-visible {
     display: table-row-group;
   }
   .print-doc tr {
-    break-inside: avoid;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
   }
   .print-doc .pd-grid {
-    border: 1pt solid #8fa6cf;
+    border: 0.75pt solid var(--line);
     font-size: 8.5pt;
   }
   .print-doc .pd-grid th,
   .print-doc .pd-grid td {
-    border: 0.6pt solid #b9c7e2;
+    border: 0.5pt solid var(--line);
     padding: 2.5pt 4pt;
     vertical-align: middle;
     text-align: left;
   }
   .print-doc .pd-grid thead th {
-    background: #2d4a85;
-    color: #ffffff;
+    background: var(--paper-2);
+    color: var(--ink-soft);
     font-weight: 700;
     text-align: center;
     font-size: 8.5pt;
   }
   .print-doc .pd-grid tfoot th {
-    background: #e3ecfa;
-    color: #1d3566;
-    font-weight: 800;
+    background: var(--paper-2);
+    color: var(--ink);
+    font-weight: 700;
+    border-top: 1.2pt solid var(--ink);
   }
   .print-doc .pd-num {
     text-align: right !important;
@@ -456,105 +613,54 @@ input[type="checkbox"]:focus-visible {
     text-align: center !important;
   }
 
-  /* ① 학기별 수강 계획: 학기 묶음(tbody)은 쪼개지 않는다 */
-  .print-doc .pd-term {
-    break-inside: avoid;
-  }
-  .print-doc .pd-plan tbody.pd-term {
-    border-top: 1.2pt solid #8fa6cf;
-  }
-  .print-doc .pd-sem {
-    font-weight: 700;
-    color: #1d3566;
-    text-align: center !important;
-    white-space: nowrap;
-  }
-  .print-doc .pd-kind {
-    text-align: center !important;
-    font-weight: 600;
-    color: #2d4a85;
-    white-space: nowrap;
-  }
-  .print-doc .pd-total {
-    font-size: 10pt;
-    font-weight: 800;
-    text-align: center !important;
-    color: #1d3566;
-  }
-  .print-doc .pd-off td {
-    background: #f0f1f4;
-    color: #5a6273;
-  }
-  .print-doc .pd-offlabel {
-    font-weight: 600;
-  }
-  .print-doc .pd-final td {
-    background: #eef7ee;
-  }
   .print-doc .pd-final-row td {
-    background: #eef7ee;
+    background: var(--sage);
     font-weight: 700;
-  }
-  .print-doc .pd-flag {
-    display: block;
-    margin-top: 1.5pt;
-    font-size: 7pt;
-    font-weight: 700;
-    color: #ffffff;
-    background: #2e7d32;
-    border-radius: 6pt;
-    padding: 0.5pt 3pt;
   }
   .print-doc .pd-muted td {
-    background: #f6f7f9;
-    color: #5a6273;
+    background: var(--paper-2);
+    color: var(--ink-soft);
   }
   .print-doc .pd-foot-note {
-    font-size: 7.5pt;
-    color: #5a6273;
+    font-size: 8pt;
+    color: var(--ink-soft);
     margin: 3pt 0 0;
   }
 
   /* ②·③ 나란히(인쇄 엔진 호환: inline-block) */
   .print-doc .pd-two {
     display: block;
-    font-size: 0;
-    break-inside: avoid;
+    break-inside: auto;
   }
   .print-doc .pd-half {
-    display: inline-block;
-    vertical-align: top;
-    width: 52%;
-    font-size: 9pt;
-  }
-  .print-doc .pd-half + .pd-half {
-    width: 45%;
-    margin-left: 3%;
+    display: block;
+    width: 100%;
+    font-size: 9.25pt;
   }
   .print-doc .pd-sum {
-    font-size: 8pt;
+    font-size: 8.5pt;
   }
   .print-doc .pd-sum thead th {
-    font-size: 7.5pt;
-    padding: 2pt 2pt;
+    font-size: 8.5pt;
+    padding: 2.5pt 3pt;
   }
   .print-doc .pd-big {
     display: flex;
     align-items: center;
     gap: 8pt;
-    border: 1pt solid #8fa6cf;
+    border: 0.75pt solid var(--line);
     border-radius: 4pt;
     padding: 5pt 8pt;
     margin-bottom: 5pt;
-    background: #f4f8fe;
+    background: var(--paper);
   }
   .print-doc .pd-big-ok {
-    border-color: #2e7d32;
-    background: #eef7ee;
+    border-color: var(--sage-ink);
+    background: var(--sage);
   }
   .print-doc .pd-big-bad {
-    border-color: #c62828;
-    background: #fdeeee;
+    border-color: var(--red);
+    background: var(--red-soft);
   }
   .print-doc .pd-mark {
     display: inline-block;
@@ -565,51 +671,65 @@ input[type="checkbox"]:focus-visible {
     text-align: center;
     font-size: 12pt;
     font-weight: 800;
-    color: #ffffff;
-    background: #5a6273;
+    color: var(--ink-soft);
+    background: var(--paper-2);
+    border: 1pt solid var(--ink-soft);
     flex: none;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
   .print-doc .pd-big-ok .pd-mark {
-    background: #2e7d32;
+    color: var(--sage-ink);
+    background: var(--sage);
+    border-color: var(--sage-ink);
   }
   .print-doc .pd-big-bad .pd-mark {
-    background: #c62828;
+    color: var(--red);
+    background: var(--red-soft);
+    border-color: var(--red);
   }
   .print-doc .pd-bignum {
     font-size: 16pt;
-    font-weight: 800;
-    color: #1d3566;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    color: var(--ink);
   }
   .print-doc .pd-bigsub {
     display: block;
-    font-size: 8pt;
-    color: #5a6273;
+    font-size: 8.2pt;
+    color: var(--ink-soft);
   }
   .print-doc .pd-ok {
-    color: #1b5e20;
-    background: #e3f2e4;
+    color: var(--sage-ink);
+    background: var(--sage);
     font-weight: 700;
   }
   .print-doc .pd-bad {
-    color: #b71c1c;
-    background: #fbe4e4;
+    color: var(--red);
+    background: var(--red-soft);
     font-weight: 700;
   }
   .print-doc .pd-unknown {
-    color: #5a6273;
-    background: #f0f1f4;
+    color: var(--ink-soft);
+    background: var(--paper-2);
     font-weight: 600;
   }
 
   /* ④ 최종 검토 · 3줄 요약 */
   .print-doc .pd-box-sec {
-    border: 1pt solid #8fa6cf;
-    background: #f4f8fe;
+    border: 0.75pt solid var(--line);
+    background: var(--paper-2);
     border-radius: 4pt;
     padding: 6pt 9pt;
-    break-inside: avoid;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+  .print-doc .pd-three h2 {
+    display: inline-flex;
+    padding: 0 3pt;
+    background: var(--marker);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   .print-doc .pd-bullets {
     margin: 0;
@@ -634,7 +754,7 @@ input[type="checkbox"]:focus-visible {
   }
   .print-doc .pd-checks li {
     padding: 2pt 0;
-    border-bottom: 0.5pt solid #e0e4ec;
+    border-bottom: 0.5pt solid var(--rule);
     font-size: 8.5pt;
     break-inside: avoid;
   }
@@ -649,9 +769,9 @@ input[type="checkbox"]:focus-visible {
   .print-doc .pd-foot {
     margin-top: 8pt;
     padding-top: 4pt;
-    border-top: 0.75pt solid #cfd6e4;
-    font-size: 7.5pt;
-    color: #5a6273;
+    border-top: 0.75pt solid var(--line);
+    font-size: 8pt;
+    color: var(--ink-soft);
   }
 }
 
@@ -667,7 +787,7 @@ input[type="checkbox"]:focus-visible {
   }
 }
 .step-in {
-  animation: step-in 200ms ease-out both;
+  animation: step-in 200ms ease-out backwards;
 }
 @media (prefers-reduced-motion: reduce) {
   .step-in,
