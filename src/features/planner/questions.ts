@@ -1,4 +1,5 @@
 import { INPUT_STEPS, type StepId } from "./inputSteps";
+import { katusaOn, prefsOf } from "./militaryPrefs";
 import { type Draft, MIN_ANSWERS, needsMilitary } from "./plan";
 import { answeredCount } from "./recommend";
 
@@ -12,12 +13,12 @@ export function visibleSteps(d: Draft): StepId[] {
         return d.progressMode === "manual";
       case "quiz":
         return d.career === "unsure";
-      case "military-track":
-      case "military-timing":
+      case "military-branch":
+      case "military-goal":
       case "katusa":
         return needsMilitary(d);
-      case "katusa-status":
-        return needsMilitary(d) && d.katusa.priority === true;
+      case "katusa-evidence":
+        return needsMilitary(d) && katusaOn(prefsOf(d));
       default:
         return true;
     }
@@ -63,14 +64,13 @@ export function stepProblem(step: StepId, d: Draft): string | null {
       return null;
     case "military":
       return d.military.status === null ? "군 복무 상황을 골라 주세요." : null;
-    case "military-track":
-      return d.military.months !== null && (!Number.isInteger(d.military.months) || d.military.months < 1)
-        ? "예상 복무기간은 1 이상의 개월 수로 적어 주세요."
-        : null;
-    case "military-timing":
-      return d.military.timing === "fixed" && !d.military.startDate ? "입영일을 입력해 주세요." : null;
+    case "military-branch":
+      return prefsOf(d).branch === null ? "선호하는 군을 고르거나 ‘상관없음’을 눌러 주세요." : null;
+    case "military-goal":
+      if (prefsOf(d).goal === null) return "가장 중요한 것을 하나 골라 주세요. 모르면 ‘아직 모름’도 괜찮아요.";
+      return d.military.timing === "fixed" && !d.military.startDate ? "이미 정해진 입영일을 적거나 ‘정해진 입영일’을 꺼 주세요." : null;
     case "katusa":
-      return d.katusa.priority === null ? "카투사 우선 여부를 골라 주세요." : null;
+      return prefsOf(d).katusa === null ? "카투사 생각을 골라 주세요." : null;
     case "leave":
       if (d.leave.mode === null) return "휴학 계획을 골라 주세요.";
       return d.leave.mode === "pick" && d.leave.ordinal === null ? "휴학할 시점을 골라 주세요." : null;
@@ -97,8 +97,8 @@ export function stepAnswered(step: StepId, d: Draft): boolean {
       return d.targetCredits !== null;
     case "review":
       return false;
-    case "military-track":
-      return d.military.trackIds.length > 0;
+    case "katusa-evidence":
+      return prefsOf(d).english !== null;
     default:
       return stepProblem(step, d) === null;
   }

@@ -1,3 +1,4 @@
+import { militaryPlanFor, type MilitaryPrefs } from "./militaryPrefs";
 import type {
   CareerTrack,
   Dataset,
@@ -48,6 +49,8 @@ export interface Draft {
   paceStyle: PaceStyle | "compare" | null;
   /** 직접 설정: 1·2학년 / 3학년 / 4학년 이후 학기당 학점 */
   customPace: { early: number; year3: number; year4: number } | null;
+  /** 군 복무 최소 질문의 답(선호 군·중요한 것·카투사). 있으면 군 전략 엔진으로 모집 분야를 정한다 */
+  militaryPrefs?: MilitaryPrefs | null;
   military: {
     /** done = 마침, planned = 다녀올 예정, undecided = 고민 중, none = 해당 없음 */
     status: "done" | "planned" | "undecided" | "none" | null;
@@ -205,14 +208,7 @@ export function draftToInputV2(draft: Draft, dataset: Dataset, careers: CareerTr
     priorities: [priority, ...DEFAULT_PRIORITIES.filter((p) => p !== priority)],
     paceStyles,
     customPaceBands: draft.paceStyle === "custom" ? paceBandsOf(draft) : null,
-    militaryPlan: withMil
-      ? {
-          trackIds: m.trackIds,
-          katusaPriority: draft.katusa.priority === true,
-          katusaStatus: draft.katusa.status,
-          certificateIds: m.certificateIds,
-        }
-      : null,
+    militaryPlan: withMil ? militaryPlanFor(draft, dataset as Parameters<typeof militaryPlanFor>[1]) : null,
   };
   // 휴학: 마친 학기 수가 ordinal이 되는 첫 학기 한 학기(군 복무 구간은 피함)
   if (draft.leave.mode === "pick" && draft.leave.ordinal !== null) {
@@ -243,7 +239,7 @@ export function draftProblem(draft: Draft, dataset: Dataset | null, today: ISODa
   if (draft.career === "unsure" && answeredCount(draft.answers) < MIN_ANSWERS)
     return { step: "quiz", message: `진로 추천 질문에 ${MIN_ANSWERS}개 이상 답해 주세요.` };
   if (draft.military.timing === "fixed" && needsMilitary(draft) && !draft.military.startDate)
-    return { step: "military-timing", message: "입영일을 입력해 주세요." };
+    return { step: "military-goal", message: "이미 정해진 입영일을 입력해 주세요." };
   if (draft.exchange.mode === "pick" && draft.exchange.ordinal === null) return { step: "exchange", message: "가고 싶은 학기를 골라 주세요." };
   if (draft.leave.mode === "pick" && draft.leave.ordinal === null) return { step: "leave", message: "휴학할 시점을 골라 주세요." };
   if (draft.paceStyle === "custom" && !draft.customPace) return { step: "late", message: "학년별 학점을 정해 주세요." };
@@ -265,7 +261,7 @@ function fieldStep(field: string): string {
   if (field === "progress.earnedMajorCredits") return "major";
   if (field.startsWith("progress.earned")) return "credits";
   if (field === "target") return "target";
-  if (field.startsWith("periods")) return "military-timing";
+  if (field.startsWith("periods")) return "military-goal";
   if (field === "customPaceBands") return "late";
   return "review";
 }
