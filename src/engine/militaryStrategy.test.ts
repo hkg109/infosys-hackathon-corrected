@@ -164,3 +164,14 @@ describe("buildMilitaryStrategies", () => {
     expect(Object.keys(b.metrics).sort()).toEqual(["goalMet", "hasFallback", "itMatch", "uncertainty", "worstServiceMonths"]);
   });
 });
+
+describe("위험 문장", () => {
+  it("'확인 필요 N건' 대신 무엇이 위험한지 문장으로", () => {
+    const r = buildMilitaryStrategies({ ...base, katusaPreference: "first_priority", itRolePriority: "high" }, militaryFixture, ctx);
+    const seq = r.strategies.find((s) => s.scenario === "katusa_sequential")!;
+    expect(seq.risks.join(" ")).toContain("카투사는 추첨이라 떨어질 수 있어서");
+    expect(seq.risks.join(" ")).toContain("늦어질 수 있어요");
+    const gen = buildMilitaryStrategies({ ...base, goal: "fast_stable" }, militaryFixture, ctx).strategies[0];
+    expect(gen.risks.join(" ")).toContain("선착순");
+  });
+});

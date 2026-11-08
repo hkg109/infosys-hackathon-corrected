@@ -329,7 +329,7 @@ export function buildMilitaryStrategies(input: MilitaryPlanningInput, catalog: M
     );
   }
 
-  function finish(c: Omit<MilitaryStrategyCandidate, "status" | "metrics" | "reasons" | "warnings">): MilitaryStrategyCandidate {
+  function finish(c: Omit<MilitaryStrategyCandidate, "status" | "metrics" | "reasons" | "warnings" | "risks">): MilitaryStrategyCandidate {
     const ws = [...warnings];
     let status: MilitaryStrategyCandidate["status"] = "computable";
     const primary = c.applications.find((a) => a.role === "primary");
@@ -371,7 +371,22 @@ export function buildMilitaryStrategies(input: MilitaryPlanningInput, catalog: M
       itMatch && itWanted ? "IT 관련 모집 분야를 포함해요." : null,
       worst !== null ? `분기별 복무기간이 모두 공식 확인돼 복학 시점을 계산할 수 있어요(최대 ${worst}개월).` : "일부 분기의 복무기간이 원문에서 확인되지 않아 복학 시점은 조건부예요.",
     ].filter((x): x is string => x !== null);
-    return { ...c, status, metrics: { goalMet, hasFallback, itMatch, uncertainty, worstServiceMonths: worst }, reasons, warnings: ws };
+    const has = (id: string) => programs.has(id);
+    const elig = (id: string) => c.eligibility.find((e) => e.programId === id);
+    const risks = [
+      c.scenario === "katusa_parallel" && c.concurrency?.relation === "forbidden" ? "이 회차는 카투사와 다른 모집병을 함께 낼 수 없어서 이 방법은 쓸 수 없어요." : null,
+      c.scenario === "katusa_parallel" && c.concurrency?.relation === "unknown" ? "카투사와 함께 지원해도 되는지 아직 공고가 없어 몰라요. 막히면 순차지원으로 바꿔야 해요." : null,
+      has(PROGRAM.katusa) ? "카투사는 추첨이라 떨어질 수 있어서, 결과가 나오기 전까지 입대 시기가 불안정해요." : null,
+      has(PROGRAM.katusa) && elig(PROGRAM.katusa)?.status === "unknown" && input.katusaEvidence?.hasLanguageScore !== "yes" ? "카투사 기준을 넘는 영어 성적을 접수 전까지 준비해야 해요." : null,
+      elig(PROGRAM.katusa)?.status === "ineligible" ? "카투사는 이미 한 번 지원해서 다시 지원할 수 없어요." : null,
+      c.scenario === "katusa_sequential" ? "카투사 결과를 본 뒤에 다른 곳에 지원하니까 입대가 몇 달 늦어질 수 있어요." : null,
+      has(PROGRAM.armyTech) ? "육군 기술행정병은 자격증·전공 점수 순으로 뽑아서 떨어질 수 있어요." : null,
+      has(PROGRAM.airTech) && elig(PROGRAM.airTech)?.status === "unknown" ? "공군 IT 특기는 관련학과 1년 이수 뒤에 지원할 수 있어서 지금은 바로 못 내요." : null,
+      has(PROGRAM.airTech) ? "공군은 21개월로 육군(18개월)보다 3개월 길어요." : null,
+      c.branches.some((b) => b.selectedProgramId && b.serviceMonths === null) ? "일부 경로는 복무기간이 공식 자료에 없어서 복학 학기를 미리 정할 수 없어요." : null,
+      primary?.programId === PROGRAM.general ? "입영일자 선택은 선착순이라 원하는 달이 먼저 마감될 수 있어요." : null,
+    ].filter((x): x is string => x !== null);
+    return { ...c, status, metrics: { goalMet, hasFallback, itMatch, uncertainty, worstServiceMonths: worst }, reasons, risks, warnings: ws };
   }
 
   const itPref = input.itRolePriority === "high" || input.itRolePriority === "medium";
