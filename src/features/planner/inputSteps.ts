@@ -7,6 +7,7 @@ export const INPUT_STEPS = [
   { id: "admission", title: "입학연도", q: "입학연도는 언제인가요?" },
   { id: "completed", title: "마친 학기", q: "현재 몇 학기까지 마쳤나요?" },
   { id: "start", title: "시작 학기", q: "다음 계획은 몇 년도 몇 학기부터 시작할까요?" },
+  { id: "transcript", title: "이수 현황", q: "성적표를 가져와 이수 현황을 한 번에 채울까요?" },
   { id: "credits", title: "총 이수학점", q: "지금까지 총 몇 학점을 이수했나요?" },
   { id: "major", title: "전공학점", q: "그중 전공학점은 몇 학점인가요?" },
   { id: "courses", title: "이수 과목", q: "이수 과목을 붙여넣거나 직접 선택할까요?" },

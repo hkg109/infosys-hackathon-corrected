@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 브라우저 OCR 자산(scripts/build/copy-ocr-assets.mjs가 생성)
+/public/ocr/

@@ -10,12 +10,12 @@ import { formatTerm, KATUSA_STATUS_LABEL, LATE_LIGHT_CONFIG, paceBandsFor } from
 import { usePlanner } from "../PlannerApp";
 import { parseGraduationCheck, type GraduationCheckParse } from "../graduationCheck";
 import { INPUT_STEPS, type StepId, stepPath } from "../inputSteps";
-import { findCoursesInText } from "../parseTranscript";
 import { blankDraft, type Draft, draftProblem, needsMilitary } from "../plan";
 import { completedTermsLabel, curriculumCovers } from "../profile";
 import { stepAnswered, stepProblem, visibleSteps } from "../questions";
 import { QUIZ } from "../recommend";
 import { SAMPLE_GRADUATION_CHECK } from "../testProfiles";
+import { TranscriptImport } from "./TranscriptImport";
 import { Button, Choice, Tag } from "./ui";
 
 /** 01 아 — 한 화면에 질문 하나. 입력은 바로 이 브라우저에 저장된다. */
@@ -193,6 +193,8 @@ function StepBody({ step, ctx }: { step: StepId; ctx: StepCtx }) {
       return <CompletedStep ctx={ctx} />;
     case "start":
       return <StartStep ctx={ctx} />;
+    case "transcript":
+      return <TranscriptStep ctx={ctx} />;
     case "credits":
       return <NumberStep ctx={ctx} field="earnedCredits" unit="학점" hint="성적표의 ‘취득학점’ 합계예요. 신입생이면 0을 적어 주세요." />;
     case "major":
@@ -430,10 +432,23 @@ function NumberStep({ ctx, field, unit, hint }: { ctx: StepCtx; field: "earnedCr
   );
 }
 
+function TranscriptStep({ ctx }: { ctx: StepCtx }) {
+  const router = useRouter();
+  return (
+    <TranscriptImport
+      draft={ctx.d}
+      update={ctx.update}
+      dataset={ctx.dataset}
+      onManual={() => {
+        ctx.set({ progressMode: "manual" });
+        router.push(stepPath("credits"));
+      }}
+    />
+  );
+}
+
 function CoursesStep({ ctx }: { ctx: StepCtx }) {
   const { d, update } = ctx;
-  const [paste, setPaste] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
   const courses = ctx.dataset ? [...ctx.dataset.courses].sort((a, b) => (a.recommendedYear ?? 9) - (b.recommendedYear ?? 9)) : [];
   const toggle = (code: string) =>
     update((x) => ({
@@ -441,29 +456,16 @@ function CoursesStep({ ctx }: { ctx: StepCtx }) {
       coursesConfirmed: true,
       completedCourseCodes: x.completedCourseCodes.includes(code) ? x.completedCourseCodes.filter((c) => c !== code) : [...x.completedCourseCodes, code],
     }));
-  const applyPaste = () => {
-    const found = findCoursesInText(paste, courses);
-    update((x) => ({ ...x, coursesConfirmed: true, completedCourseCodes: [...new Set([...x.completedCourseCodes, ...found])] }));
-    setMsg(found.length === 0 ? "학과 과목을 찾지 못했어요. 학수번호나 과목명이 들어가게 복사해 주세요." : `과목 ${found.length}개를 찾아 체크했어요.`);
-  };
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-10">
       <div>
         <p className="flex items-center gap-2 text-[16px] font-semibold">
-          <ClipboardPaste size={17} aria-hidden /> 성적표 붙여넣기
+          <ClipboardPaste size={17} aria-hidden /> 성적표로 한 번에
         </p>
-        <p className="mt-1 mb-3 text-[13px] text-muted">성적 조회 표를 복사해 붙여넣으면 학과 과목만 골라 체크해요. 성적은 읽지 않고 이 브라우저 밖으로 보내지 않아요.</p>
-        <textarea value={paste} onChange={(e) => setPaste(e.target.value)} rows={6} placeholder={"예)  CSE1002  전산학개론  3  A+"} className="w-full resize-y" aria-label="성적표 붙여넣기" />
-        <div className="mt-3 flex items-center gap-3">
-          <Button onClick={applyPaste} disabled={!paste.trim()}>
-            과목 찾기
-          </Button>
-          {msg && (
-            <span role="status" className="text-[13px] text-ink-soft">
-              {msg}
-            </span>
-          )}
-        </div>
+        <p className="mt-1 mb-3 text-[13px] text-muted">하나씩 고르기 번거로우면 성적표를 붙여넣거나 캡처로 가져와요. 확인한 뒤에만 반영해요.</p>
+        <Link href={stepPath("transcript")} className="inline-flex items-center gap-2 text-[14px] font-semibold text-pen underline-offset-4 hover:underline">
+          성적표 가져오기로 가기 <ArrowRight size={15} aria-hidden />
+        </Link>
         <Button
           kind="ghost"
           className="mt-6"
@@ -925,6 +927,8 @@ function ReviewStep({ ctx }: { ctx: StepCtx }) {
         return d.completedTerms === null ? "—" : completedTermsLabel(d.completedTerms);
       case "start":
         return d.startTerm ? formatTerm(d.startTerm) : "—";
+      case "transcript":
+        return d.earnedCredits === null ? "—" : `총 ${d.earnedCredits} · 전공 ${d.earnedMajorCredits ?? "—"}학점 · 학과 과목 ${d.completedCourseCodes.length}개${d.progressMode === "import" ? " (가져오기)" : ""}`;
       case "credits":
         return d.earnedCredits === null ? "—" : `${d.earnedCredits}학점`;
       case "major":

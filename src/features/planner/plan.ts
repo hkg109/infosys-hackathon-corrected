@@ -33,6 +33,8 @@ export interface Draft {
   completedCourseCodes: string[];
   /** 이수 과목 질문에 답했는지(빈 배열 = 들은 학과 과목 없음으로 확인) */
   coursesConfirmed: boolean;
+  /** 이수 현황을 채운 방법. import = 성적표 가져오기 후 확인, manual = 직접 입력. 없으면 아직 고르지 않음 */
+  progressMode?: "import" | "manual" | null;
   targetCredits: number | null;
   /** 목표학점 출처. graduation_check = 개인 졸업사정 조회 결과(공식 졸업학점으로 일반화하지 않음) */
   targetSource: "graduation_check" | "user_goal" | null;
@@ -103,6 +105,7 @@ export function blankDraft(today: ISODate): Draft {
     earnedMajorCredits: null,
     completedCourseCodes: [],
     coursesConfirmed: false,
+    progressMode: null,
     targetCredits: null,
     targetSource: null,
     career: null,
@@ -234,8 +237,9 @@ export function candidatePlanInput(c: TrackCandidate): PlanInput | null {
 export function draftProblem(draft: Draft, dataset: Dataset | null, today: ISODate = ""): { step: string; message: string } | null {
   if (draft.completedTerms === null) return { step: "completed", message: "마친 학기 수를 알려 주세요." };
   if (!draft.startTerm) return { step: "start", message: "계획을 시작할 학기를 골라 주세요." };
-  if (draft.earnedCredits === null) return { step: "credits", message: "지금까지 이수한 총학점을 알려 주세요." };
-  if (draft.earnedMajorCredits === null) return { step: "major", message: "그중 전공학점을 알려 주세요." };
+  const manual = draft.progressMode === "manual";
+  if (draft.earnedCredits === null) return { step: manual ? "credits" : "transcript", message: "지금까지 이수한 총학점을 알려 주세요." };
+  if (draft.earnedMajorCredits === null) return { step: manual ? "major" : "transcript", message: "그중 전공학점을 알려 주세요." };
   if (draft.career === "unsure" && answeredCount(draft.answers) < MIN_ANSWERS)
     return { step: "quiz", message: `진로 추천 질문에 ${MIN_ANSWERS}개 이상 답해 주세요.` };
   if (draft.military.timing === "fixed" && needsMilitary(draft) && !draft.military.startDate)
@@ -247,7 +251,10 @@ export function draftProblem(draft: Draft, dataset: Dataset | null, today: ISODa
   const errors = validatePlanInputV2(draftToInputV2(draft, dataset, ["software"]), { today: today || undefined }).filter(
     (i) => i.severity === "error",
   );
-  if (errors[0]) return { step: fieldStep(errors[0].field), message: errors[0].message };
+  if (errors[0]) {
+    const step = fieldStep(errors[0].field);
+    return { step: !manual && (step === "credits" || step === "major") ? "transcript" : step, message: errors[0].message };
+  }
   return null;
 }
 

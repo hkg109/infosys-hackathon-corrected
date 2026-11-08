@@ -6,6 +6,10 @@ import { answeredCount } from "./recommend";
 export function visibleSteps(d: Draft): StepId[] {
   return INPUT_STEPS.map((s) => s.id).filter((id) => {
     switch (id) {
+      case "credits":
+      case "major":
+      case "courses":
+        return d.progressMode === "manual";
       case "quiz":
         return d.career === "unsure";
       case "military-track":
@@ -25,6 +29,11 @@ export function stepProblem(step: StepId, d: Draft): string | null {
   switch (step) {
     case "completed":
       return d.completedTerms === null ? "마친 학기 수를 골라 주세요." : null;
+    case "transcript":
+      if (d.progressMode === "manual") return null;
+      if (d.earnedCredits === null || d.earnedMajorCredits === null)
+        return "성적표를 가져와 총·전공 학점을 확인하거나 ‘직접 수정하기’를 골라 주세요.";
+      return d.earnedMajorCredits > d.earnedCredits ? "전공학점은 총 이수학점 안에 포함돼요. 총학점보다 클 수 없어요." : null;
     case "start":
       return d.startTerm === null ? "시작 학기를 골라 주세요." : null;
     case "credits":
