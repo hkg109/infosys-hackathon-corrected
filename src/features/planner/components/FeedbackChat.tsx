@@ -5,14 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import type { DatasetV2 } from "@/contracts/types";
 import { diffPlans, ENGINE_VERSION, formatTerm, simulatePlan } from "@/engine";
 import { type ChatMessage, type FeedbackResponder, requestTrackFeedback } from "../feedbackAgent";
-import { SCRIPTED_DEMO_LABEL, scriptedDemoResponder } from "../feedbackDemo";
 import { usePlanner } from "../PlannerApp";
 import type { PlanState } from "../storage";
 
 const SUGGESTIONS = [
-  "특정 교수님의 과목은 피하고 싶어요",
-  "계절학기를 활용하고 싶어요",
-  "4학년 2학기는 최대한 가볍게 하고 싶어요",
+  "4학년 2학기는 12학점만 듣고 싶어요",
+  "데이터베이스시스템은 4학년 때 들을래요",
+  "다음 학기에 휴학하고 싶어요",
   "조금 더 빨리 끝내고 싶어요",
 ];
 
@@ -37,8 +36,7 @@ export function FeedbackChat({
   responder?: FeedbackResponder;
 }) {
   const { setPlan, draft } = usePlanner();
-  const [demo, setDemo] = useState(false);
-  const respond: FeedbackResponder = responder ?? (demo ? scriptedDemoResponder : requestTrackFeedback);
+  const respond: FeedbackResponder = responder ?? requestTrackFeedback;
 
   const [messages, setMessages] = useState<Msg[]>([
     {
@@ -65,7 +63,7 @@ export function FeedbackChat({
     setBusy(true);
     try {
       const reply = await respond({ message: m, history, plan, dataset });
-      const isDemo = reply.origin === "scripted_demo";
+      const isRules = reply.origin === "rules";
       if (reply.nextInput) {
         const before = simulatePlan(plan.input, dataset);
         const after = simulatePlan(reply.nextInput, dataset);
@@ -81,9 +79,9 @@ export function FeedbackChat({
           lastChanges: reply.changes,
           confirmedAt: null,
         });
-        setMessages((h) => [...h, { role: "assistant", text: reply.message, demo: isDemo, applied: { changes: reply.changes, summary } }]);
+        setMessages((h) => [...h, { role: "assistant", text: reply.message, rules: isRules, applied: { changes: reply.changes, summary } }]);
       } else {
-        setMessages((h) => [...h, { role: "assistant", text: reply.message, demo: isDemo }]);
+        setMessages((h) => [...h, { role: "assistant", text: reply.message, rules: isRules }]);
       }
     } finally {
       setBusy(false);
@@ -118,7 +116,7 @@ export function FeedbackChat({
             <li key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               {m.role === "assistant" ? (
                 <div className="max-w-[88%]">
-                  <p className="mb-1 font-hand text-[18px] leading-none text-pen">아맞다{m.demo ? ` · ${SCRIPTED_DEMO_LABEL}` : ""}</p>
+                  <p className="mb-1 font-hand text-[18px] leading-none text-pen">아맞다{m.rules ? " · 규칙 해석" : ""}</p>
                   <p className="rounded-[4px_14px_14px_14px] border border-line bg-paper-2 px-4 py-3 text-[14px] leading-relaxed">{m.text}</p>
                   {m.applied && (
                     <div className={`mt-2 rounded-[6px] border-l-[3px] px-3 py-2 text-[13px] ${m.applied.undone ? "border-line text-muted line-through" : "border-pen bg-pen/[0.05]"}`}>
@@ -149,12 +147,6 @@ export function FeedbackChat({
       </div>
 
       <div className="border-t border-line px-4 pt-3 pb-4">
-        {!responder && (
-          <label className="mb-2 flex w-fit cursor-pointer items-center gap-2 text-[12px] text-ink-soft">
-            <input type="checkbox" checked={demo} onChange={(e) => setDemo(e.target.checked)} />
-            {SCRIPTED_DEMO_LABEL} 사용 — 정해진 문장에만 반응해요
-          </label>
-        )}
         <div className="mb-2.5 flex flex-wrap gap-1.5">
           {SUGGESTIONS.map((s) => (
             <button
