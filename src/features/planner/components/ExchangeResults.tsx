@@ -258,41 +258,69 @@ const Mini = ({ label, children }: { label: string; children: ReactNode }) => (
 );
 
 function Branches({ set }: { set: ExchangeCandidateSet }) {
-  const roots = set.branches.filter((b) => b.parentId === null);
-  const kids = (id: string) => set.branches.filter((b) => b.parentId === id);
-  const Node = ({ id }: { id: string }) => {
-    const b = set.branches.find((x) => x.id === id)!;
-    return (
-      <li className="min-w-0">
-        <p className="text-[14px] font-semibold break-words">{b.title}</p>
-        <ul className="mt-0.5 grid gap-0.5 text-[12px] text-ink-soft">
-          {b.nextActions.map((a) => (
-            <li key={a} className="break-words">
-              · {a}
-            </li>
-          ))}
-        </ul>
-        {kids(id).length > 0 && (
-          <ul className="mt-2 grid gap-2 border-l-2 border-line pl-4">
-            {kids(id).map((k) => (
-              <Node key={k.id} id={k.id} />
-            ))}
-          </ul>
-        )}
-      </li>
-    );
-  };
+  const stages = [
+    { title: "한양대 선발 결과", note: "한양대가 먼저 선발·배정해요", events: ["hanyang_selected", "hanyang_not_selected"] },
+    { title: "파견교 심사 결과", note: "한양대 선발 이후 파견교에 따로 지원해요", events: ["host_accepted", "host_rejected"] },
+    { title: "수강·주거 준비", note: "파견교 수락 후 상황별로 확인해요", events: ["primary_courses_approved", "backup_courses_required", "housing_secured", "housing_not_secured"] },
+    { title: "귀국 후 학점 인정", note: "인정 결과가 나올 때까지 완료 학기는 미정이에요", events: ["credit_fully_recognized", "credit_partially_recognized", "credit_pending"] },
+  ] as const;
+  const cancelled = set.branches.filter((b) => b.event === "user_cancelled");
+  const shown = new Set<string>([...stages.flatMap((s) => [...s.events]), "user_cancelled"]);
+  const other = set.branches.filter((b) => !shown.has(b.event));
   return (
     <section aria-labelledby="ex-branches">
-      <h2 id="ex-branches" className="mb-1 font-serif text-[20px] font-bold">
+      <h2 id="ex-branches" className="mb-1 font-serif text-[22px] font-bold">
         결과에 따라 이렇게 갈라져요
       </h2>
-      <p className="mb-3 text-[12px] text-muted">확률은 계산하지 않아요. 한양대 선발과 파견교 수락은 다른 단계예요.</p>
-      <ul className="grid gap-4 md:grid-cols-2">
-        {roots.map((r) => (
-          <Node key={r.id} id={r.id} />
-        ))}
-      </ul>
+      <p className="mb-6 text-[13px] text-ink-soft">한양대 선발 → 파견교 수락 → 수강 준비 → 귀국 후 학점 인정 순서로 확인하세요. 합격 확률은 계산하지 않아요.</p>
+      <ol className="grid gap-5">
+        {stages.map((stage, index) => {
+          const branches = set.branches.filter((b) => (stage.events as readonly string[]).includes(b.event));
+          if (branches.length === 0) return null;
+          return (
+            <li key={stage.title} className="min-w-0 rounded-[12px] border border-line bg-paper p-5">
+              <div className="mb-4 flex items-start gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-pen font-serif text-[17px] font-bold text-paper" aria-hidden>{index + 1}</span>
+                <div className="min-w-0">
+                  <h3 className="font-serif text-[19px] font-bold">{stage.title}</h3>
+                  <p className="text-[12px] text-muted">{stage.note}</p>
+                </div>
+              </div>
+              <ul className="grid gap-3 md:grid-cols-2">
+                {branches.map((branch) => (
+                  <li key={branch.id} className={`min-w-0 rounded-[8px] border p-4 ${branch.event === "hanyang_not_selected" || branch.event === "host_rejected" || branch.event === "housing_not_secured" ? "border-red/40 bg-red-soft/20" : "border-line bg-paper-2/60"}`}>
+                    <p className="text-[15px] font-semibold break-words">{branch.title}</p>
+                    <p className="mt-1 text-[11px] text-muted">{branch.parentId ? `앞 단계: ${set.branches.find((b) => b.id === branch.parentId)?.title ?? "결과 확인"}` : "지원 결과에 따라 선택"}</p>
+                    <ul className="mt-3 grid gap-2 border-t border-line pt-3 text-[13px] text-ink-soft">
+                      {branch.nextActions.map((action, i) => (
+                        <li key={`${branch.id}-${i}`} className="flex items-start gap-2 break-words">
+                          <span className="shrink-0 font-bold text-pen" aria-hidden>→</span>
+                          <span className="min-w-0">{action}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          );
+        })}
+      </ol>
+      {(cancelled.length > 0 || other.length > 0) && (
+        <div className="mt-5 rounded-[10px] border border-dashed border-line bg-paper px-5 py-4">
+          <h3 className="font-serif text-[17px] font-bold">그 밖의 상황</h3>
+          <ul className="mt-3 grid gap-3 md:grid-cols-2">
+            {[...cancelled, ...other].map((branch) => (
+              <li key={branch.id} className="min-w-0">
+                <p className="text-[14px] font-semibold">{branch.title}</p>
+                <ul className="mt-1 grid gap-1 text-[12px] text-ink-soft">
+                  {branch.nextActions.map((action, i) => <li key={`${branch.id}-${i}`}>· {action}</li>)}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }
