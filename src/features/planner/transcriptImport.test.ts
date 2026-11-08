@@ -217,3 +217,18 @@ describe("한양인 포털 성적 조회 행 형식(가상 값)", () => {
     expect(d.courseCreditSum).toBe(8);
   });
 });
+
+describe("rowsFromVision(스크린샷 인식 결과)", () => {
+  it("여러 장의 과목 행을 같은 파서·검토 경로로 넘기고, 요약 학점은 후보로만", async () => {
+    const { rowsFromVision } = await import("./transcriptImport");
+    const rows = rowsFromVision([
+      { rows: [{ term: "2026년-1학년-1학기", category: "교양필수", code: "CUL0203", name: "AI시대쓰기의힘", credits: 2, grade: "A+" }], summary: { earnedCredits: null, majorCredits: null, targetCredits: null }, unreadable: false },
+      { rows: [{ term: "2026년-1학년-2학기", category: "전공핵심", code: "ITE1012", name: "정보시스템개론", credits: 3, grade: "F" }], summary: { earnedCredits: 21, majorCredits: 6, targetCredits: null }, unreadable: false },
+    ]);
+    const d = parseTranscriptRows(rows, courses, "image_ai");
+    expect(codes(d.completed)).toEqual(["CUL0203"]);
+    expect(codes(d.notCompleted)).toEqual(["ITE1012"]);
+    expect(d.earnedCredits.map((v) => v.value)).toEqual([21]);
+    expect(d.earnedMajorCredits.map((v) => v.value)).toEqual([6]);
+  });
+});

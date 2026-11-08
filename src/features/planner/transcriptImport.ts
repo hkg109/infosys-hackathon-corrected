@@ -1,4 +1,4 @@
-import type { Course } from "@/contracts/types";
+import type { Course, TranscriptImageReply } from "@/contracts/types";
 
 /**
  * 성적표·졸업사정 가져오기(검토 전 단계). 순수 함수만 둔다 — DOM·저장 없음.
@@ -14,7 +14,7 @@ import type { Course } from "@/contracts/types";
  * - 이름·학번 등 개인정보 행은 계산에 쓰지 않고 결과에도 남기지 않는다.
  */
 
-export type TranscriptImportSource = "clipboard_html" | "clipboard_text";
+export type TranscriptImportSource = "clipboard_html" | "clipboard_text" | "image_ai";
 export type MatchKind = "exact_code" | "exact_name" | "normalized_name" | "ocr_suggestion" | "unmatched";
 export type CourseStatus = "completed" | "in_progress" | "failed" | "withdrawn" | "unknown";
 export type Confidence = "high" | "medium" | "low";
@@ -101,6 +101,25 @@ export function rowsFromTable(table: string[][]): SourceRow[] {
     .map((cells) => cells.map((c) => c.normalize("NFKC").replace(/\s+/g, " ").trim()))
     .filter((cells) => cells.some((c) => c !== ""))
     .map((cells, index) => ({ index, cells: cells.filter((c) => c !== ""), raw: cells.filter((c) => c !== "").join("\t") }));
+}
+
+/**
+ * 스크린샷 인식 결과(여러 장) → 행. 과목은 셀 순서를 고정하고, 요약 학점은 "레이블\t숫자" 행으로 만든다.
+ * 그 뒤는 붙여넣기와 같은 파서·검토 창을 거친다(학과 자료 매칭·사용자 확인).
+ */
+export function rowsFromVision(replies: TranscriptImageReply[]): SourceRow[] {
+  const lines: string[][] = [];
+  for (const r of replies) {
+    for (const x of r.rows) {
+      const cells = [x.term, x.category, x.code, x.name, x.credits === null ? null : String(x.credits), x.grade].map((c) => (c ?? "").toString().trim());
+      if (cells.some((c) => c)) lines.push(cells);
+    }
+    const s = r.summary;
+    if (s.earnedCredits !== null) lines.push(["총 이수학점", String(s.earnedCredits)]);
+    if (s.majorCredits !== null) lines.push(["전공 이수학점", String(s.majorCredits)]);
+    if (s.targetCredits !== null) lines.push(["졸업학점", String(s.targetCredits)]);
+  }
+  return lines.map((cells, index) => ({ index, cells: cells.filter((c) => c !== ""), raw: cells.filter((c) => c !== "").join("\t") }));
 }
 
 // ── 정규화 ───────────────────────────────────────────────
