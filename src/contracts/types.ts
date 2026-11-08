@@ -14,7 +14,7 @@ export interface Term {
 }
 
 /** 서비스가 정한 진로 분류. 학교 공식 트랙이 아니다. */
-export type CareerTrack = "software" | "data" | "security" | "consulting" | "business";
+export type CareerTrack = "software" | "data" | "security" | "consulting" | "business" | "finance";
 export type CourseGroup = CareerTrack | "common";
 
 /** 정보의 확인 상태 */
@@ -141,6 +141,39 @@ export interface PlanInput {
   termCaps?: Array<{ term: Term; credits: number }>;
   /** 과목별 사용자 요청: exclude = 이 계획에서 빼기, not_before = 그 학기 전에는 배치하지 않기 */
   courseRules?: Array<{ code: string; action: "exclude" | "not_before"; term?: Term }>;
+  /** 개인 졸업사정의 전공 요건. 없으면 전공 요건을 따지지 않는다 */
+  majorRequirement?: MajorRequirement | null;
+  /** 전공 400단위 이수학점(전공 이수학점의 일부). 모르면 null → 이수 과목 학수번호로 추정 */
+  earnedUpperMajorCredits?: number | null;
+}
+
+// ── 전공 요건(개인 졸업사정) ─────────────────────────────
+
+/**
+ * 개인 졸업사정 조회에서 확인한 전공 요건. 학교 공통 졸업요건으로 일반화하지 않는다.
+ * 각 값 null = 모름(그 요건은 따지지 않는다). 모두 최소 이수학점으로 본다.
+ */
+export interface MajorRequirement {
+  /** 전공학점 요건(총학점에 포함) */
+  majorCredits: number | null;
+  /** 전공 100~300단위 요건 */
+  lowerLevelCredits: number | null;
+  /** 전공 400단위 요건 */
+  upperLevelCredits: number | null;
+  source: "graduation_check" | "user_goal";
+}
+
+/** 전공 요건 대비 진행. 단위는 학수번호 첫 숫자로 판단한다(1~3 = 100~300단위, 4 = 400단위, 그 밖 = 단위 미상). */
+export interface MajorProgress {
+  required: { major: number | null; lower: number | null; upper: number | null };
+  /** 이미 이수. upper가 추정값이면 upperEstimated */
+  earned: { major: number; lower: number; upper: number; upperEstimated: boolean };
+  /** 이 계획에 배치한 추천 전공 과목 학점 */
+  planned: { major: number; lower: number; upper: number; unknownLevel: number };
+  /** 추천 과목 밖에서 더 골라야 해 '전공 선택 자리'로 넣은 학점(upper·lower는 major의 일부) */
+  extra: { major: number; lower: number; upper: number };
+  /** 계획대로면 알려진 전공 요건을 모두 채우는지 */
+  met: boolean;
 }
 
 // ── 학점 페이스(후반 여유형) ─────────────────────────────
@@ -164,7 +197,10 @@ export type WarningCode =
   | "PREREQ_UNKNOWN"
   | "UNPLACED_COURSE"
   | "SEARCH_LIMIT"
-  | "USER_EXCLUDED";
+  | "USER_EXCLUDED"
+  | "MAJOR_EXTRA"
+  | "MAJOR_LEVEL_ESTIMATED"
+  | "MIN_CREDITS_FILLED";
 
 export interface PlanWarning {
   code: WarningCode;
@@ -188,6 +224,10 @@ export interface PlannedTerm {
   courses: PlacedCourse[];
   /** 표본 외 미배정 전공·교양 학점 슬롯 */
   slotCredits: number;
+  /** slotCredits 중 전공 요건을 채우려고 잡은 '전공 선택 자리'(교양 자리로 쓰지 않는다) */
+  majorSlotCredits?: number;
+  /** majorSlotCredits 중 400단위 자리 */
+  upperMajorSlotCredits?: number;
   plannedCredits: number;
   /** 이 학기에 쓴 계획 상한 = min(학점 페이스, 확인된 학교 상한). 중단 학기는 없음 */
   capCredits?: number;
@@ -213,6 +253,8 @@ export interface PlanResult {
   expectedCompletion: Term | null;
   estimation: "user_target" | "unavailable";
   remainingCredits: number | null;
+  /** 전공 요건을 입력했을 때만 */
+  majorProgress?: MajorProgress | null;
 }
 
 export interface PlanDiff {
@@ -718,6 +760,8 @@ export interface ProgressInput {
   earnedCredits: number | null;
   /** 전공 이수학점. 총 이수학점의 일부이며 더하지 않는다. */
   earnedMajorCredits: number | null;
+  /** 전공 400단위 이수학점(전공 이수학점의 일부). 없거나 null이면 이수 과목으로 추정 */
+  earnedUpperMajorCredits?: number | null;
   /** null = 이수 과목 미입력. [] = 이수 과목 없음으로 확인 */
   completedCourseCodes: string[] | null;
   /** 수강 중 과목. 이수 완료로 자동 인정하지 않는다. */
@@ -797,6 +841,8 @@ export interface PlanInputV2 {
   startTerm: Term | null;
   progress: ProgressInput;
   target: TargetCredits | null;
+  /** 개인 졸업사정의 전공 요건(전공학점·100~300단위·400단위). 없으면 전공 요건을 따지지 않는다 */
+  majorRequirement?: MajorRequirement | null;
   requiredCourses: RequiredCoursesInput | null;
   /** 관심 진로. 빈 배열 = 미정 → 두 진로 모두 탐색, "미정" 표시 */
   careers: CareerTrack[];
@@ -1366,7 +1412,16 @@ export interface FeedbackApiReply {
 /** /api/transcript-image 응답. 화면은 이 값을 바로 반영하지 않고 검토 창을 거친다 */
 export interface TranscriptImageReply {
   rows: Array<{ term: string | null; category: string | null; code: string | null; name: string | null; credits: number | null; grade: string | null }>;
-  summary: { earnedCredits: number | null; majorCredits: number | null; targetCredits: number | null };
+  summary: {
+    earnedCredits: number | null;
+    majorCredits: number | null;
+    targetCredits: number | null;
+    /** 졸업사정 요건 열의 전공학점·100~300단위·400단위 기준, 400단위 취득학점. 화면에 분명할 때만 */
+    majorRequiredCredits?: number | null;
+    majorLowerRequiredCredits?: number | null;
+    majorUpperRequiredCredits?: number | null;
+    majorUpperEarnedCredits?: number | null;
+  };
   /** 성적표로 보이지 않거나 글자를 읽을 수 없으면 true */
   unreadable: boolean;
 }

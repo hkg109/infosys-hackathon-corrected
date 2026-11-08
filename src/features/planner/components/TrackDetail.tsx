@@ -80,9 +80,9 @@ function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; dr
   const totals = (res?.terms ?? []).reduce(
     (acc, t) => {
       const b = termBreakdown(t, emptyGenEd(), dataset);
-      return { major: acc.major + b.major, ge: acc.ge + b.generalEducation, slot: acc.slot + b.unassigned, total: acc.total + b.total };
+      return { major: acc.major + b.major, majorSlot: acc.majorSlot + b.majorSlot, ge: acc.ge + b.generalEducation, slot: acc.slot + b.unassigned, total: acc.total + b.total };
     },
-    { major: 0, ge: 0, slot: 0, total: 0 },
+    { major: 0, majorSlot: 0, ge: 0, slot: 0, total: 0 },
   );
 
   const careerCerts = (dataset.military?.careerCertificates ?? []).filter((x) => x.career === track.career);
@@ -228,12 +228,16 @@ function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; dr
           )}
 
           <Block title="전공·교양 학점 구성">
-            <div className="grid grid-cols-4 border-y border-line text-center">
+            <div className={`grid ${totals.majorSlot > 0 ? "grid-cols-5" : "grid-cols-4"} border-y border-line text-center`}>
               <Mini label="배치한 전공 과목">{totals.major}학점</Mini>
+              {totals.majorSlot > 0 && <Mini label="전공 선택 자리">{totals.majorSlot}학점</Mini>}
               <Mini label="배치한 교양 과목">{totals.ge}학점</Mini>
               <Mini label="미지정 자리">{totals.slot}학점</Mini>
               <Mini label="계획 합계">{totals.total}학점</Mini>
             </div>
+            {totals.majorSlot > 0 && (
+              <p className="mt-2 text-[12px] text-muted">전공 선택 자리는 졸업사정 전공 요건을 채우려고 잡은 학점이에요. 수강신청 때 전공 과목을 직접 골라야 해요.</p>
+            )}
             <p className="mt-2 text-[12px] text-muted">미지정 자리는 다음 단계에서 2·3학점 교양 자리로 구체화할 수 있어요. 구체화해도 합계는 바뀌지 않아요.</p>
           </Block>
 

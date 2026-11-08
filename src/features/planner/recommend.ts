@@ -28,6 +28,7 @@ export const QUIZ: QuizQuestion[] = [
       { id: "hack", label: "우리 학교 사이트 취약점 점검하기", weights: { security: 2 } },
       { id: "process", label: "동아리 업무를 시스템으로 바꾸는 설계", weights: { consulting: 2 } },
       { id: "biz", label: "새 서비스 사업계획서 쓰기", weights: { business: 2 } },
+      { id: "invest", label: "주가·금융 데이터로 투자 전략 분석하기", weights: { finance: 2, data: 1 } },
     ],
   },
   {
@@ -39,6 +40,7 @@ export const QUIZ: QuizQuestion[] = [
       { id: "review", label: "빠진 것·위험한 것을 짚는다", weights: { security: 2, consulting: 1 } },
       { id: "organize", label: "역할을 나누고 일정을 짠다", weights: { consulting: 2, business: 1 } },
       { id: "pitch", label: "아이디어를 내고 발표한다", weights: { business: 2 } },
+      { id: "budget", label: "예산과 숫자가 맞는지 따진다", weights: { finance: 2, consulting: 1 } },
     ],
   },
   {
@@ -50,6 +52,7 @@ export const QUIZ: QuizQuestion[] = [
       { id: "net", label: "컴퓨터네트워크 · 정보보호", weights: { security: 2 } },
       { id: "erp", label: "ERP시스템 · IT와경영전략", weights: { consulting: 2 } },
       { id: "ecom", label: "전자상거래이론 · 마케팅개론", weights: { business: 2 } },
+      { id: "fin", label: "재무관리 · 블록체인개론", weights: { finance: 2 } },
     ],
   },
   {
@@ -61,6 +64,7 @@ export const QUIZ: QuizQuestion[] = [
       { id: "sec", label: "보안 기업이나 금융권 보안팀", weights: { security: 2 } },
       { id: "si", label: "IT 컨설팅·SI 회사", weights: { consulting: 2 } },
       { id: "startup", label: "스타트업 서비스 기획팀", weights: { business: 2 } },
+      { id: "bank", label: "은행·증권사 IT나 핀테크 회사", weights: { finance: 2 } },
     ],
   },
   {
@@ -72,6 +76,7 @@ export const QUIZ: QuizQuestion[] = [
       { id: "puzzle", label: "남들이 못 찾은 허점을 찾았을 때", weights: { security: 2 } },
       { id: "fix", label: "복잡한 일이 깔끔하게 정리될 때", weights: { consulting: 2, business: 1 } },
       { id: "people", label: "사람들이 내 아이디어에 반응할 때", weights: { business: 2, consulting: 1 } },
+      { id: "market", label: "시장 흐름을 읽어 낸 게 맞았을 때", weights: { finance: 2, data: 1 } },
     ],
   },
 ];

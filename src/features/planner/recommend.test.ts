@@ -13,7 +13,7 @@ describe("recommendCareers", () => {
 
   it("같은 답이면 같은 결과, 답이 없으면 고정 순서", () => {
     expect(recommendCareers(pick(0))).toEqual(recommendCareers(pick(0)));
-    expect(recommendCareers({}).map((m) => m.track)).toEqual(["software", "data", "security", "consulting", "business"]);
+    expect(recommendCareers({}).map((m) => m.track)).toEqual(["software", "data", "security", "consulting", "business", "finance"]);
   });
 
   it("이미 들은 진로 과목은 점수와 근거에 더한다", () => {

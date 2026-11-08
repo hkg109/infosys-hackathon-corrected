@@ -171,6 +171,7 @@ export function toEngineInput(
     earnedMajorCredits: progress.earnedMajorCredits,
     completedTerms: progress.completedTerms,
     targetCredits: input.target?.value ?? null,
+    ...(input.majorRequirement ? { majorRequirement: input.majorRequirement, earnedUpperMajorCredits: progress.earnedUpperMajorCredits ?? null } : {}),
     track: career,
     creditCap: paceStyle === "custom" ? Math.max(...(input.customPaceBands ?? []).map((b) => b.credits), 1) : paceCredits,
     breaks,

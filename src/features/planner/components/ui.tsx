@@ -129,6 +129,7 @@ export const GROUP_COLOR: Record<CourseGroup, string> = {
   security: "var(--g-security)",
   consulting: "var(--g-consulting)",
   business: "var(--g-business)",
+  finance: "var(--g-finance)",
 };
 
 export const groupLabel = (g: CourseGroup) => (g === "common" ? "공통 기초" : CAREER_LABEL[g]);

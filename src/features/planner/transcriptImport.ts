@@ -1,4 +1,5 @@
 import type { Course, TranscriptImageReply } from "@/contracts/types";
+import type { MajorRequirementDraft } from "./plan";
 
 /**
  * 성적표·졸업사정 가져오기(검토 전 단계). 순수 함수만 둔다 — DOM·저장 없음.
@@ -61,6 +62,11 @@ export interface TranscriptImportDraft {
   earnedCredits: DetectedValue[];
   earnedMajorCredits: DetectedValue[];
   targetCredits: DetectedValue[];
+  /** 전공 요건(졸업사정 기준 열)과 400단위 취득학점 후보 */
+  majorRequired: DetectedValue[];
+  majorLowerRequired: DetectedValue[];
+  majorUpperRequired: DetectedValue[];
+  majorUpperEarned: DetectedValue[];
   /** 학과 자료와 맞춘 완료 과목(재수강 중복은 한 번만) */
   completed: DetectedCourseRow[];
   inProgress: DetectedCourseRow[];
@@ -118,6 +124,10 @@ export function rowsFromVision(replies: TranscriptImageReply[]): SourceRow[] {
     if (s.earnedCredits !== null) lines.push(["총 이수학점", String(s.earnedCredits)]);
     if (s.majorCredits !== null) lines.push(["전공 이수학점", String(s.majorCredits)]);
     if (s.targetCredits !== null) lines.push(["졸업학점", String(s.targetCredits)]);
+    if (s.majorRequiredCredits != null) lines.push(["전공학점 기준", String(s.majorRequiredCredits)]);
+    if (s.majorLowerRequiredCredits != null) lines.push(["전공 100~300단위 기준", String(s.majorLowerRequiredCredits)]);
+    if (s.majorUpperRequiredCredits != null) lines.push(["전공 400단위 기준", String(s.majorUpperRequiredCredits)]);
+    if (s.majorUpperEarnedCredits != null) lines.push(["전공 400단위 취득", String(s.majorUpperEarnedCredits)]);
   }
   return lines.map((cells, index) => ({ index, cells: cells.filter((c) => c !== ""), raw: cells.filter((c) => c !== "").join("\t") }));
 }
@@ -199,13 +209,54 @@ function findHeader(rows: SourceRow[], before: number): Header | null {
   return null;
 }
 
+/**
+ * 전공 요건 줄(전공학점 기준·전공 100~300단위·전공 400단위). 열 머리(배당·기준 / 취득)가 있거나
+ * 레이블에 "기준"·"취득"이 붙은 경우만 높은 신뢰로 읽는다. 숫자 하나뿐이고 열을 모르면 기준값 낮은 신뢰 후보로 둔다.
+ */
+const MAJOR_REQ_LABEL = /^전공\s*학점\s*(기준|요건|배당)$/;
+const LOWER_LABEL = /^전공\s*100\s*[~\u223c-]\s*300\s*단위(\s*(기준|요건|배당|취득|이수))?$/;
+const UPPER_LABEL = /^전공\s*400\s*단위(\s*(기준|요건|배당|취득|이수))?$/;
+type MajorReqHits = { required: DetectedValue[]; lower: DetectedValue[]; upper: DetectedValue[]; upperEarned: DetectedValue[] };
+
+function majorReqRow(r: SourceRow, rows: SourceRow[], out: MajorReqHits): boolean {
+  const label = r.cells[0]?.trim() ?? "";
+  const kind = MAJOR_REQ_LABEL.test(label) ? "required" : LOWER_LABEL.test(label) ? "lower" : UPPER_LABEL.test(label) ? "upper" : null;
+  if (!kind) return false;
+  const nums = r.cells.slice(1).map((c) => c.trim()).filter(isNum);
+  if (nums.length === 0) return true;
+  const mk = (value: number, col: string, confidence: Confidence): DetectedValue => ({ value, sourceRow: r.index, rawText: r.raw, label: col ? `${label} · ${col}` : label, confidence });
+  const reqList = kind === "required" ? out.required : kind === "lower" ? out.lower : out.upper;
+  if (/(기준|요건|배당)$/.test(label)) {
+    if (nums.length === 1) reqList.push(mk(Number(nums[0]), "", "high"));
+    return true;
+  }
+  if (/(취득|이수)$/.test(label)) {
+    if (nums.length === 1 && kind === "upper") out.upperEarned.push(mk(Number(nums[0]), "", "high"));
+    return true;
+  }
+  const header = findHeader(rows, r.index);
+  const byCol = (words: RegExp) => {
+    const col = header?.cols.find((c) => words.test(c.word));
+    const cell = col ? r.cells[col.index]?.trim() : undefined;
+    return cell && isNum(cell) ? Number(cell) : null;
+  };
+  const req = byCol(/^(배당|기준|요건|필요)$/);
+  const got = byCol(/^(취득|이수)$/);
+  if (req !== null) reqList.push(mk(req, "기준", "high"));
+  if (got !== null && kind === "upper") out.upperEarned.push(mk(got, "취득", "high"));
+  if (req === null && got === null && nums.length === 1) reqList.push(mk(Number(nums[0]), "열 확인 필요", "low"));
+  return true;
+}
+
 function summaryValues(rows: SourceRow[]) {
   const earned: DetectedValue[] = [];
   const major: DetectedValue[] = [];
   const target: DetectedValue[] = [];
+  const req: MajorReqHits = { required: [], lower: [], upper: [], upperEarned: [] };
   for (const r of rows) {
     const label = r.cells[0]?.trim() ?? "";
     if (!label || NOT_CREDIT.test(label)) continue;
+    if (majorReqRow(r, rows, req)) continue;
     const isGrad = GRAD_TOTAL.test(label);
     const isTotal = TOTAL_EARNED.test(label);
     const isMajor = MAJOR_EARNED.test(label);
@@ -249,7 +300,15 @@ function summaryValues(rows: SourceRow[]) {
     else for (const n of nums) (isMajor ? major : earned).push(mk(Number(n.c), "열 확인 필요", "low"));
   }
   const dedupe = (xs: DetectedValue[]) => xs.filter((x, i) => xs.findIndex((y) => y.value === x.value && y.sourceRow === x.sourceRow) === i);
-  return { earned: dedupe(earned), major: dedupe(major), target: dedupe(target) };
+  return {
+    earned: dedupe(earned),
+    major: dedupe(major),
+    target: dedupe(target),
+    majorRequired: dedupe(req.required),
+    majorLowerRequired: dedupe(req.lower),
+    majorUpperRequired: dedupe(req.upper),
+    majorUpperEarned: dedupe(req.upperEarned),
+  };
 }
 
 // ── 과목 행 ──────────────────────────────────────────────
@@ -374,7 +433,9 @@ export function parseTranscriptRows(rawRows: SourceRow[], courses: Course[], sou
     return true;
   });
   const summary = summaryValues(safeRows);
-  const summaryRows = new Set([...summary.earned, ...summary.major, ...summary.target].map((v) => v.sourceRow));
+  const summaryRows = new Set(
+    [...summary.earned, ...summary.major, ...summary.target, ...summary.majorRequired, ...summary.majorLowerRequired, ...summary.majorUpperRequired, ...summary.majorUpperEarned].map((v) => v.sourceRow),
+  );
   const header = (r: SourceRow) => r.cells.filter((c) => /^(학수번호|과목명|교과목명|과목코드|학점|성적|등급|이수구분|구분|년도|학기)$/.test(c.trim())).length >= 2;
 
   const detected: DetectedCourseRow[] = [];
@@ -492,6 +553,10 @@ export function parseTranscriptRows(rawRows: SourceRow[], courses: Course[], sou
     earnedCredits: summary.earned,
     earnedMajorCredits: summary.major,
     targetCredits: summary.target,
+    majorRequired: summary.majorRequired,
+    majorLowerRequired: summary.majorLowerRequired,
+    majorUpperRequired: summary.majorUpperRequired,
+    majorUpperEarned: summary.majorUpperEarned,
     completed,
     inProgress,
     notCompleted,
@@ -510,6 +575,11 @@ export interface ImportChoice {
   earnedCredits: number | null;
   earnedMajorCredits: number | null;
   targetCredits: number | null;
+  /** 졸업사정 전공 요건과 400단위 취득학점. null = 기존값 유지 */
+  majorRequired?: number | null;
+  majorLowerRequired?: number | null;
+  majorUpperRequired?: number | null;
+  earnedUpperMajorCredits?: number | null;
   /** 완료로 반영할 학수번호 */
   completedCodes: string[];
   mode: "merge" | "replace";
@@ -520,13 +590,18 @@ export interface ProgressFields {
   earnedMajorCredits: number | null;
   targetCredits: number | null;
   completedCourseCodes: string[];
+  majorRequirement?: MajorRequirementDraft | null;
+  earnedUpperMajorCredits?: number | null;
 }
 
 /** 반영 전에 막을 문제. 없으면 null */
 export function importProblem(choice: ImportChoice, current: ProgressFields): string | null {
   const total = choice.earnedCredits ?? current.earnedCredits;
   const major = choice.earnedMajorCredits ?? current.earnedMajorCredits;
-  for (const v of [choice.earnedCredits, choice.earnedMajorCredits, choice.targetCredits]) if (v !== null && (!Number.isFinite(v) || v < 0)) return "학점은 0 이상이어야 해요.";
+  for (const v of [choice.earnedCredits, choice.earnedMajorCredits, choice.targetCredits, choice.majorRequired ?? null, choice.majorLowerRequired ?? null, choice.majorUpperRequired ?? null, choice.earnedUpperMajorCredits ?? null])
+    if (v !== null && (!Number.isFinite(v) || v < 0)) return "학점은 0 이상이어야 해요.";
+  const upper = choice.earnedUpperMajorCredits ?? current.earnedUpperMajorCredits ?? null;
+  if (upper !== null && major !== null && upper > major) return "전공 400단위 이수학점은 전공 이수학점 안에 포함돼요.";
   if (total !== null && major !== null && major > total) return "전공학점은 총 이수학점 안에 포함돼요. 총학점보다 클 수 없어요.";
   if (choice.targetCredits !== null && choice.targetCredits <= 0) return "목표학점은 0보다 커야 해요.";
   return null;
@@ -540,12 +615,30 @@ export function applyTranscriptImport(current: ProgressFields, choice: ImportCho
     earnedMajorCredits: choice.earnedMajorCredits ?? current.earnedMajorCredits,
     targetCredits: choice.targetCredits ?? current.targetCredits,
     completedCourseCodes: [...new Set(codes)],
+    majorRequirement: mergeMajorReq(current.majorRequirement ?? null, choice),
+    earnedUpperMajorCredits: choice.earnedUpperMajorCredits ?? current.earnedUpperMajorCredits ?? null,
+  };
+}
+
+function mergeMajorReq(cur: MajorRequirementDraft | null, c: ImportChoice): MajorRequirementDraft | null {
+  const picked = [c.majorRequired, c.majorLowerRequired, c.majorUpperRequired].some((v) => v !== null && v !== undefined);
+  if (!picked) return cur;
+  return {
+    major: c.majorRequired ?? cur?.major ?? null,
+    lower: c.majorLowerRequired ?? cur?.lower ?? null,
+    upper: c.majorUpperRequired ?? cur?.upper ?? null,
+    source: "graduation_check",
   };
 }
 
 /** 검토 화면 첫 줄 */
 export function importSummary(d: TranscriptImportDraft): string {
-  const nums = [d.earnedCredits.length > 0 && "총 이수학점", d.earnedMajorCredits.length > 0 && "전공학점", d.targetCredits.length > 0 && "졸업 기준학점"].filter(Boolean);
+  const nums = [
+    d.earnedCredits.length > 0 && "총 이수학점",
+    d.earnedMajorCredits.length > 0 && "전공학점",
+    d.targetCredits.length > 0 && "졸업 기준학점",
+    (d.majorRequired.length > 0 || d.majorLowerRequired.length > 0 || d.majorUpperRequired.length > 0) && "전공 요건",
+  ].filter(Boolean);
   const check = d.ambiguous.length + (d.earnedCredits.length > 1 ? 1 : 0) + (d.earnedMajorCredits.length > 1 ? 1 : 0);
   return (
     `${d.rowCount}개 행을 읽었고, 학과 과목 ${d.completed.length + d.inProgress.length}개` +

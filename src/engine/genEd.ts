@@ -6,8 +6,13 @@ export interface TermLike {
   status: string;
   courses: PlacedCourse[];
   slotCredits: number;
+  /** slotCredits 중 전공 선택 자리(교양 자리로 쓰지 않는다) */
+  majorSlotCredits?: number;
   plannedCredits: number;
 }
+
+/** 교양 자리로 쓸 수 있는 미지정 학점 = slot − 전공 선택 자리 */
+export const freeSlotCredits = (t: TermLike) => Math.max(0, t.slotCredits - (t.majorSlotCredits ?? 0));
 import { sameTerm, termIndex } from "./terms";
 
 /**
@@ -54,7 +59,7 @@ export function addGenEd(
   origin: GeneralEducationPlaceholder["origin"] = "user",
 ): AddGenEdResult {
   if (!planned || planned.status !== "study") return { ok: false, reason: "수강 학기에만 교양 자리를 넣을 수 있어요." };
-  const left = planned.slotCredits - genEdCreditsIn(state, planned.term);
+  const left = freeSlotCredits(planned) - genEdCreditsIn(state, planned.term);
   if (credits > left)
     return {
       ok: false,
@@ -84,6 +89,8 @@ export interface TermCreditBreakdown {
   generalEducation: number;
   /** 교양 자리 */
   placeholders: GeneralEducationPlaceholder[];
+  /** 전공 요건을 채우려고 잡은 전공 선택 자리 학점 */
+  majorSlot: number;
   /** 아직 구체화하지 않은 미지정 학점 */
   unassigned: number;
   /** 학기 총학점(엔진 결과 그대로. 다시 더하지 않는다) */
@@ -94,7 +101,7 @@ export interface TermCreditBreakdown {
 
 /**
  * 학기 학점 구성. total은 엔진의 plannedCredits를 그대로 쓰고,
- * major + generalEducation + 그 밖의 배치 과목 + unassigned = total 이 되도록 나눈다.
+ * major + majorSlot + generalEducation + 그 밖의 배치 과목 + unassigned = total 이 되도록 나눈다.
  */
 export function termBreakdown(t: TermLike, state: GenEdState, dataset: Dataset): TermCreditBreakdown {
   const category = (code: string) => dataset.courses.find((c) => c.code === code)?.category ?? "";
@@ -102,13 +109,15 @@ export function termBreakdown(t: TermLike, state: GenEdState, dataset: Dataset):
   const geCourses = t.courses.filter((c) => category(c.code).includes("교양")).reduce((a, c) => a + c.credits, 0);
   const placeholders = t.status === "study" ? state.items.filter((g) => sameTerm(g.term, t.term)) : [];
   const ph = placeholders.reduce((a, g) => a + g.credits, 0);
+  const free = freeSlotCredits(t);
   return {
     major,
-    generalEducation: geCourses + Math.min(ph, t.slotCredits),
+    majorSlot: t.slotCredits - free,
+    generalEducation: geCourses + Math.min(ph, free),
     placeholders,
-    unassigned: Math.max(0, t.slotCredits - ph),
+    unassigned: Math.max(0, free - ph),
     total: t.plannedCredits,
-    overflow: Math.max(0, ph - t.slotCredits),
+    overflow: Math.max(0, ph - free),
   };
 }
 
@@ -120,7 +129,7 @@ export function staleGenEd(state: GenEdState, terms: TermLike[]): GeneralEducati
   for (const g of state.items) {
     const t = byTerm.get(termIndex(g.term));
     const u = used.get(termIndex(g.term)) ?? 0;
-    if (!t || t.status !== "study" || u + g.credits > t.slotCredits) out.push(g);
+    if (!t || t.status !== "study" || u + g.credits > freeSlotCredits(t)) out.push(g);
     else used.set(termIndex(g.term), u + g.credits);
   }
   return out;

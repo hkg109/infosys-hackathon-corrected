@@ -36,7 +36,7 @@ describe("generateCandidates", () => {
 
   it("관심 진로가 비어 있으면 전체 진로를 탐색한다", () => {
     const set = gen({ ...sampleInputV2, careers: [], pace: { mode: "fixed", credits: 18 } });
-    expect(set.exploredCount).toBe(5);
+    expect(set.exploredCount).toBe(6);
   });
 
   it("병역 시작만 미정이면 학년 경계 시점 최대 3개를 펼쳐 실제로 계산한다", () => {

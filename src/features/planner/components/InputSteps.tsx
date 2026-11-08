@@ -10,7 +10,7 @@ import { formatTerm, GOAL_LABEL, LATE_LIGHT_CONFIG, paceBandsFor } from "@/engin
 import { usePlanner } from "../PlannerApp";
 import { parseGraduationCheck, type GraduationCheckParse } from "../graduationCheck";
 import { INPUT_STEPS, type StepId, stepPath } from "../inputSteps";
-import { blankDraft, type Draft, draftProblem, needsMilitary } from "../plan";
+import { blankDraft, type Draft, draftProblem, hasMajorReqDraft, type MajorRequirementDraft, needsMilitary } from "../plan";
 import { exPrefsOf, type ExchangePrefs, PRIORITY_LABEL } from "../exchangePrefs";
 import { type MilitaryPrefs, parseMilitarySentence, prefsOf, type SentenceParse } from "../militaryPrefs";
 import { completedTermsLabel, curriculumCovers } from "../profile";
@@ -521,6 +521,7 @@ function TargetStep({ ctx }: { ctx: StepCtx }) {
         <Help>
           학교 공통 졸업학점이 아니라 <b className="text-ink">내 졸업사정 조회에서 확인한 값</b>을 적어 주세요. 모르면 비워 두세요 — 그러면 예상 완료 학기는 ‘확인 필요’로 보여 드려요.
         </Help>
+        <MajorRequirementFields ctx={ctx} />
         {d.targetCredits !== null && (
           <p className="mt-3 text-[14px]">
             출처: <Tag tone={d.targetSource === "graduation_check" ? "sage" : "plain"}>{d.targetSource === "graduation_check" ? "개인 졸업사정 조회(이 학생만)" : "내가 정한 목표"}</Tag>
@@ -576,6 +577,45 @@ function TargetStep({ ctx }: { ctx: StepCtx }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/** 졸업사정의 전공 요건(전공학점·100~300단위·400단위)과 400단위 이수학점. 트랙 추천·로드맵이 전공 요건을 채우게 한다 */
+function MajorRequirementFields({ ctx }: { ctx: StepCtx }) {
+  const { d, set } = ctx;
+  const req = d.majorRequirement ?? null;
+  const setReq = (patch: Partial<Pick<MajorRequirementDraft, "major" | "lower" | "upper">>) => {
+    const next: MajorRequirementDraft = { major: null, lower: null, upper: null, source: "user_goal", ...req, ...patch };
+    set({ majorRequirement: hasMajorReqDraft(next) ? next : null });
+  };
+  const fields: Array<{ key: "major" | "lower" | "upper"; label: string }> = [
+    { key: "major", label: "전공학점" },
+    { key: "lower", label: "전공 100~300단위" },
+    { key: "upper", label: "전공 400단위" },
+  ];
+  const num = (v: string) => (v === "" ? null : Math.max(0, Math.floor(Number(v))));
+  return (
+    <div className="mt-6 rounded-[10px] border border-line bg-paper p-4">
+      <p className="text-[15px] font-semibold">전공 요건 (졸업사정 기준)</p>
+      <p className="mt-0.5 mb-3 text-[12px] text-muted">적으면 트랙마다 전공·400단위 학점을 채우는지 계산해요. 모르면 비워 두세요.</p>
+      <div className="grid grid-cols-3 gap-3">
+        {fields.map((f) => (
+          <label key={f.key} className="grid gap-1 text-[13px]">
+            <span className="text-ink-soft">{f.label}</span>
+            <span className="flex items-baseline gap-1">
+              <input type="number" min={0} max={200} inputMode="numeric" value={req?.[f.key] ?? ""} placeholder="—" onChange={(e) => setReq({ [f.key]: num(e.target.value) })} className="!w-[84px] tabular-nums" aria-label={`${f.label} 기준`} />
+              <span className="text-muted">학점</span>
+            </span>
+          </label>
+        ))}
+      </div>
+      <label className="mt-3 flex items-baseline gap-2 text-[13px]">
+        <span className="text-ink-soft">그중 지금까지 들은 전공 400단위</span>
+        <input type="number" min={0} max={200} inputMode="numeric" value={d.earnedUpperMajorCredits ?? ""} placeholder="—" onChange={(e) => set({ earnedUpperMajorCredits: num(e.target.value) })} className="!w-[84px] tabular-nums" aria-label="전공 400단위 이수학점" />
+        <span className="text-muted">학점 · 비우면 이수 과목으로 추정</span>
+      </label>
+      {req?.source === "graduation_check" && <p className="mt-2 text-[12px] text-sage-ink">졸업사정 조회에서 가져온 값이에요(이 학생만).</p>}
     </div>
   );
 }

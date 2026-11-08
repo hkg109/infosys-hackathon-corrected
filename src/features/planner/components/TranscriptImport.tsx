@@ -286,6 +286,13 @@ function ReviewDialog({
   const [earned, setEarned] = useState<number | null>(initialNumber(result.earnedCredits, draft.earnedCredits));
   const [major, setMajor] = useState<number | null>(initialNumber(result.earnedMajorCredits, draft.earnedMajorCredits));
   const [target, setTarget] = useState<number | null>(initialNumber(result.targetCredits, draft.targetCredits));
+  const [reqMajor, setReqMajor] = useState<number | null>(initialNumber(result.majorRequired, draft.majorRequirement?.major ?? null));
+  const [reqLower, setReqLower] = useState<number | null>(initialNumber(result.majorLowerRequired, draft.majorRequirement?.lower ?? null));
+  const [reqUpper, setReqUpper] = useState<number | null>(initialNumber(result.majorUpperRequired, draft.majorRequirement?.upper ?? null));
+  const [upperEarned, setUpperEarned] = useState<number | null>(initialNumber(result.majorUpperEarned, draft.earnedUpperMajorCredits ?? null));
+  const showMajorReq =
+    result.majorRequired.length + result.majorLowerRequired.length + result.majorUpperRequired.length + result.majorUpperEarned.length > 0 ||
+    draft.majorRequirement != null;
   const [rows, setRows] = useState<Row[]>(() => [
     ...result.completed.map((r) => ({ ...r, group: "completed" as const, status: "completed" as const, chosen: r.matchedCourseCode })),
     ...result.ambiguous.map((r) => ({ ...r, group: "ambiguous" as const, status: "exclude" as const, chosen: r.matchKind === "ocr_suggestion" ? null : r.matchedCourseCode })),
@@ -314,10 +321,21 @@ function ReviewDialog({
     earnedCredits: earned,
     earnedMajorCredits: major,
     targetCredits: target,
+    majorRequired: reqMajor,
+    majorLowerRequired: reqLower,
+    majorUpperRequired: reqUpper,
+    earnedUpperMajorCredits: upperEarned,
     completedCodes,
     mode,
   };
-  const current = { earnedCredits: draft.earnedCredits, earnedMajorCredits: draft.earnedMajorCredits, targetCredits: draft.targetCredits, completedCourseCodes: draft.completedCourseCodes };
+  const current = {
+    earnedCredits: draft.earnedCredits,
+    earnedMajorCredits: draft.earnedMajorCredits,
+    targetCredits: draft.targetCredits,
+    completedCourseCodes: draft.completedCourseCodes,
+    majorRequirement: draft.majorRequirement ?? null,
+    earnedUpperMajorCredits: draft.earnedUpperMajorCredits ?? null,
+  };
   const problem = importProblem(choice, current);
   const next = applyTranscriptImport(current, choice);
   const added = next.completedCourseCodes.filter((c) => !draft.completedCourseCodes.includes(c)).length;
@@ -372,6 +390,17 @@ function ReviewDialog({
               <NumberField label="전공 이수학점" value={major} onChange={setMajor} found={result.earnedMajorCredits} hint="총학점에 포함 — 더하지 않아요" />
               <NumberField label="목표(졸업 기준) 총학점" value={target} onChange={setTarget} found={result.targetCredits} hint="개인 졸업사정 값(모르면 비워 두세요)" />
             </div>
+            {showMajorReq && (
+              <>
+                <h4 className="mt-5 mb-2 text-[15px] font-semibold">전공 요건(졸업사정 기준)</h4>
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+                  <NumberField label="전공학점 기준" value={reqMajor} onChange={setReqMajor} found={result.majorRequired} hint="졸업사정의 ‘전공학점’" />
+                  <NumberField label="전공 100~300단위 기준" value={reqLower} onChange={setReqLower} found={result.majorLowerRequired} hint="졸업사정의 ‘전공 100~300단위’" />
+                  <NumberField label="전공 400단위 기준" value={reqUpper} onChange={setReqUpper} found={result.majorUpperRequired} hint="졸업사정의 ‘전공 400단위’" />
+                  <NumberField label="전공 400단위 이수학점" value={upperEarned} onChange={setUpperEarned} found={result.majorUpperEarned} hint="모르면 비워 두세요(이수 과목으로 추정)" />
+                </div>
+              </>
+            )}
             <p className="mt-2 text-[12px] text-muted">찾은 학과 과목의 학점 합은 {result.courseCreditSum}학점이에요(교양·타과·인정 학점이 빠져 있어 총 이수학점으로 쓰지 않아요).</p>
           </section>
 

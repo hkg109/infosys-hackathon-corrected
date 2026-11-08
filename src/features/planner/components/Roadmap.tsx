@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import type { BreakPeriod, CourseGroup, Dataset, PlanInput, PlannedTerm, PlanResult, Term } from "@/contracts/types";
-import { emptyGenEd, GEN_ED_NOTE, genEdCreditsIn, type GenEdState, isBlocked, termBreakdown, termIndex } from "@/engine";
+import { emptyGenEd, GEN_ED_NOTE, type GenEdState, isBlocked, termBreakdown, termIndex } from "@/engine";
 import { gradeLabel, termMonths } from "../plan";
 import { GroupDot, groupLabel } from "./ui";
 
@@ -139,7 +139,7 @@ function TermPage({
     );
 
   const b = termBreakdown(t, genEd, dataset);
-  const left = t.slotCredits - genEdCreditsIn(genEd, t.term);
+  const left = b.unassigned;
   const reason = (c: 2 | 3) => (left <= 0 ? "이 학기에는 남은 미지정 학점이 없어요" : c > left ? `남은 미지정 학점이 ${left}학점이에요` : `교양 ${c}학점 자리 추가`);
 
   return (
@@ -173,6 +173,16 @@ function TermPage({
             <span className="w-9 shrink-0 text-right tabular-nums text-ink-soft">{g.credits}</span>
           </li>
         ))}
+        {b.majorSlot > 0 && (
+          <li className="flex h-[34px] items-center gap-2.5 text-[13.5px]" title="전공 요건(졸업사정)을 채우려고 잡은 자리예요. 수강신청 때 전공 과목을 직접 골라야 해요.">
+            <span aria-hidden className="inline-block size-[9px] shrink-0 rounded-[2px] border border-dashed border-ink bg-ink/10" />
+            <span className="min-w-0 truncate font-medium">
+              전공 선택 자리
+            </span>
+            <span className="ml-auto shrink-0 text-[11px] text-muted">{(t.upperMajorSlotCredits ?? 0) > 0 ? `400단위 ${t.upperMajorSlotCredits}` : "전공 요건"}</span>
+            <span className="w-9 shrink-0 text-right tabular-nums text-ink-soft">{b.majorSlot}</span>
+          </li>
+        )}
         {b.unassigned > 0 && (
           <li className="flex h-[34px] items-center gap-2.5 text-[13px] text-muted">
             <span aria-hidden className="inline-block size-[9px] shrink-0 rounded-[2px] border border-dashed border-muted" />
@@ -209,7 +219,7 @@ function TermPage({
       <div className="flex items-center justify-between gap-2 px-4 pt-1.5 pb-2.5">
         {isCompletion ? <span className="font-hand text-[20px] text-red">여기서 계획 완료!</span> : <span />}
         <span className="text-right text-[12px] text-ink-soft tabular-nums">
-          전공 {b.major} · 교양 {b.generalEducation}
+          전공 {b.major + b.majorSlot} · 교양 {b.generalEducation}
           {b.unassigned > 0 ? ` · 미지정 ${b.unassigned}` : ""} · 합계 <b className="text-[14px] text-ink">{b.total}</b>
           {t.capCredits !== undefined && <span className="text-muted"> / 상한 {t.capCredits}</span>}
         </span>

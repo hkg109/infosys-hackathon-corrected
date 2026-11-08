@@ -40,6 +40,10 @@ export interface Draft {
   targetCredits: number | null;
   /** 목표학점 출처. graduation_check = 개인 졸업사정 조회 결과(공식 졸업학점으로 일반화하지 않음) */
   targetSource: "graduation_check" | "user_goal" | null;
+  /** 개인 졸업사정의 전공 요건(전공학점·100~300단위·400단위). 각 값 null = 모름 */
+  majorRequirement?: MajorRequirementDraft | null;
+  /** 전공 400단위 이수학점(전공 이수학점의 일부). null = 모름 → 이수 과목으로 추정 */
+  earnedUpperMajorCredits?: number | null;
   /** 관심 진로. unsure = 질문으로 추천받기 */
   career: CareerTrack | "unsure" | null;
   /** 진로 추천 질문 id → 고른 선택지 id */
@@ -87,6 +91,16 @@ export interface Draft {
   /** 테스트 프로필로 불러온 경우(가상 데이터) */
   demo: { profileId: string; label: string; genEd: Array<{ studyIndex: number; credits: 2 | 3 }> } | null;
 }
+
+export interface MajorRequirementDraft {
+  major: number | null;
+  lower: number | null;
+  upper: number | null;
+  source: "graduation_check" | "user_goal";
+}
+
+export const hasMajorReqDraft = (r: MajorRequirementDraft | null | undefined): r is MajorRequirementDraft =>
+  !!r && (r.major !== null || r.lower !== null || r.upper !== null);
 
 /** 교환학생 결과에서 고른 전략. 다시 계산하지 않고 이 값을 로드맵·출력이 함께 쓴다 */
 export interface ExchangeChoice {
@@ -196,6 +210,7 @@ export function draftToInputV2(draft: Draft, dataset: Dataset, careers: CareerTr
       completedTerms: draft.completedTerms,
       earnedCredits: draft.earnedCredits,
       earnedMajorCredits: draft.earnedMajorCredits,
+      earnedUpperMajorCredits: draft.earnedUpperMajorCredits ?? null,
       completedCourseCodes: draft.coursesConfirmed || draft.completedCourseCodes.length > 0 ? draft.completedCourseCodes : null,
       inProgressCourseCodes: [],
       unrecognizedLines: [],
@@ -204,6 +219,14 @@ export function draftToInputV2(draft: Draft, dataset: Dataset, careers: CareerTr
       draft.targetCredits === null
         ? null
         : { value: draft.targetCredits, source: draft.targetSource ?? "user_goal", checkedAt: null },
+    majorRequirement: hasMajorReqDraft(draft.majorRequirement)
+      ? {
+          majorCredits: draft.majorRequirement.major,
+          lowerLevelCredits: draft.majorRequirement.lower,
+          upperLevelCredits: draft.majorRequirement.upper,
+          source: draft.majorRequirement.source,
+        }
+      : null,
     requiredCourses: null,
     careers,
     pace:

@@ -162,11 +162,15 @@ describe("simulatePlan 경계 상황", () => {
     expect(r.terms[first].term).toEqual({ year: 2029, season: 1 });
   });
 
-  it("목표학점을 이미 채웠으면 빈 학점 슬롯 없이 남은 추천 과목만 배치한다", () => {
+  it("목표학점을 이미 채웠으면 남은 추천 과목만 배치하고, 빈 자리는 학교 최소 신청학점을 맞출 때만 둔다", () => {
     const r = simulatePlan({ ...sampleInputNoBreak, earnedCredits: 140, targetCredits: 130 }, fixtureDataset);
     expect(r.error).toBeNull();
     expect(r.remainingCredits).toBe(0);
-    for (const t of r.terms) expect(t.slotCredits).toBe(0);
+    for (const t of r.terms) {
+      if (t.slotCredits === 0) continue;
+      expect(t.plannedCredits).toBe(10);
+      expect(r.warnings.some((w) => w.code === "MIN_CREDITS_FILLED" && w.term && w.term.year === t.term.year && w.term.season === t.term.season)).toBe(true);
+    }
     const last = studyTerms(r).filter((t) => t.courses.length > 0).at(-1);
     expect(r.expectedCompletion).toEqual(last?.term);
   });

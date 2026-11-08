@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "fixture-2026-11-07-db3",
+  "catalogVersion": "fixture-2026-11-08-finance",
   "campus": "서울",
   "department": "정보시스템학과",
   "curriculum": "2024-2027",
@@ -905,6 +905,31 @@
       "courseCode": "GEN5026",
       "group": "business",
       "reason": "스타트업 아이디어를 사업계획으로 설계합니다."
+    },
+    {
+      "courseCode": "BUS3002",
+      "group": "finance",
+      "reason": "기업 자금 조달·투자 판단의 기초인 재무 개념을 다룹니다."
+    },
+    {
+      "courseCode": "MAT4015",
+      "group": "finance",
+      "reason": "위험·수익을 숫자로 다루는 금융 분석의 통계 기초입니다."
+    },
+    {
+      "courseCode": "ITE4087",
+      "group": "finance",
+      "reason": "데이터로 투자·여신 같은 금융 의사결정을 지원하는 방법을 다룹니다."
+    },
+    {
+      "courseCode": "ITE4049",
+      "group": "finance",
+      "reason": "디지털 자산·분산원장 등 핀테크 기반 기술과 연결됩니다."
+    },
+    {
+      "courseCode": "ITE4031",
+      "group": "finance",
+      "reason": "온라인 결제·플랫폼 금융 서비스의 사업 구조와 연결됩니다."
     }
   ],
   "rules": [
@@ -1416,7 +1441,7 @@
     "HYP4002": "S1 표기: 2027-1 ~ 2030-2"
   },
   "recommendation": {
-    "configVersion": "rec-2026-11-07-v2",
+    "configVersion": "rec-2026-11-08-v3",
     "careers": [
       {
         "track": "software",
@@ -1555,6 +1580,32 @@
             "reason": "스타트업 아이디어를 사업계획으로 설계합니다."
           }
         ]
+      },
+      {
+        "track": "finance",
+        "label": "금융 IT·핀테크",
+        "coreCourses": [
+          {
+            "courseCode": "BUS3002",
+            "reason": "기업 자금 조달·투자 판단의 기초인 재무 개념을 다룹니다."
+          },
+          {
+            "courseCode": "MAT4015",
+            "reason": "위험·수익을 숫자로 다루는 금융 분석의 통계 기초입니다."
+          },
+          {
+            "courseCode": "ITE4087",
+            "reason": "데이터로 투자·여신 같은 금융 의사결정을 지원하는 방법을 다룹니다."
+          },
+          {
+            "courseCode": "ITE4049",
+            "reason": "디지털 자산·분산원장 등 핀테크 기반 기술과 연결됩니다."
+          },
+          {
+            "courseCode": "ITE4031",
+            "reason": "온라인 결제·플랫폼 금융 서비스의 사업 구조와 연결됩니다."
+          }
+        ]
       }
     ],
     "paceOptions": [
@@ -1596,10 +1647,10 @@
         "termOrdinalFrom": 1,
         "termOrdinalTo": 4,
         "curriculum": null,
-        "note": "2026학년도 신입생부터 첫째~넷째 학기 20학점(예정 안내)"
+        "note": "2026학년도 신입생부터 첫째~넷째 학기 20학점(예정 안내) · 최소 신청학점 10학점(현행표와 같음)"
       },
       "maxCredits": 20,
-      "minCredits": null,
+      "minCredits": 10,
       "status": "planned",
       "sourceRef": {
         "sourceId": "S2",
@@ -1617,10 +1668,10 @@
         "termOrdinalFrom": 5,
         "termOrdinalTo": null,
         "curriculum": null,
-        "note": "서울 3학년 이상 최대 18학점 조정 예정(건축학부 제외 등 범위는 원문 확인)"
+        "note": "서울 3학년 이상 최대 18학점 조정 예정(건축학부 제외 등 범위는 원문 확인) · 최소 신청학점 10학점(현행표와 같음)"
       },
       "maxCredits": 18,
-      "minCredits": null,
+      "minCredits": 10,
       "status": "planned",
       "sourceRef": {
         "sourceId": "S2",

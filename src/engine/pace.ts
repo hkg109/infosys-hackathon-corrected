@@ -75,6 +75,36 @@ export function schoolCapFor(
   return hits.sort((x, y) => x.maxCredits - y.maxCredits || x.id.localeCompare(y.id))[0] ?? null;
 }
 
+/**
+ * 학교 최소 신청학점(S2 17~18쪽): 현행표(2025학년도 입학자까지)와 2026학년도 신입생 표 모두
+ * 첫째~일곱째 학기 10학점이다. 최대학점의 "예정" 여부와 별개로, 최소값은 두 표가 같으므로 둘 다 쓴다.
+ * 입학연도를 모르면 이 학기 순번에 걸리는 규칙들의 최소값이 모두 같을 때만 쓴다.
+ * 졸업예정학기(3학점)는 엔진이 마지막 학기를 졸업예정학기로 단정하지 않으므로 쓰지 않는다.
+ */
+export function schoolMinFor(
+  rules: CreditCapRule[] | undefined,
+  admissionYear: number | null | undefined,
+  ordinal: number,
+): { min: number; ruleId: string } | null {
+  if (!rules) return null;
+  const hits = rules.filter((r) => {
+    if (r.minCredits === null) return false;
+    const a = r.appliesTo;
+    if (admissionYear !== null && admissionYear !== undefined) {
+      if (a.admissionYearFrom !== null && admissionYear < a.admissionYearFrom) return false;
+      if (a.admissionYearTo !== null && admissionYear > a.admissionYearTo) return false;
+    }
+    if (a.termOrdinalFrom !== null && ordinal < a.termOrdinalFrom) return false;
+    if (a.termOrdinalTo !== null && ordinal > a.termOrdinalTo) return false;
+    return true;
+  });
+  if (hits.length === 0) return null;
+  const mins = new Set(hits.map((r) => r.minCredits));
+  if (mins.size > 1) return null;
+  const r = [...hits].sort((x, y) => x.id.localeCompare(y.id))[0];
+  return { min: r.minCredits!, ruleId: r.id };
+}
+
 /** 학기 계획 상한 = min(사용자 페이스 구간, 확인된 학교 상한) */
 export function termCapFor(
   input: PlanInput,

@@ -43,7 +43,15 @@ const OutputSchema = z.object({
       grade: z.string().nullable(),
     }),
   ),
-  summary: z.object({ earnedCredits: z.number().nullable(), majorCredits: z.number().nullable(), targetCredits: z.number().nullable() }),
+  summary: z.object({
+    earnedCredits: z.number().nullable(),
+    majorCredits: z.number().nullable(),
+    targetCredits: z.number().nullable(),
+    majorRequiredCredits: z.number().nullable(),
+    majorLowerRequiredCredits: z.number().nullable(),
+    majorUpperRequiredCredits: z.number().nullable(),
+    majorUpperEarnedCredits: z.number().nullable(),
+  }),
   unreadable: z.boolean(),
 });
 
@@ -53,7 +61,10 @@ const PROMPT = `이 이미지는 한국 대학교(한양대학교) 포털의 성
 - category: 이수구분(예: 교양필수, 전공핵심). 없으면 null.
 - code: 학수번호(예: CUL0203, I-D3018). 글자가 불확실하면 보이는 대로 쓰고 추측해서 고치지 마.
 - name: 교과목명. credits: 학점(숫자, 예: 2.00 → 2). grade: 등급(A+, B0, F, P, W 등). 점수·평점(96.7, 4.50)은 credits·grade에 넣지 마.
-- summary: 화면에 "총 취득학점/이수학점", "전공 취득학점", "졸업학점(기준)"이 숫자로 분명히 보일 때만 그 값. 아니면 null. 과목 학점을 직접 더하지 마.
+- summary: 화면에 숫자로 분명히 보일 때만 그 값, 아니면 null. 과목 학점을 직접 더하지 마.
+  - earnedCredits: 총 취득(이수)학점. majorCredits: 전공 취득(이수)학점. targetCredits: 졸업학점 기준(요건).
+  - majorRequiredCredits: 졸업요건의 "전공학점" 기준값. majorLowerRequiredCredits: "전공 100~300단위" 기준값. majorUpperRequiredCredits: "전공 400단위" 기준값. majorUpperEarnedCredits: 전공 400단위 취득학점.
+  - 졸업사정 화면에 기준(요건) 열만 있으면 그 숫자는 기준값이야. 취득학점(earnedCredits, majorCredits, majorUpperEarnedCredits)에 넣지 마. 기준과 취득 중 어느 열인지 모호하면 null.
 - 이름·학번·생년월일 같은 개인정보는 어디에도 쓰지 마.
 - 성적 화면이 아니거나 글자를 읽을 수 없으면 rows는 빈 배열, unreadable은 true.`;
 

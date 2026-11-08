@@ -11,14 +11,17 @@ import type {
   PlanWarning,
   UnplacedCourse,
 } from "@/contracts/types";
-import { maxUserCap, termCapFor } from "./pace";
+import { estimateUpperEarned, hasMajorRequirement, majorShortfall, sumMajorLevels } from "./majorReq";
+import { maxUserCap, schoolMinFor, termCapFor } from "./pace";
 import { formatTerm, isBlocked, isValidDate, nextTerm, termIndex } from "./terms";
 
 export const ENGINE_VERSION = "0.2.0";
 export const MAX_FUTURE_TERMS = 24;
 
-export function groupOf(code: string, dataset: Dataset): CourseGroup | null {
-  return dataset.careerTags.find((t) => t.courseCode === code)?.group ?? null;
+/** 과목이 여러 진로에 걸치면(예: 재무관리 = 비즈니스·금융) 고른 진로 → 공통 → 첫 태그 순으로 고른다. */
+export function groupOf(code: string, dataset: Dataset, track?: CareerTrack): CourseGroup | null {
+  const tags = dataset.careerTags.filter((t) => t.courseCode === code);
+  return (tags.find((t) => t.group === track) ?? tags.find((t) => t.group === "common") ?? tags[0])?.group ?? null;
 }
 
 const semesterOrder = (s: Course["semester"]) => (s === 1 ? 1 : s === 2 ? 2 : 3);
@@ -26,10 +29,7 @@ const semesterOrder = (s: Course["semester"]) => (s === 1 ? 1 : s === 2 ? 2 : 3)
 /** 공통 기반 + 선택한 진로의 추천 과목. 결정적인 순서로 정렬한다. */
 export function recommendedCourses(dataset: Dataset, track: CareerTrack): Course[] {
   return dataset.courses
-    .filter((c) => {
-      const g = groupOf(c.code, dataset);
-      return g === "common" || g === track;
-    })
+    .filter((c) => dataset.careerTags.some((t) => t.courseCode === c.code && (t.group === "common" || t.group === track)))
     .sort(
       (a, b) =>
         (a.recommendedYear ?? 99) - (b.recommendedYear ?? 99) ||
@@ -62,6 +62,13 @@ export function validatePlanInput(input: PlanInput): string | null {
     return "인정 유효학기는 0 이상의 정수여야 합니다.";
   if (input.targetCredits !== null && (!Number.isFinite(input.targetCredits) || input.targetCredits <= 0))
     return "목표학점은 0보다 커야 합니다.";
+  const r = input.majorRequirement;
+  if (r)
+    for (const v of [r.majorCredits, r.lowerLevelCredits, r.upperLevelCredits])
+      if (v !== null && (!Number.isFinite(v) || v < 0)) return "전공 요건 학점은 0 이상이어야 합니다.";
+  const up = input.earnedUpperMajorCredits;
+  if (up !== undefined && up !== null && (!Number.isFinite(up) || up < 0 || up > input.earnedMajorCredits))
+    return "전공 400단위 이수학점은 전공 이수학점 안에 포함되어야 합니다.";
   for (const b of input.breaks) {
     if (!isValidDate(b.startDate) || !isValidDate(b.endDate))
       return "중단 기간의 날짜 형식을 확인해 주세요.";
@@ -139,8 +146,19 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
     input.targetCredits === null ? null : Math.max(0, input.targetCredits - input.earnedCredits);
   const terms: PlannedTerm[] = [];
   const warnings: PlanWarning[] = [];
+
+  // 전공 요건: 추천 과목으로 못 채우는 전공 학점은 '전공 선택 자리'로 잡는다(400단위는 3학년부터).
+  const req = hasMajorRequirement(input.majorRequirement) ? input.majorRequirement : null;
+  const upperGiven = input.earnedUpperMajorCredits ?? null;
+  const earnedUpper = Math.min(input.earnedMajorCredits, upperGiven ?? estimateUpperEarned(input.completedCourseCodes, dataset));
+  const majorEarned = { major: input.earnedMajorCredits, lower: input.earnedMajorCredits - earnedUpper, upper: earnedUpper };
+  const queueLevels = sumMajorLevels(queue);
+  const need = req ? majorShortfall(req, majorEarned, queueLevels) : { major: 0, lower: 0, upper: 0 };
+  let majorLeft = need.major;
+  let upperLeft = need.upper;
+
   let activeTerms = 0;
-  let finished = queue.length === 0 && (remaining === null || remaining === 0);
+  let finished = queue.length === 0 && (remaining === null || remaining === 0) && majorLeft === 0;
   let lastStudyTerm = null as PlannedTerm["term"] | null;
   let term = input.startTerm;
 
@@ -174,7 +192,7 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
         code: c.code,
         name: c.name,
         credits: c.credits,
-        group: groupOf(c.code, dataset) ?? "common",
+        group: groupOf(c.code, dataset, input.track) ?? "common",
         assumptions,
       });
       used += c.credits;
@@ -185,7 +203,36 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
     // 선수과목은 다음 학기부터 충족된 것으로 본다.
     placedCodes.forEach((code) => done.add(code));
 
-    const planned = remaining === null ? used : Math.min(cap, Math.max(used, remaining));
+    // 남은 자리에 전공 선택 자리를 먼저 둔다. 400단위 자리는 3학년부터.
+    const free = Math.max(0, cap - used);
+    const upperSlot = studentYear >= 3 ? Math.min(free, upperLeft) : 0;
+    const otherSlot = Math.min(free - upperSlot, majorLeft - upperLeft);
+    const majorSlot = upperSlot + otherSlot;
+    upperLeft -= upperSlot;
+    majorLeft -= majorSlot;
+
+    const fixed = used + majorSlot;
+    let planned = remaining === null ? fixed : Math.min(cap, Math.max(fixed, remaining));
+    // 학교 최소 신청학점(1~7번째 학기 10학점, S2 17~18쪽)보다 적으면 미지정 자리로 채운다. 학기 상한·사용자 학기 제한이 더 작으면 그 값까지만.
+    const ordinal = input.completedTerms + activeTerms + 1;
+    const minRule = schoolMinFor(dataset.creditCapRules, input.admissionYear, ordinal);
+    if (minRule && planned < minRule.min) {
+      const filled = Math.min(cap, minRule.min);
+      if (filled > planned) {
+        warnings.push({
+          code: "MIN_CREDITS_FILLED",
+          message: `${formatTerm(term)}은 ${ordinal}번째 학기라 최소 신청학점 ${minRule.min}학점(수강신청 안내 17~18쪽)을 맞추려고 미지정 자리 ${filled - planned}학점을 더했어요.`,
+          term,
+        });
+        planned = filled;
+      }
+      if (filled < minRule.min)
+        warnings.push({
+          code: "MIN_CREDITS_FILLED",
+          message: `${formatTerm(term)} 계획 학점(${filled})이 최소 신청학점 ${minRule.min}학점보다 적어요. 학기 학점 제한을 확인하세요.`,
+          term,
+        });
+    }
     if (remaining !== null) remaining = Math.max(0, remaining - planned);
 
     for (const p of placed) {
@@ -205,10 +252,19 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
         });
     }
 
-    terms.push({ term, status: "study", courses: placed, slotCredits: planned - used, plannedCredits: planned, capCredits: cap, capRuleId: ruleId });
+    terms.push({
+      term,
+      status: "study",
+      courses: placed,
+      slotCredits: planned - used,
+      ...(req ? { majorSlotCredits: majorSlot, upperMajorSlotCredits: upperSlot } : {}),
+      plannedCredits: planned,
+      capCredits: cap,
+      capRuleId: ruleId,
+    });
     activeTerms++;
     lastStudyTerm = term;
-    finished = queue.length === 0 && (remaining === null || remaining === 0);
+    finished = queue.length === 0 && (remaining === null || remaining === 0) && majorLeft === 0;
   }
 
   const unplaced: UnplacedCourse[] = [
@@ -249,6 +305,34 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
       message: "일부 과목의 공식 선수요건을 확인하지 못했습니다.",
     });
 
+  let majorProgress: PlanResult["majorProgress"] = null;
+  if (req) {
+    const placedAll = terms.flatMap((t) => t.courses).map((p) => recommended.find((c) => c.code === p.code)!).filter(Boolean);
+    const planned = sumMajorLevels(placedAll);
+    const slotted = {
+      major: need.major - majorLeft,
+      upper: need.upper - upperLeft,
+    };
+    const lowerSlotted = Math.min(need.lower, slotted.major - slotted.upper);
+    majorProgress = {
+      required: { major: req.majorCredits, lower: req.lowerLevelCredits, upper: req.upperLevelCredits },
+      earned: { ...majorEarned, upperEstimated: upperGiven === null },
+      planned,
+      extra: { major: slotted.major, lower: lowerSlotted, upper: slotted.upper },
+      met: majorLeft === 0 && unplaced.length === 0,
+    };
+    if (need.major > 0)
+      warnings.push({
+        code: "MAJOR_EXTRA",
+        message: `전공 요건까지 ${need.major}학점${need.upper > 0 ? `(400단위 ${need.upper}학점 포함)` : ""}이 이 진로 추천 과목만으로는 모자라 '전공 선택 자리'로 넣었어요. 수강신청 때 전공 과목을 직접 골라야 해요.`,
+      });
+    if (upperGiven === null && req.upperLevelCredits !== null)
+      warnings.push({
+        code: "MAJOR_LEVEL_ESTIMATED",
+        message: `전공 400단위 이수학점을 입력하지 않아 이수 과목 중 자료에 있는 400단위 과목(${earnedUpper}학점)으로 추정했어요.`,
+      });
+  }
+
   // 배치하지 못한 과목이 있으면 완료 시점을 추정하지 않는다.
   const canEstimate = finished && unplaced.length === 0 && input.targetCredits !== null;
   return {
@@ -260,5 +344,6 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
     expectedCompletion: canEstimate ? (lastStudyTerm ?? input.startTerm) : null,
     estimation: canEstimate ? "user_target" : "unavailable",
     remainingCredits: remaining,
+    ...(req ? { majorProgress } : {}),
   };
 }

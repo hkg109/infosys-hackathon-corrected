@@ -36,6 +36,7 @@ export {
   addGenEd,
   removeGenEd,
   genEdCreditsIn,
+  freeSlotCredits,
   termBreakdown,
   staleGenEd,
 } from "./genEd";
@@ -44,3 +45,4 @@ export { planStats } from "./stats";
 export type { PlanStats } from "./stats";
 export { buildMilitaryStrategies, selectBranchPeriod, nextCycle, concurrencyFor, GOAL_LABEL, BRANCH_LABEL, PROGRAM } from "./militaryStrategy";
 export { buildExchangeCandidateSet, completedAtDeparture, completedAtApplication, convertGpa, cycleFor, targetTerms, PRIORITY_NO_DATA, type MilitaryWindow, type ExchangeContext } from "./exchange";
+export { courseLevel, estimateUpperEarned, hasMajorRequirement, isMajorCourse, LEVEL_ASSUMPTION, majorShortfall, sumMajorLevels } from "./majorReq";

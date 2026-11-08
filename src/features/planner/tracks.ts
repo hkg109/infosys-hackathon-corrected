@@ -147,9 +147,12 @@ const periodUnresolved = (c: TrackCandidate) => c.missing.some((m) => m.field.st
 
 const metric = (c: TrackCandidate, key: string) => c.metrics.find((m) => m.key === key)?.value ?? null;
 
+/** 전공 요건을 넣었을 때, 추천 과목 밖에서 더 골라야 하는 전공 학점. 요건이 없으면 null */
+const majorExtra = (c: TrackCandidate) => c.result?.majorProgress?.extra.major ?? null;
+
 export function buildTracks(draft: Draft, dataset: DatasetV2, today = ""): TrackSet {
   const picked = draft.career && draft.career !== "unsure" ? draft.career : null;
-  const matches = recommendCareers(draft.answers, draft.completedCourseCodes, dataset, picked);
+  const quizMatches = recommendCareers(draft.answers, draft.completedCourseCodes, dataset, picked);
   const opts = { today: today || undefined };
   const raws: Raw[] = [];
   let military: MilitaryScenarioResolution | null = null;
@@ -160,7 +163,7 @@ export function buildTracks(draft: Draft, dataset: DatasetV2, today = ""): Track
         ? [draft.exchange.ordinal]
         : [];
 
-  for (const { track: career } of matches) {
+  for (const { track: career } of quizMatches) {
     const base = draftToInputV2(draft, dataset, [career]);
     const set = generateCandidates(base, dataset, undefined, opts);
     military ??= set.military ?? null;
@@ -187,6 +190,19 @@ export function buildTracks(draft: Draft, dataset: DatasetV2, today = ""): Track
     }
   }
 
+  // 전공 요건(졸업사정)을 넣었으면: 질문 점수가 같은 진로끼리는 추천 과목만으로 전공 요건을 더 많이 채우는 진로를 앞에 둔다.
+  const extraOf = (career: CareerTrack) =>
+    Math.min(...raws.filter((r) => r.career === career && !r.exc).map((r) => majorExtra(r.candidate) ?? 0), Infinity);
+  const matches = quizMatches
+    .map((m, i) => ({ m, i, extra: extraOf(m.track) }))
+    .sort(
+      (a, b) =>
+        Number(b.m.track === picked) - Number(a.m.track === picked) ||
+        b.m.score - a.m.score ||
+        (a.extra === Infinity ? 0 : a.extra) - (b.extra === Infinity ? 0 : b.extra) ||
+        a.i - b.i,
+    )
+    .map(({ m }) => m);
   const careerOrder = new Map(matches.map((m, i) => [m.track, i]));
   const roleOrder = { primary: 0, normal: 1, conditional: 2, fallback: 3 } as const;
   // 교환 전략을 고른 경우: 그 학기 교환 트랙을 먼저(고른 계획이 기본 로드맵이 되도록). 아니면 교환 없는 트랙을 먼저.
@@ -277,6 +293,23 @@ function describeTrack(r: Raw, rank: number, all: Raw[], draft: Draft, dataset: 
         : `진로 핵심 과목을 평균 ${core.toFixed(1)}번째 학기에 들어요.`,
     );
   }
+  const mp = res?.majorProgress ?? null;
+  const majorCautions: string[] = [];
+  if (mp) {
+    const reqParts = [
+      mp.required.major !== null && `전공 ${mp.required.major}`,
+      mp.required.lower !== null && `100~300단위 ${mp.required.lower}`,
+      mp.required.upper !== null && `400단위 ${mp.required.upper}`,
+    ].filter(Boolean);
+    const coveredUpper = mp.earned.upper + mp.planned.upper;
+    if (mp.extra.major === 0)
+      highlights.push(`이 진로 추천 과목만으로 전공 요건(${reqParts.join(" · ")}학점)을 채워요${mp.required.upper !== null ? ` — 400단위 ${coveredUpper}학점` : ""}.`);
+    else {
+      highlights.push(`전공 요건(${reqParts.join(" · ")}학점) 중 이 진로 과목으로 전공 ${mp.earned.major + mp.planned.major}학점${mp.required.upper !== null ? ` · 400단위 ${coveredUpper}학점` : ""}을 채워요.`);
+      majorCautions.push(`전공 ${mp.extra.major}학점${mp.extra.upper > 0 ? `(400단위 ${mp.extra.upper}학점 포함)` : ""}은 추천 과목 밖에서 골라야 해요. 로드맵에 ‘전공 선택 자리’로 넣었어요.`);
+    }
+    if (mp.earned.upperEstimated && mp.required.upper !== null) majorCautions.push(`지금까지 들은 400단위 전공은 이수 과목으로 추정했어요(${mp.earned.upper}학점). 졸업사정 값을 적으면 더 정확해요.`);
+  }
   if (stats.maxCredits !== null && stats.maxCredits <= 15) highlights.push(`한 학기 최대 ${stats.maxCredits}학점으로 여유 있게 다녀요.`);
   if (style === "late_light" && stats.year4PlusAvg !== null)
     highlights.push(`4학년 이후 평균 ${stats.year4PlusAvg.toFixed(1)}학점으로 줄여 계획해요(서비스 계획 방식).`);
@@ -288,6 +321,7 @@ function describeTrack(r: Raw, rank: number, all: Raw[], draft: Draft, dataset: 
   if (r.exc) highlights.push(`${formatTerm(r.exc)}에 교환학생 한 학기를 넣었어요. 군 복무 기간과 겹치지 않게 골랐어요.`);
 
   const cautions = [
+    ...majorCautions,
     ...(c.key.militaryRole === "conditional" ? ["카투사 선발 결과에 따라 달라지는 조건부 계획이에요. 선발을 가정한 것이며 합격 가능성 예측이 아니에요."] : []),
     ...(res?.assumptions.filter((a) => a.id !== "term_calendar").map((a) => a.message) ?? []),
     ...c.missing.map((m) => `${m.message}${m.impact ? ` ${m.impact}` : ""}`),

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, BarChart3, ChevronLeft, ChevronRight, Code2, Info, ShieldCheck, Store, Workflow, type LucideIcon } from "lucide-react";
+import { ArrowRight, BarChart3, ChevronLeft, ChevronRight, Code2, Info, Landmark, ShieldCheck, Store, Workflow, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { CAREER_LABEL } from "@/contracts/careers";
@@ -17,6 +17,7 @@ export const CAREER_ICON: Record<CareerTrack, LucideIcon> = {
   security: ShieldCheck,
   consulting: Workflow,
   business: Store,
+  finance: Landmark,
 };
 
 const shortTerm = (t: { year: number; season: number } | null) => (t ? `'${String(t.year).slice(2)}-${t.season}` : null);
