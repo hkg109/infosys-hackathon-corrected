@@ -124,7 +124,7 @@ export function MilitaryInfo() {
       kicker="알아두면 좋은 · 군대"
       title="군대 트랙, 어떻게 고를까"
       lead="병무청 원문을 직접 열어 확인한 내용만 담았어요. 원문에 없는 복무기간·점수는 비워 두고 ‘확인 필요’로 표시해요. 이 화면은 합격 가능성 예측이 아니에요."
-      back={{ href: "/input/military-track", label: "군 복무 트랙 질문으로 돌아가기" }}
+      back={{ href: "/input/military-branch", label: "군 복무 질문으로 돌아가기" }}
       mine={
         <>
           <p className="font-hand text-[26px] leading-none text-ink">내 계획에 넣은 군대 트랙</p>
