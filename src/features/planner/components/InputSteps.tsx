@@ -8,7 +8,6 @@ import { CAREER_LABEL, CAREER_TRACKS } from "@/contracts/careers";
 import type { CareerTrack, DatasetV2, ExchangePriority, PriorityKey, Term } from "@/contracts/types";
 import { formatTerm, GOAL_LABEL, LATE_LIGHT_CONFIG, paceBandsFor } from "@/engine";
 import { usePlanner } from "../PlannerApp";
-import { parseGraduationCheck, type GraduationCheckParse } from "../graduationCheck";
 import { INPUT_STEPS, type StepId, stepPath } from "../inputSteps";
 import { blankDraft, type Draft, draftProblem, hasMajorReqDraft, type MajorRequirementDraft, needsMilitary } from "../plan";
 import { exPrefsOf, type ExchangePrefs, PRIORITY_LABEL } from "../exchangePrefs";
@@ -16,7 +15,6 @@ import { type MilitaryPrefs, parseMilitarySentence, prefsOf, type SentenceParse 
 import { completedTermsLabel, curriculumCovers } from "../profile";
 import { stepAnswered, stepProblem, visibleSteps } from "../questions";
 import { QUIZ } from "../recommend";
-import { SAMPLE_GRADUATION_CHECK } from "../testProfiles";
 import { TranscriptImport } from "./TranscriptImport";
 import { Button, Choice, Tag } from "./ui";
 
@@ -533,10 +531,8 @@ function CoursesStep({ ctx }: { ctx: StepCtx }) {
 
 function TargetStep({ ctx }: { ctx: StepCtx }) {
   const { d, set } = ctx;
-  const [paste, setPaste] = useState(d.demo?.profileId === "D" ? SAMPLE_GRADUATION_CHECK : "");
-  const [parsed, setParsed] = useState<GraduationCheckParse | null>(null);
   return (
-    <div className="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-12">
+    <div className="max-w-[640px]">
       <div>
         <BigNumber
           value={d.targetCredits}
@@ -556,52 +552,6 @@ function TargetStep({ ctx }: { ctx: StepCtx }) {
               비우기
             </button>
           </p>
-        )}
-      </div>
-      <div className="rounded-[10px] border border-line bg-paper p-5">
-        <p className="flex items-center gap-2 text-[16px] font-semibold">
-          <ClipboardPaste size={17} aria-hidden /> 졸업사정 조회 결과 붙여넣기
-        </p>
-        <p className="mt-1 mb-3 text-[13px] text-muted">열이 분명한 값만 읽고, 어느 열인지 모호한 줄은 직접 확인하도록 남겨요.</p>
-        <textarea value={paste} onChange={(e) => setPaste(e.target.value)} rows={6} className="w-full resize-y font-mono text-[12px]" aria-label="졸업사정 조회 결과" />
-        <Button className="mt-2" disabled={!paste.trim()} onClick={() => setParsed(parseGraduationCheck(paste))}>
-          읽어 보기
-        </Button>
-        {parsed && (
-          <div className="mt-4 text-[14px]">
-            <ul className="grid gap-1">
-              {parsed.rows.map((r) => (
-                <li key={r.raw} className="flex items-baseline gap-2">
-                  <Tag tone={r.status === "clear" ? "sage" : "red"}>{r.status === "clear" ? "읽음" : r.status === "ambiguous" ? "확인 필요" : "숫자 없음"}</Tag>
-                  <b className="font-medium">{r.label}</b>
-                  <span className="text-ink-soft">
-                    {r.status === "clear" ? Object.entries(r.values).map(([k, v]) => `${k} ${v}`).join(" · ") : r.note}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {parsed.target.status === "clear" ? (
-              <Button
-                kind="ink"
-                className="mt-4"
-                onClick={() =>
-                  set({
-                    targetCredits: parsed.target.value,
-                    targetSource: "graduation_check",
-                    ...(parsed.earned.status === "clear" ? { earnedCredits: parsed.earned.value } : {}),
-                    ...(parsed.majorEarned.status === "clear" ? { earnedMajorCredits: parsed.majorEarned.value } : {}),
-                  })
-                }
-              >
-                확인했어요 — 목표 {parsed.target.value}학점
-                {parsed.earned.status === "clear" ? ` · 취득 ${parsed.earned.value}학점` : ""}
-                {parsed.majorEarned.status === "clear" ? ` · 전공 취득 ${parsed.majorEarned.value}학점` : ""} 사용
-              </Button>
-            ) : (
-              <p className="mt-3 text-red">목표 졸업학점 줄을 분명하게 읽지 못했어요. 왼쪽에 직접 적어 주세요.</p>
-            )}
-            <p className="mt-2 text-[12px] text-muted">이 값은 이 학생 한 명의 입력값으로만 써요. 학교 공통 졸업요건으로 저장하지 않아요.</p>
-          </div>
         )}
       </div>
     </div>
