@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { CAREER_LABEL, CAREER_TRACKS } from "@/contracts/careers";
-import type { CareerTrack, DatasetV2, PriorityKey, Term } from "@/contracts/types";
+import type { CareerTrack, DatasetV2, ExchangePriority, PriorityKey, Term } from "@/contracts/types";
 import { formatTerm, GOAL_LABEL, LATE_LIGHT_CONFIG, paceBandsFor } from "@/engine";
 import { usePlanner } from "../PlannerApp";
 import { parseGraduationCheck, type GraduationCheckParse } from "../graduationCheck";
 import { INPUT_STEPS, type StepId, stepPath } from "../inputSteps";
 import { blankDraft, type Draft, draftProblem, needsMilitary } from "../plan";
+import { exPrefsOf, type ExchangePrefs, PRIORITY_LABEL } from "../exchangePrefs";
 import { type MilitaryPrefs, parseMilitarySentence, prefsOf, type SentenceParse } from "../militaryPrefs";
 import { completedTermsLabel, curriculumCovers } from "../profile";
 import { stepAnswered, stepProblem, visibleSteps } from "../questions";
@@ -226,6 +227,16 @@ function StepBody({ step, ctx }: { step: StepId; ctx: StepCtx }) {
       return <LeaveStep ctx={ctx} />;
     case "exchange":
       return <ExchangeStep ctx={ctx} />;
+    case "exchange-when":
+      return <ExchangeWhenStep ctx={ctx} />;
+    case "exchange-length":
+      return <ExchangeLengthStep ctx={ctx} />;
+    case "exchange-goal":
+      return <ExchangeGoalStep ctx={ctx} />;
+    case "exchange-language":
+      return <ExchangeLanguageStep ctx={ctx} />;
+    case "exchange-life":
+      return <ExchangeLifeStep ctx={ctx} />;
     case "priority":
       return <PriorityStep ctx={ctx} />;
     case "review":
@@ -937,43 +948,230 @@ function LeaveStep({ ctx }: { ctx: StepCtx }) {
   );
 }
 
-const EXCHANGE_TERMS: Array<[number, string]> = [
-  [3, "2학년 2학기"],
-  [4, "3학년 1학기"],
-  [5, "3학년 2학기"],
-  [6, "4학년 1학기"],
-];
+function setEx(ctx: StepCtx, patch: Partial<ExchangePrefs>) {
+  ctx.update((x) => {
+    const next = { ...exPrefsOf(x), ...patch };
+    const on = next.intent !== null && next.intent !== "none";
+    // 트랙 계산용 교환 모드: 고른 전략이 있으면 그 학기, 없으면 시기별 추천
+    const exchange: Draft["exchange"] = !on ? { mode: "none", ordinal: null } : x.exchangeChoice ? x.exchange : { mode: "recommend", ordinal: null };
+    return { ...x, exchangePrefs: next, exchange, ...(on ? {} : { exchangeChoice: null }) };
+  });
+}
 
 function ExchangeStep({ ctx }: { ctx: StepCtx }) {
-  const { d, update } = ctx;
-  const setEx = (patch: Partial<Draft["exchange"]>) => update((x) => ({ ...x, exchange: { ...x.exchange, ...patch } }));
-  const done = d.completedTerms ?? 0;
+  const p = exPrefsOf(ctx.d);
   return (
     <div>
       <BigChoices
         ctx={ctx}
         label="교환학생"
+        cols={2}
+        options={[
+          { value: "committed" as const, label: "꼭 가고 싶어요" },
+          { value: "conditional" as const, label: "조건이 맞으면 가고 싶어요" },
+          { value: "considering" as const, label: "아직 고민 중이에요" },
+          { value: "none" as const, label: "지금은 생각 없어요", desc: "로드맵에 넣지 않아요(정보는 언제든 볼 수 있어요)" },
+        ]}
+        selected={(v) => p.intent === v}
+        onPick={(v) => setEx(ctx, { intent: v })}
+      />
+      <Help>교환 시기와 지원 학교까지 졸업·군 복무 계획에 함께 맞춰 볼 수 있어요. 학교별 TO·마감·GPA 기준·과목 제한은 묻지 않고 공식 자료로 확인해요.</Help>
+      <InfoLink href="/info/exchange" title="교환학생 선택지 자세히 알아보기" desc="교환·방문학생 차이, 준비 흐름, 학점 인정 방식을 정리했어요." />
+    </div>
+  );
+}
+
+function ExchangeWhenStep({ ctx }: { ctx: StepCtx }) {
+  const p = exPrefsOf(ctx.d);
+  const start = ctx.d.startTerm;
+  const terms: Term[] = [];
+  if (start) {
+    let t = start;
+    for (let i = 0; i < 6; i++) {
+      terms.push(t);
+      t = t.season === 1 ? { year: t.year, season: 2 } : { year: t.year + 1, season: 1 };
+    }
+  }
+  return (
+    <div>
+      <BigChoices
+        ctx={ctx}
+        label="교환 시기"
         cols={3}
         autoAdvance={false}
         options={[
-          { value: "recommend" as const, label: "관심 있어요", desc: "언제 갈지는 트랙으로 추천받을래요" },
-          { value: "pick" as const, label: "가고 싶은 학기가 있어요", desc: "학년·학기를 고를게요" },
-          { value: "none" as const, label: "생각 없어요", desc: "국내에서만 다닐래요" },
+          { value: "recommend" as const, label: "가장 좋은 시기를 추천해 주세요", desc: "지원 자격·군 복무를 보고 골라요" },
+          { value: "next_spring" as const, label: "다음 봄학기" },
+          { value: "next_fall" as const, label: "다음 가을학기" },
+          { value: "fixed" as const, label: "직접 학기를 고를게요" },
+          { value: "unknown" as const, label: "아직 모르겠어요" },
         ]}
-        selected={(v) => d.exchange.mode === v}
-        onPick={(v) => setEx({ mode: v, ...(v !== "pick" ? { ordinal: null } : {}) })}
+        selected={(v) => p.when === v}
+        onPick={(v) => setEx(ctx, { when: v, ...(v !== "fixed" ? { fixedTerm: null } : {}) })}
       />
-      {d.exchange.mode === "pick" && (
-        <div role="radiogroup" aria-label="교환 학기" className="mt-5 flex flex-wrap gap-2">
-          {EXCHANGE_TERMS.filter(([o]) => o >= done).map(([o, label]) => (
-            <Choice key={o} selected={d.exchange.ordinal === o} onClick={() => setEx({ ordinal: o })} className="min-h-[52px] text-[15px]">
-              {label}
+      {p.when === "fixed" && (
+        <div role="radiogroup" aria-label="파견 학기" className="mt-5 flex flex-wrap gap-2">
+          {terms.map((t) => (
+            <Choice key={`${t.year}-${t.season}`} selected={p.fixedTerm?.year === t.year && p.fixedTerm?.season === t.season} onClick={() => setEx(ctx, { fixedTerm: t })} className="min-h-[52px] text-[15px]">
+              {formatTerm(t)}
             </Choice>
           ))}
         </div>
       )}
-      <Help>교환 학기는 군 복무와 겹치지 않게 넣어요. 인정 학점은 학교 승인 전이라 더하지 않고, 그 뒤 완료 시점은 ‘확인 필요’로 보여 드려요.</Help>
-      <InfoLink href="/info/exchange" title="교환학생 선택지 자세히 알아보기" desc="교환·방문학생 차이, 준비 흐름, 학점 인정 방식을 정리했어요." />
+      <details className="mt-8 max-w-[760px] text-[14px]">
+        <summary className="cursor-pointer font-medium text-ink-soft">해당되면 체크해 주세요(선택)</summary>
+        <div className="mt-3 grid gap-2 rounded-[10px] border border-line p-4">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={p.priorExchange} onChange={(e) => setEx(ctx, { priorExchange: e.target.checked })} /> 예전에 파견교환을 다녀왔어요
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={p.transfer} onChange={(e) => setEx(ctx, { transfer: e.target.checked })} /> 편입생이에요
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={p.doubleMajor} onChange={(e) => setEx(ctx, { doubleMajor: e.target.checked })} /> 복수전공(복수학위)을 하고 있어요
+          </label>
+        </div>
+      </details>
+      <Help>공고가 아직 없는 학기는 학교를 확정하지 않고, 지난 회차 자료로 준비할 점과 ‘다음 공고 확인 필요’를 보여 드려요.</Help>
+    </div>
+  );
+}
+
+function ExchangeLengthStep({ ctx }: { ctx: StepCtx }) {
+  const p = exPrefsOf(ctx.d);
+  return (
+    <BigChoices
+      ctx={ctx}
+      label="교환 기간"
+      cols={2}
+      options={[
+        { value: "one_term" as const, label: "한 학기" },
+        { value: "one_year" as const, label: "1년", desc: "1년 옵션이 확인된 학교만 보여 드려요" },
+        { value: "either" as const, label: "둘 다 괜찮아요" },
+        { value: "recommend" as const, label: "추천해 주세요" },
+      ]}
+      selected={(v) => p.duration === v}
+      onPick={(v) => setEx(ctx, { duration: v })}
+    />
+  );
+}
+
+function ExchangeGoalStep({ ctx }: { ctx: StepCtx }) {
+  const p = exPrefsOf(ctx.d);
+  const all = Object.keys(PRIORITY_LABEL) as ExchangePriority[];
+  const toggle = (k: ExchangePriority) => {
+    const has = p.priorities.includes(k);
+    const next = has ? p.priorities.filter((x) => x !== k) : p.priorities.length >= 2 ? [p.priorities[0], k] : [...p.priorities, k];
+    setEx(ctx, { priorities: next });
+  };
+  useEffect(() => {
+    ctx.registerKeys(all.map((k) => () => toggle(k)));
+  });
+  return (
+    <div>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
+        {all.map((k, i) => {
+          const order = p.priorities.indexOf(k);
+          return (
+            <BigChoice key={k} n={i + 1} role="checkbox" selected={order >= 0} onClick={() => toggle(k)}>
+              <span className="block text-[17px] font-semibold">{PRIORITY_LABEL[k]}</span>
+              {order >= 0 && <span className="mt-0.5 block text-[13px] text-pen">{order === 0 ? "1순위" : "2순위"}</span>}
+            </BigChoice>
+          );
+        })}
+      </div>
+      <Help>먼저 고른 것이 1순위예요. 비용·명성·국가는 비교할 공식 자료가 아직 없어서 고르면 순위 대신 이유로 알려 드려요.</Help>
+    </div>
+  );
+}
+
+function ExchangeLanguageStep({ ctx }: { ctx: StepCtx }) {
+  const p = exPrefsOf(ctx.d);
+  const lang = p.language ?? { test: "IELTS_ACADEMIC" as const, total: null, testedAt: null };
+  return (
+    <div className="grid gap-8">
+      <BigChoices
+        ctx={ctx}
+        label="어학 준비"
+        cols={2}
+        autoAdvance={false}
+        options={[
+          { value: "has_score" as const, label: "성적이 있어요" },
+          { value: "preparing" as const, label: "시험을 준비 중이에요" },
+          { value: "none" as const, label: "아직 없어요" },
+          { value: "unknown" as const, label: "어떤 시험이 필요한지 모르겠어요" },
+        ]}
+        selected={(v) => p.languageStatus === v}
+        onPick={(v) => setEx(ctx, { languageStatus: v, ...(v !== "has_score" ? { language: null } : {}) })}
+      />
+      {p.languageStatus === "has_score" && (
+        <div className="flex flex-wrap items-end gap-4 text-[14px]">
+          <label className="grid gap-1">
+            시험
+            <select value={lang.test} onChange={(e) => setEx(ctx, { language: { ...lang, test: e.target.value as typeof lang.test } })}>
+              <option value="IELTS_ACADEMIC">IELTS Academic</option>
+              <option value="TOEFL_IBT">TOEFL iBT(120점, 2026-01 이전 응시)</option>
+              <option value="TOEFL_IBT_2026">TOEFL iBT(6점, 2026-01 이후 응시)</option>
+            </select>
+          </label>
+          <label className="grid gap-1">
+            총점
+            <input type="number" step="0.5" min={0} value={lang.total ?? ""} onChange={(e) => setEx(ctx, { language: { ...lang, total: e.target.value === "" ? null : Number(e.target.value) } })} className="!w-[120px]" />
+          </label>
+          <label className="grid gap-1">
+            응시일(선택)
+            <input type="date" value={lang.testedAt ?? ""} onChange={(e) => setEx(ctx, { language: { ...lang, testedAt: e.target.value || null } })} />
+          </label>
+        </div>
+      )}
+      <label className="grid max-w-[420px] gap-1 text-[14px]">
+        <span className="font-semibold">누적 평점(4.5 만점) — 알면 적어 주세요</span>
+        <input type="number" step="0.01" min={0} max={4.5} value={p.gpa ?? ""} placeholder="예) 3.75" onChange={(e) => setEx(ctx, { gpa: e.target.value === "" ? null : Number(e.target.value) })} className="!w-[160px]" />
+        <span className="text-[12px] text-muted">비워 두면 GPA 조건은 ‘확인 필요’로 남겨요. 파견교 기준이 4.0 만점이면 한양대 엑셀 변환식으로만 비교해요.</span>
+      </label>
+    </div>
+  );
+}
+
+function ExchangeLifeStep({ ctx }: { ctx: StepCtx }) {
+  const p = exPrefsOf(ctx.d);
+  return (
+    <div className="grid gap-8">
+      <div>
+        <p className="mb-3 text-[16px] font-semibold">예산</p>
+        <BigChoices
+          ctx={ctx}
+          label="예산"
+          cols={2}
+          autoAdvance={false}
+          options={[
+            { value: "save" as const, label: "비용 절약이 가장 중요해요" },
+            { value: "moderate" as const, label: "보통 수준이면 괜찮아요" },
+            { value: "flexible" as const, label: "학교·경험이 더 중요해요" },
+            { value: "unknown" as const, label: "아직 모르겠어요" },
+          ]}
+          selected={(v) => p.budget === v}
+          onPick={(v) => setEx(ctx, { budget: v })}
+        />
+      </div>
+      <div>
+        <p className="mb-3 text-[16px] font-semibold">주거</p>
+        <div role="radiogroup" aria-label="주거" className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
+          {(
+            [
+              ["guaranteed_required", "기숙사 보장이 중요해요"],
+              ["preferred", "기숙사가 있으면 좋아요"],
+              ["off_campus_ok", "교외 숙소도 괜찮아요"],
+              ["unknown", "아직 모르겠어요"],
+            ] as const
+          ).map(([v, l]) => (
+            <BigChoice key={v} selected={p.housing === v} onClick={() => setEx(ctx, { housing: v })}>
+              <span className="block text-[17px] font-semibold">{l}</span>
+            </BigChoice>
+          ))}
+        </div>
+      </div>
+      <Help>정확한 생활비는 묻지 않아요. 학교별 비용 자료가 아직 없어 금액으로 비교하지 않고, 기숙사는 ‘신청 가능’과 ‘보장’을 구분해 보여 드려요.</Help>
     </div>
   );
 }
@@ -1031,7 +1229,23 @@ function ReviewStep({ ctx }: { ctx: StepCtx }) {
       case "leave":
         return d.leave.mode === "pick" ? `${ORDINAL_CHOICES.find(([o]) => o === d.leave.ordinal)?.[1] ?? "?"} 한 학기` : d.leave.mode === "none" ? "없음" : "—";
       case "exchange":
-        return d.exchange.mode === "recommend" ? "관심 있음" : d.exchange.mode === "pick" ? (EXCHANGE_TERMS.find(([o]) => o === d.exchange.ordinal)?.[1] ?? "?") : d.exchange.mode === "none" ? "생각 없음" : "—";
+        return { committed: "꼭 가고 싶음", conditional: "조건이 맞으면", considering: "고민 중", none: "생각 없음" }[exPrefsOf(d).intent ?? "none"] + (d.exchangeChoice ? ` · ${d.exchangeChoice.universityName} ${formatTerm(d.exchangeChoice.term)}` : "");
+      case "exchange-when": {
+        const p = exPrefsOf(d);
+        return p.when === "fixed" && p.fixedTerm ? formatTerm(p.fixedTerm) : { next_spring: "다음 봄학기", next_fall: "다음 가을학기", recommend: "추천받기", unknown: "모름", fixed: "—" }[p.when ?? "unknown"];
+      }
+      case "exchange-length":
+        return { one_term: "한 학기", one_year: "1년", either: "둘 다", recommend: "추천" }[exPrefsOf(d).duration ?? "recommend"];
+      case "exchange-goal":
+        return exPrefsOf(d).priorities.map((k) => PRIORITY_LABEL[k]).join(" → ") || "—";
+      case "exchange-language": {
+        const p = exPrefsOf(d);
+        return `${{ has_score: "성적 있음", preparing: "준비 중", none: "없음", unknown: "모름" }[p.languageStatus ?? "unknown"]}${p.language?.total ? ` (${p.language.total})` : ""} · GPA ${p.gpa ?? "모름"}`;
+      }
+      case "exchange-life": {
+        const p = exPrefsOf(d);
+        return `${{ save: "절약", moderate: "보통", flexible: "경험 우선", unknown: "모름" }[p.budget ?? "unknown"]} · ${{ guaranteed_required: "기숙사 보장 필요", preferred: "기숙사 선호", off_campus_ok: "교외 가능", unknown: "모름" }[p.housing ?? "unknown"]}`;
+      }
       case "priority":
         return d.priority === "fast_completion" ? "빨리 끝내기" : d.priority === "career_core" ? "진로 과목 먼저" : d.priority === "light_terms" ? "여유 있는 학기" : "—";
       default:

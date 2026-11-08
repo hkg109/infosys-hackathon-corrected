@@ -46,14 +46,16 @@ function Output({ plan, dataset, initialChat }: { plan: PlanState; dataset: Data
         {
           id: "exchange",
           title: "교환학생 지원 일정·학점 인정 확인",
-          detail: "교환 학기 1년쯤 전부터 국제처 모집 공지를 확인하세요. 인정 학점이 정해지면 다시 맞추세요.",
+          detail: `${draft?.exchangeChoice ? `${draft.exchangeChoice.universityName}(${formatTerm(draft.exchangeChoice.term)}) — ` : ""}2027-1 공고는 2026-07-03에 게시됐어요. 다음 회차 일정은 아직 확인되지 않았어요. 인정학점은 귀국 후 학과 심의로 정해지며, 정해지면 완료 학기를 다시 계산해요.`,
           sourceIds: [],
         },
         ...g.items,
       ].slice(0, 6),
     };
-  }, [input, result, dataset, plan.exchange]);
+  }, [input, result, dataset, plan.exchange, draft?.exchangeChoice]);
   const mil = militarySummary(input, result);
+  // 교환 학기가 들어간 계획은 인정학점·유효학기가 미정이므로 v1 재계산 완료 학기를 확정값으로 보여 주지 않는다(PLAN 10장)
+  const exchangePending = plan.exchange !== null && (draft?.exchangeChoice?.recognition.status ?? "unknown") === "unknown";
   const confirmed = plan.confirmedAt !== null;
   const remaining = input.targetCredits === null ? null : Math.max(0, input.targetCredits - input.earnedCredits);
   const total = result.terms.reduce((a, t) => a + t.plannedCredits, 0);
@@ -130,8 +132,8 @@ function Output({ plan, dataset, initialChat }: { plan: PlanState; dataset: Data
         <Cell label="학기당 계획" sub={input.paceStyle === "late_light" ? "후반 여유형(서비스 계획 방식)" : input.paceStyle === "custom" ? "직접 설정" : undefined}>
           최대 {input.creditCap}학점
         </Cell>
-        <Cell label="예상 계획 완료" strong>
-          {result.expectedCompletion ? formatTerm(result.expectedCompletion) : "목표학점 필요"}
+        <Cell label="예상 계획 완료" strong sub={exchangePending ? "교환 인정학점 확인 후 계산" : undefined}>
+          {exchangePending ? "교환 인정 확인 후" : result.expectedCompletion ? formatTerm(result.expectedCompletion) : input.targetCredits === null ? "목표학점 필요" : "확인 필요"}
         </Cell>
         <Cell label="남은 학점 / 계획">{remaining === null ? `— / ${total}학점` : `${remaining} / ${total}학점`}</Cell>
       </dl>

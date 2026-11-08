@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url";
-import type { DatasetV2, MilitaryCatalog } from "../../src/contracts/types";
-import { fixtureDataset } from "../../src/data/fixtures";
+import type { DatasetV2, ExchangeCatalog, MilitaryCatalog } from "../../src/contracts/types";
+import { exchangeFixture, fixtureDataset } from "../../src/data/fixtures";
 import { CAREER_TRACKS } from "../../src/contracts/careers";
 
 export function validateFixture(dataset: DatasetV2): string[] {
@@ -162,8 +162,61 @@ export function validateMilitary(m: MilitaryCatalog): string[] {
   return errors;
 }
 
+const OFFICIAL_KINDS = new Set(["hanyang_notice", "hanyang_attachment_pdf", "hanyang_partner_xlsx", "hanyang_credit_policy", "host_official_page", "host_course_catalog", "host_fact_sheet", "test_provider_official"]);
+
+/** 교환학생 자료 검사(명세 11.5) */
+export function validateExchange(c: ExchangeCatalog): string[] {
+  const errors: string[] = [];
+  const refs = new Map(c.sources.map((s) => [s.id, s]));
+  const cycleIds = new Set(c.cycles.map((x) => x.id));
+  const seen = new Set<string>();
+  const dup = (id: string, what: string) => {
+    if (seen.has(id)) errors.push(`${what} ID 중복: ${id}`);
+    seen.add(id);
+  };
+  for (const s of c.sources) {
+    dup(s.id, "출처");
+    if (s.url !== null && !/^https:\/\//.test(s.url)) errors.push(`출처 ${s.id}: https URL이 아님`);
+    if (!isDate(s.checkedAt)) errors.push(`출처 ${s.id}: 확인일 형식 오류`);
+  }
+  const checkValue = (at: string, v: { truth: string; sourceRefs: string[]; value: unknown; validity: { applicationCycleId: string | null } }) => {
+    for (const r of v.sourceRefs) if (!refs.has(r)) errors.push(`${at}: 없는 출처 ${r}`);
+    if (v.truth === "verified_official" && !v.sourceRefs.some((r) => OFFICIAL_KINDS.has(refs.get(r)?.evidenceKind ?? ""))) errors.push(`${at}: 공식 확인값인데 공식 출처가 없음`);
+    if (v.truth === "verified_official" && v.value === null) errors.push(`${at}: 값이 없는데 공식 확인`);
+    if (v.validity.applicationCycleId && !cycleIds.has(v.validity.applicationCycleId)) errors.push(`${at}: 없는 회차 ${v.validity.applicationCycleId}`);
+  };
+  for (const cy of c.cycles) {
+    dup(cy.id, "회차");
+    if (cy.officialStatus === "forecast" && cy.commonEligibilityRules.length > 0) errors.push(`회차 ${cy.id}: 예상 회차에 공식 자격 규칙을 두면 안 됨`);
+    const w = cy.applicationWindow.value;
+    if (w && (!isDate(w.start) || !isDate(w.end) || w.start >= w.end)) errors.push(`회차 ${cy.id}: 접수 기간 오류`);
+    if (cy.officialStatus === "forecast" && [cy.postedAt, cy.applicationWindow, cy.resultDate].some((v) => v.truth === "verified_official")) errors.push(`회차 ${cy.id}: 예상 회차에 공식 배지`);
+    for (const r of cy.commonEligibilityRules) checkValue(`회차 ${cy.id} 규칙 ${r.id}`, r.source);
+  }
+  for (const o of c.offerings) {
+    const at = `파견교 ${o.id}`;
+    dup(o.id, "offering");
+    if (!cycleIds.has(o.applicationCycleId)) errors.push(`${at}: 없는 회차`);
+    if (!o.hostAcademicPeriod) errors.push(`${at}: 파견 학기 없음`);
+    if (o.reviewStatus === "reviewed" && !o.sourceRefs.some((r) => OFFICIAL_KINDS.has(refs.get(r)?.evidenceKind ?? ""))) errors.push(`${at}: 검토 완료인데 공식 출처 없음`);
+    for (const r of o.sourceRefs) if (!refs.has(r)) errors.push(`${at}: 없는 출처 ${r}`);
+    if (o.quota.value !== null && (!Number.isInteger(o.quota.value) || o.quota.value < 0)) errors.push(`${at}: TO 오류`);
+    if (o.gpa.value && !(o.gpa.value.scale > 0 && o.gpa.value.min > 0 && o.gpa.value.min <= o.gpa.value.scale)) errors.push(`${at}: GPA 기준 오류`);
+    for (const l of o.language) if (!l.scaleVersion) errors.push(`${at}: 어학 기준에 점수 체계 버전 없음`);
+    for (const r of o.courseAccess) if (!r.effectiveTerm) errors.push(`${at}: 과목 제한에 적용 학기 없음`);
+    const cal = o.calendar.value;
+    if (cal && (!isDate(cal.start) || !isDate(cal.end) || cal.start >= cal.end)) errors.push(`${at}: 개강·종강 오류`);
+    for (const d of [o.deadlines.nomination.value, o.deadlines.application.value]) if (d !== null && !isDate(d)) errors.push(`${at}: 마감 날짜 형식 오류`);
+    for (const u of [o.links.exchange, o.links.courses]) if (u && !/^https?:\/\//.test(u)) errors.push(`${at}: 링크 형식 오류`);
+    for (const v of [o.academicSystem, o.durationOptions, o.quota, o.gpa, o.calendar, o.deadlines.nomination, o.deadlines.application]) checkValue(at, v);
+    if (/(\d{6}-\d{7}|학번\s*\d{8,})/.test(JSON.stringify(o))) errors.push(`${at}: 개인정보로 보이는 값`);
+  }
+  if (c.gpaConversions.value) checkValue("GPA 변환", c.gpaConversions);
+  return errors;
+}
+
 function main() {
-  const errors = validateFixture(fixtureDataset);
+  const errors = [...validateFixture(fixtureDataset), ...validateExchange(exchangeFixture).map((e) => `[교환] ${e}`)];
   if (errors.length === 0) {
     console.log("fixture 검사 통과");
     return;

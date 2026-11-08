@@ -1,0 +1,5596 @@
+{
+  "catalogVersion": "exchange-hy-2027-1-2026-11-08",
+  "reviewedAt": "2026-11-08",
+  "sources": [
+    {
+      "id": "hy-2027-1-notice",
+      "title": "[파견교환] 2027학년도 1학기 파견교환학생 모집 안내(파견교 추가 2026.07.09)",
+      "url": "https://exchangeout.hanyang.ac.kr/notice?_kr_ac_hanyang_bbs_web_portlet_BbsPortlet_action=view_message&_kr_ac_hanyang_bbs_web_portlet_BbsPortlet_messageId=205112&p_p_id=kr_ac_hanyang_bbs_web_portlet_BbsPortlet&p_p_lifecycle=0&redirect=%2Fhome",
+      "evidenceKind": "hanyang_notice",
+      "publishedAt": "2026-07-03",
+      "updatedAt": "2026-07-09",
+      "checkedAt": "2026-11-08",
+      "excerptSummary": "서울캠퍼스 대상 본모집 공고. 공고기간 2026-07-03~07-30. 개인 사유 파견 취소 시 이후 국제처 프로그램 참가 제한 안내. 첨부 5종.",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-notice-pdf-en",
+      "title": "1-1. Spring Semester of 2027 Exchange Student Recruitment.pdf",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/1-1.+Spring+Semester+of+2027+Exchange+Student+Recruitment.pdf/a3cbe49f-5fd0-06b9-2f30-0f604903d358?status=0&download=true",
+      "evidenceKind": "hanyang_attachment_pdf",
+      "publishedAt": "2026-07-03",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "1-1. Spring Semester of 2027 Exchange Student Recruitment.pdf",
+      "page": 1,
+      "excerptSummary": "지원자격·선발(서류 종합평가: 누적 GPA·어학, 동점 시 GPA→총 이수학점→어학)·비용(한양대 등록금 납부, 파견교 등록금 면제)·학점 인정(환산 규칙, P/F, 귀국 후 신청 기한). 일부 문장은 글꼴 치환으로 추출돼 해독함 — 사람 재확인 필요.",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-schedule",
+      "title": "[파견교환] 2027학년도 1학기 파견교환학생 모집일정 안내",
+      "url": "https://exchangeout.hanyang.ac.kr/notice?_kr_ac_hanyang_bbs_web_portlet_BbsPortlet_action=view_message&_kr_ac_hanyang_bbs_web_portlet_BbsPortlet_messageId=203602&p_p_id=kr_ac_hanyang_bbs_web_portlet_BbsPortlet&p_p_lifecycle=0&redirect=%2Fhome",
+      "evidenceKind": "hanyang_notice",
+      "publishedAt": "2026-06-26",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "excerptSummary": "일정표는 이미지 첨부로만 제공(본문에 날짜 행 없음). 영미·유럽·기타권과 일본·중국어권 중복 지원 불가, 기간 외 신청 무효.",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r14",
+      "title": "2027-1 파견교 정보 엑셀(서울) — University of Stuttgart",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A14:AG14",
+      "excerptSummary": "University of Stuttgart 행(순번 6) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r16",
+      "title": "2027-1 파견교 정보 엑셀(서울) — The Chinese University of Hong Kong",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A16:AG16",
+      "excerptSummary": "The Chinese University of Hong Kong 행(순번 8) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r35",
+      "title": "2027-1 파견교 정보 엑셀(서울) — The Hong Kong Polytechnic University",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A35:AG35",
+      "excerptSummary": "The Hong Kong Polytechnic University 행(순번 27) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r36",
+      "title": "2027-1 파견교 정보 엑셀(서울) — City University of Hong Kong",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A36:AG36",
+      "excerptSummary": "City University of Hong Kong 행(순번 28) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r39",
+      "title": "2027-1 파견교 정보 엑셀(서울) — Nanyang Technological University",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A39:AG39",
+      "excerptSummary": "Nanyang Technological University 행(순번 31) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r46",
+      "title": "2027-1 파견교 정보 엑셀(서울) — The University of Leeds",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A46:AG46",
+      "excerptSummary": "The University of Leeds 행(순번 38) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r51",
+      "title": "2027-1 파견교 정보 엑셀(서울) — Adelaide University",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A51:AG51",
+      "excerptSummary": "Adelaide University 행(순번 43) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r52",
+      "title": "2027-1 파견교 정보 엑셀(서울) — Zurich University of Applied Sciences (ZHAW) - School of Engineering",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A52:AG52",
+      "excerptSummary": "Zurich University of Applied Sciences (ZHAW) - School of Engineering 행(순번 44) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r61",
+      "title": "2027-1 파견교 정보 엑셀(서울) — IT University of Copenhagen",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A61:AG61",
+      "excerptSummary": "IT University of Copenhagen 행(순번 53) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r71",
+      "title": "2027-1 파견교 정보 엑셀(서울) — The University of Sheffield",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A71:AG71",
+      "excerptSummary": "The University of Sheffield 행(순번 63) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r74",
+      "title": "2027-1 파견교 정보 엑셀(서울) — North Carolina State University",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A74:AG74",
+      "excerptSummary": "North Carolina State University 행(순번 66) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r76",
+      "title": "2027-1 파견교 정보 엑셀(서울) — University of Twente",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A76:AG76",
+      "excerptSummary": "University of Twente 행(순번 68) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r82",
+      "title": "2027-1 파견교 정보 엑셀(서울) — University of Malaya",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A82:AG82",
+      "excerptSummary": "University of Malaya 행(순번 74) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r83",
+      "title": "2027-1 파견교 정보 엑셀(서울) — The University of New South Wales",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A83:AG83",
+      "excerptSummary": "The University of New South Wales 행(순번 75) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r96",
+      "title": "2027-1 파견교 정보 엑셀(서울) — Queensland University of Technology",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A96:AG96",
+      "excerptSummary": "Queensland University of Technology 행(순번 88) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r99",
+      "title": "2027-1 파견교 정보 엑셀(서울) — Chalmers University of Technology",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A99:AG99",
+      "excerptSummary": "Chalmers University of Technology 행(순번 91) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r103",
+      "title": "2027-1 파견교 정보 엑셀(서울) — EPITA",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A103:AG103",
+      "excerptSummary": "EPITA 행(순번 95) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r107",
+      "title": "2027-1 파견교 정보 엑셀(서울) — Macquarie University",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A107:AG107",
+      "excerptSummary": "Macquarie University 행(순번 99) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r110",
+      "title": "2027-1 파견교 정보 엑셀(서울) — New Jersey Institute of Technology",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A110:AG110",
+      "excerptSummary": "New Jersey Institute of Technology 행(순번 102) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-r112",
+      "title": "2027-1 파견교 정보 엑셀(서울) — Singapore University of Technology and Design (SUTD)",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "본모집_영미유럽기타",
+      "cellRange": "A112:AG112",
+      "excerptSummary": "Singapore University of Technology and Design (SUTD) 행(순번 104) — TO·학제·지원자격·수업·기숙사·일정",
+      "reviewer": null
+    },
+    {
+      "id": "hy-2027-1-xlsx-gpa",
+      "title": "2027-1 파견교 정보 엑셀(서울) — 평균평점(GPA) 변환 시트",
+      "url": "https://exchangeout.hanyang.ac.kr/documents/portlet_file_entry/70067768/2.+2027-1%ED%95%99%EA%B8%B0+%ED%8C%8C%EA%B2%AC%EA%B5%90+%EC%A0%95%EB%B3%B4_%EB%B3%B8%EB%AA%A8%EC%A7%91%28%EA%B3%B5%EC%A7%80%EC%9A%A9%29_%EC%84%9C%EC%9A%B8_2026.07.09_%EC%B6%94%EA%B0%80.xlsx/1c57cfe8-27ac-dd71-d8f8-4a148c5c4cf5?status=0&download=true",
+      "evidenceKind": "hanyang_partner_xlsx",
+      "publishedAt": "2026-07-09",
+      "updatedAt": null,
+      "checkedAt": "2026-11-08",
+      "fileName": "2. 2027-1학기 파견교 정보_본모집(공지용)_서울_2026.07.09_추가.xlsx",
+      "sheet": "평균평점(GPA) 변환",
+      "cellRange": "C5:C7",
+      "excerptSummary": "4.5 만점 성적을 4.3·4.0·100점 만점으로 비례 변환하는 수식(C5=(C4*4.3)/4.5, C6=(C4*4)/4.5, C7=(C4*100)/4.5). 5.0 만점 변환은 없음.",
+      "reviewer": null
+    }
+  ],
+  "cycles": [
+    {
+      "id": "hy-2027-1-main",
+      "label": "2027학년도 1학기 파견교환 본모집(서울)",
+      "targetHomeTerm": {
+        "year": 2027,
+        "season": 1
+      },
+      "officialStatus": "closed",
+      "postedAt": {
+        "value": "2026-07-03",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-notice"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "applicationWindow": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-schedule"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "본모집 접수 기간은 일정 이미지와 PDF에만 있어 이번 추출에서 확인하지 못했어요. 공고기간은 2026-07-03~07-30."
+      },
+      "resultDate": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-schedule"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "selectionMethod": {
+        "value": "서류 종합평가: 누적 GPA와 어학성적을 평가. 동점이면 GPA → 총 이수학점 → 어학성적 순. 희망 대학은 최대 15개까지 입력.",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-notice-pdf-en"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배점 비율은 이번 추출에서 확인하지 못했어요."
+      },
+      "commonEligibilityRules": [
+        {
+          "id": "hy-campus",
+          "owner": "hanyang",
+          "kind": "campus",
+          "operator": "eq",
+          "operand": "seoul",
+          "source": {
+            "value": "서울캠퍼스 재학생 또는 휴학생으로 해외유학에 결격사유가 없는 자",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            }
+          },
+          "blocking": true
+        },
+        {
+          "id": "hy-terms-min",
+          "owner": "hanyang",
+          "kind": "completed_terms_min",
+          "operator": "gte",
+          "operand": 2,
+          "source": {
+            "value": "지원 시점에 2개 학기 이상 이수",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "note": "PDF 글꼴 치환 구간을 해독한 문장 — 원문 PDF에서 사람이 재확인해야 합니다."
+          },
+          "blocking": true
+        },
+        {
+          "id": "hy-terms-max",
+          "owner": "hanyang",
+          "kind": "completed_terms_max",
+          "operator": "lte",
+          "operand": 6,
+          "source": {
+            "value": "2026년 1학기까지 6개 학기 이하 이수(건축학부 8개 학기). 6개 학기(건축 8)를 마친 경우 2026년 2학기 휴학 필수·한 학기만 지원",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "note": "PDF 글꼴 치환 구간을 해독한 문장 — 원문 PDF에서 사람이 재확인해야 합니다."
+          },
+          "blocking": true
+        },
+        {
+          "id": "hy-gpa",
+          "owner": "hanyang",
+          "kind": "gpa_min",
+          "operator": "gte",
+          "operand": 2.5,
+          "scale": 4.5,
+          "source": {
+            "value": "누적 평균평점 2.5 이상(4.5 만점). 편입생은 전 대학·본교 평점 모두 2.5 이상",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            }
+          },
+          "blocking": true
+        },
+        {
+          "id": "hy-prior",
+          "owner": "hanyang",
+          "kind": "prior_exchange",
+          "operator": "lte",
+          "operand": 1,
+          "source": {
+            "value": "파견교환 이력이 없거나 기존 파견이 한 학기인 자(단과대 주관 프로그램 포함 총 1년까지)",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            }
+          },
+          "blocking": true
+        },
+        {
+          "id": "hy-consecutive",
+          "owner": "hanyang",
+          "kind": "consecutive_exchange",
+          "operator": "custom",
+          "operand": null,
+          "source": {
+            "value": "한 학기 파견에 지원해 합격한 자는 연속된 다음 학기에 지원 불가",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            }
+          },
+          "blocking": true
+        },
+        {
+          "id": "hy-final-term",
+          "owner": "hanyang",
+          "kind": "final_regular_term",
+          "operator": "custom",
+          "operand": null,
+          "source": {
+            "value": "마지막 정규학기에는 파견 불가",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            }
+          },
+          "blocking": true
+        },
+        {
+          "id": "hy-transfer",
+          "owner": "hanyang",
+          "kind": "transfer_terms",
+          "operator": "gte",
+          "operand": 1,
+          "source": {
+            "value": "편입생은 본교에서 1개 학기 이상 이수",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            }
+          },
+          "blocking": true
+        },
+        {
+          "id": "hy-major",
+          "owner": "hanyang",
+          "kind": "major_restriction",
+          "operator": "not_in",
+          "operand": [
+            "double_degree"
+          ],
+          "source": {
+            "value": "다중전공·부전공 이수자는 지원 가능, 복수전공(복수학위) 이수자는 지원 불가",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "note": "PDF 글꼴 치환 구간을 해독한 문장 — 원문 PDF에서 사람이 재확인해야 합니다."
+          },
+          "blocking": true
+        },
+        {
+          "id": "hy-language",
+          "owner": "hanyang",
+          "kind": "language",
+          "operator": "custom",
+          "operand": null,
+          "source": {
+            "value": "한양대 최소 어학 기준(권역별 표)과 파견교 기준을 모두 충족. 어학성적은 파견 시작일 기준 2년 이내, 영국 1년 파견은 IELTS(Academic)만 인정",
+            "truth": "verified_official",
+            "sourceRefs": [
+              "hy-2027-1-notice-pdf-en"
+            ],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "note": "PDF 글꼴 치환 구간을 해독한 문장 — 원문 PDF에서 사람이 재확인해야 합니다."
+          },
+          "blocking": true
+        }
+      ],
+      "cancellationRules": {
+        "value": [
+          "파견대학 배정 후 상대교가 프로그램을 취소하면 다음 모집에 재지원 가능",
+          "그 밖의 취소(개인 사유, 온라인 옵션 등)는 이후 국제처 프로그램 참여 불가",
+          "지원 기간 이후 대학·기간 변경 불가"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-notice",
+          "hy-2027-1-notice-pdf-en"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "tuition": {
+        "value": "한양대 등록금 납부, 파견교 등록금 면제. 주거·생활비 등은 본인 부담",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-notice-pdf-en"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "creditRecognition": {
+        "value": [
+          "파견 중 취득 학점은 소속 학과 심의 후 전공 또는 교양으로 인정(학기당 상한 있음 — 원문 PDF 확인)",
+          "본교 기이수·유사 과목은 인정 불가",
+          "환산: 유럽 ECTS × 0.5(반올림), 쿼터·트라이메스터 학점 × 0.5(반올림), 그 밖의 대학 1학점 = 한양대 1학점(과목별 계산)",
+          "성적표에는 PASS/FAIL로 표기되고 평점 계산에서 제외",
+          "귀국 후 다음 학기 말까지 인정 절차 진행(봄 파견 2월 말, 가을 파견 8월 말)"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-notice-pdf-en"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "환산 규칙은 안내용이에요. 이번 버전은 인정학점을 계산하지 않고 미정으로 둬요(PLAN 10장)."
+      },
+      "sourceRefs": [
+        "hy-2027-1-notice",
+        "hy-2027-1-notice-pdf-en",
+        "hy-2027-1-schedule"
+      ]
+    },
+    {
+      "id": "hy-2027-2-forecast",
+      "label": "2027학년도 2학기 파견교환 모집(공고 전)",
+      "targetHomeTerm": {
+        "year": 2027,
+        "season": 2
+      },
+      "officialStatus": "forecast",
+      "postedAt": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [],
+        "validity": {
+          "applicationCycleId": "hy-2027-2-forecast",
+          "exchangeTermId": "2027-2",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "applicationWindow": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [],
+        "validity": {
+          "applicationCycleId": "hy-2027-2-forecast",
+          "exchangeTermId": "2027-2",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "공식 공고 전 — 국제처 파견교환 공지에서 확인 필요"
+      },
+      "resultDate": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "selectionMethod": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "공고 전"
+      },
+      "commonEligibilityRules": [],
+      "cancellationRules": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "tuition": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "creditRecognition": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "sourceRefs": []
+    }
+  ],
+  "offerings": [
+    {
+      "id": "hy-2027-1-university-of-stuttgart",
+      "universityName": "University of Stuttgart",
+      "country": "독일",
+      "region": "유럽",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r14"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r14"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 1,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r14"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r14"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "숫자 기준으로 읽을 수 없는 원문 — 원문 확인 필요"
+      },
+      "gpaRaw": "We require grades of C or above in general. This means a GPA of minimum 2.0 on a 4.0 scale.",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 72,
+          "subscoresRequired": null,
+          "raw": "min 72"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": 4,
+          "subscoresRequired": null,
+          "raw": "4"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 5.5,
+          "subscoresRequired": null,
+          "raw": "5.5"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r14"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "Not applicable",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r14"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-university-of-stuttgart-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Not applicable",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "3",
+          "max": "30"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r14"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r14"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-04-01",
+          "end": "2027-08-31"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r14"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r14"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-11-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r14"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.uni-stuttgart.de/en/study/application/international-non-degree/overseas/",
+        "courses": "https://www.uni-stuttgart.de/en/university/faculties-institutes/"
+      },
+      "notes": [
+        "get in touch to check any other language tests and requirements on a case by case basis"
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r14"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-chinese-university-of-hong-kong",
+      "universityName": "The Chinese University of Hong Kong",
+      "country": "홍콩",
+      "region": "아시아",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r16"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r16"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 4,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r16"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 3,
+          "scale": 4
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r16"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "3.0/4.0",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 80,
+          "subscoresRequired": null,
+          "raw": "80"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": 4.5,
+          "subscoresRequired": null,
+          "raw": "4.5"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6,
+          "subscoresRequired": null,
+          "raw": "6"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r16"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "https://www.oalglobal.cuhk.edu.hk/files/incoming/course_exceptions.pdf",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r16"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-chinese-university-of-hong-kong-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "수강 제한 목록이 링크로만 제공돼요 — 링크에서 컴퓨터·정보시스템 과목이 있는지 확인이 필요해요."
+          ],
+          "source": {
+            "value": "https://www.oalglobal.cuhk.edu.hk/files/incoming/course_exceptions.pdf",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "9 credits",
+          "max": "18 credits"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r16"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r16"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-11",
+          "end": "2027-05-15"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r16"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-09-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r16"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-02",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r16"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.oalglobal.cuhk.edu.hk/getting_started/",
+        "courses": "https://www.oalglobal.cuhk.edu.hk/academics/"
+      },
+      "notes": [],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r16"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-hong-kong-polytechnic-university",
+      "universityName": "The Hong Kong Polytechnic University",
+      "country": "홍콩",
+      "region": "아시아",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r35"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r35"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 1,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r35"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r35"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "숫자 기준으로 읽을 수 없는 원문 — 원문 확인 필요"
+      },
+      "gpaRaw": "We recommend GPA point of at least 2.7/4.0.",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 80,
+          "subscoresRequired": null,
+          "raw": "TOEFL 80 internet-based"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": null,
+          "subscoresRequired": null,
+          "raw": "."
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6,
+          "subscoresRequired": null,
+          "raw": "IELTS 6.0"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r35"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "N/A",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r35"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-hong-kong-polytechnic-university-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "N/A",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "9 credits",
+          "max": "18 credits"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r35"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r35"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-11",
+          "end": "2027-05-08"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r35"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-09-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r35"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r35"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.polyu.edu.hk/geo/exchange-and-study-abroad/incoming-students/incoming-exchange/",
+        "courses": "https://www.polyu.edu.hk/geo/exchange-and-study-abroad/incoming-students/incoming-exchange/"
+      },
+      "notes": [
+        "Incoming Exchange students are not required to submit proof of English proficiency at the time of application. However, students may be asked to provide such a document when needed.",
+        "Not all the subjects are open to all inbound exchange students. There are courses that only open to exchange students who are admitted to the offering department and specific programme (some with pre-requisite)."
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r35"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-city-university-of-hong-kong",
+      "universityName": "City University of Hong Kong",
+      "country": "홍콩",
+      "region": "아시아",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r36"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r36"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 1,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r36"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r36"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "숫자 기준으로 읽을 수 없는 원문 — 원문 확인 필요"
+      },
+      "gpaRaw": "good result",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 79,
+          "subscoresRequired": null,
+          "raw": "79"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6.5,
+          "subscoresRequired": null,
+          "raw": "6.5"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r36"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "NA",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r36"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-city-university-of-hong-kong-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "NA",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "12",
+          "max": "18"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r36"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r36"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-11",
+          "end": "2027-05-10"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r36"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-08-31",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r36"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r36"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.cityu.edu.hk/en/ceng/global-outreach/student-exchange/inbound-exchange",
+        "courses": "https://www.cityu.edu.hk/ceng/global-outreach/student-exchange/inbound-exchange"
+      },
+      "notes": [],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r36"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-nanyang-technological-university",
+      "universityName": "Nanyang Technological University",
+      "country": "싱가포르",
+      "region": "아시아",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r39"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r39"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 3,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r39"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 3.3,
+          "scale": 5
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r39"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "3.3 / 5",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 90,
+          "subscoresRequired": null,
+          "raw": "TOEFL/TOEFL iBT® (taken before 2026): a minimum of 570 (paper) or 90 (internet) or 237 (computer)"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": 4.5,
+          "subscoresRequired": true,
+          "raw": "TOEFL/TOEFL iBT® (taken from January 2026): a minimum 4.5 (Overall) and 4.5 (Speaking)"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6,
+          "subscoresRequired": true,
+          "raw": "IELTS/IELTS Indicator: a minimum 6 (Overall) and 6 (Writing)"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": "파견교 국가 국적자는 지원 불가",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r39"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "closedDepartments": {
+        "value": "NTU’s College of Computing and Data Science (CCDS) courses – course codes beginning with SC, CE, and CZ – are not open for selection or application due to capacity limits,",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r39"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-nanyang-technological-university-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "limited",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "수강불가 학과·과목에 컴퓨팅 계열이 들어 있어요(엑셀 원문). 정보시스템 전공 과목 수강이 제한될 수 있어요."
+          ],
+          "source": {
+            "value": "NTU’s College of Computing and Data Science (CCDS) courses – course codes beginning with SC, CE, and CZ – are not open for selection or application due to capacity limits,",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "Minimum one course",
+          "max": "Maximum 6 courses or 20 Academic Units"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r39"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r39"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-11",
+          "end": "2027-05-07"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r39"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-09-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r39"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-09-30",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r39"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://gem.ntu.edu.sg/index.cfm?FuseAction=Programs.ViewProgramAngular&id=10006",
+        "courses": "https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main"
+      },
+      "notes": [
+        "Students are not allowed to take courses from the Restricted Course List - https://gem.ntu.edu.sg/_customtags/ct_DocumentRetrieve.cfm?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwYXlsb2FkIjp7InRpbWVzdGFtcCI6IjIwMjYtMDQtMDhUMDY6MTE6NTkiLCJleHBpcmVMaW5rIj"
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r39"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-university-of-leeds",
+      "universityName": "The University of Leeds",
+      "country": "영국",
+      "region": "영미",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r46"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r46"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 1,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r46"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r46"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "숫자 기준으로 읽을 수 없는 원문 — 원문 확인 필요"
+      },
+      "gpaRaw": "3",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 80,
+          "subscoresRequired": true,
+          "raw": "Overall: 80   Listening: 17   Reading: 18   Writing: 19   Speaking: 20  . For schools that have set a higher language requirement, we will need Overall: 88   Listening: 19   Reading: 20   Writing: 21   Speaking: 22"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": 4,
+          "subscoresRequired": true,
+          "raw": "Overall: 4   Listening, reading, speaking and writing: 4 . For Schools that have set a higher language requirement, we will need Overall: 4.5   Listening, reading and speaking: 4   Writing: 4.5"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6,
+          "subscoresRequired": true,
+          "raw": "Standard language requirements: 6.0 overall with no less than 5.5 in each component. Higher language requirements: 6.5 overall with no less than 6.0 in each component"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r46"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "Medicine, Dentistry, Nursing and Architecture are not open to study for incoming study abroad students.",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r46"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-university-of-leeds-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Medicine, Dentistry, Nursing and Architecture are not open to study for incoming study abroad students.",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "50 Leeds credits per semester, 100 Leeds credits per year",
+          "max": "60 Leeds credits per semester, 120 Leeds credits per year"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r46"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r46"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-25",
+          "end": "2027-06-19"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r46"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-31",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r46"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-31",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r46"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.leeds.ac.uk/international-exchange-and-study-abroad",
+        "courses": "https://www.leeds.ac.uk/international-exchange-and-study-abroad-offer/doc/what-can-i-study"
+      },
+      "notes": [
+        "Students must come to Leeds for the full year (Semester 1 & 2) to study these subjects: Chemical and Process Engineering, Mechanical Engineering.   /  / Studio Fine Art modules are taught in Semester 1. There are no Semester 2 studio Fine Art modules. Portfol"
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r46"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-adelaide-university",
+      "universityName": "Adelaide University",
+      "country": "호주",
+      "region": "영미",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r51"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r51"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 1,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r51"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r51"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 별도 GPA 기준 없이 한양대 선발 기준을 따름(엑셀 원문)"
+      },
+      "gpaRaw": "한양대 선발 기준",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 79,
+          "subscoresRequired": null,
+          "raw": "79"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6.5,
+          "subscoresRequired": true,
+          "raw": "Overall 6.5 (no band lower than 6.0)"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r51"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "Medicine and Dentistry",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r51"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-adelaide-university-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Medicine and Dentistry",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "18 units",
+          "max": "24 units"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r51"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "unavailable",
+        "source": {
+          "value": "X",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r51"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-02-08",
+          "end": "2027-06-20"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r51"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r51"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-11-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r51"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://adelaide.edu.au/study/global-learning/study-abroad-and-exchange/",
+        "courses": "https://adelaide.edu.au/study/global-learning/study-abroad-and-exchange/choosing-study-abroad-and-exchange-courses/"
+      },
+      "notes": [
+        "Students sitting TOEFL will need to complete the TOEFL Australia Test: https://www.ets.org/toefl/test-takers/ibt/where-to-study/study-in-australia.html / Results required: Overall 79, S18, R13, L12, W21"
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r51"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-zurich-university-of-applied-sciences-sc",
+      "universityName": "Zurich University of Applied Sciences (ZHAW) - School of Engineering",
+      "country": "스위스",
+      "region": "유럽",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r52"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r52"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 2,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r52"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 2.5,
+          "scale": 4
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r52"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "GPA 2.5 out of 4.0 or a good B Level",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 72,
+          "subscoresRequired": null,
+          "raw": "TOEFL iBT new 4 (old 72)"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 5.5,
+          "subscoresRequired": null,
+          "raw": "IELTS 5.5"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r52"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "Students can choose modules from all degree programmes at ZHAW School of Engineering.",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r52"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-zurich-university-of-applied-sciences-sc-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Students can choose modules from all degree programmes at ZHAW School of Engineering.",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "15",
+          "max": "30"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r52"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "unavailable",
+        "source": {
+          "value": "X",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r52"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-02-22",
+          "end": "2027-06-03"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r52"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r52"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-11-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r52"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.zhaw.ch/en/engineering/study/international-office/incoming-exchange-students",
+        "courses": "https://www.zhaw.ch/en/engineering/study/international-office/incoming-exchange-students (one course list for fall and one for spring)"
+      },
+      "notes": [],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r52"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-it-university-of-copenhagen",
+      "universityName": "IT University of Copenhagen",
+      "country": "덴마크",
+      "region": "유럽",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r61"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r61"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 2,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r61"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r61"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 별도 GPA 기준 없이 한양대 선발 기준을 따름(엑셀 원문)"
+      },
+      "gpaRaw": "한양대 선발 기준",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 88,
+          "subscoresRequired": null,
+          "raw": "minimum of 88"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6.5,
+          "subscoresRequired": null,
+          "raw": "Minimum of 6.5"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": "파견교 국가 국적자는 지원 불가",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r61"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "closedDepartments": {
+        "value": "NA",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r61"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-it-university-of-copenhagen-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "NA",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "7.5",
+          "max": "30"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r61"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "unavailable",
+        "source": {
+          "value": "X",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r61"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-02-01",
+          "end": "2027-06-30"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r61"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r61"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-11-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r61"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://en.itu.dk/Programmes/International-students/Exchange-students",
+        "courses": "https://en.itu.dk/Programmes/International-students/Exchange-students/Course-list"
+      },
+      "notes": [],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r61"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-university-of-sheffield",
+      "universityName": "The University of Sheffield",
+      "country": "영국",
+      "region": "영미",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r71"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r71"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 2,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r71"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 3,
+          "scale": 4.5
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r71"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "Equivalent to a UK 2:2. On a 4.5 scale this would be 3.0/4.5",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 88,
+          "subscoresRequired": true,
+          "raw": "88 with a minimum of 19 in Listening, 20 in Reading, 22 in Speaking and 19 in Writing. (https://sheffield.ac.uk/globalopps/inbound/apply/entry-requirements)"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": 4.5,
+          "subscoresRequired": true,
+          "raw": "Overall score of 4.5 with 4.5 in Listening and Speaking and 4.0 in Reading and Writing (https://sheffield.ac.uk/globalopps/inbound/apply/entry-requirements)"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6.5,
+          "subscoresRequired": true,
+          "raw": "Overall score of 6.5 with a minimum of 6.0 in each component. (https://sheffield.ac.uk/globalopps/inbound/apply/entry-requirements)"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r71"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "https://sheffield.ac.uk/globalopps/inbound/apply/what",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r71"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-university-of-sheffield-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "수강 제한 목록이 링크로만 제공돼요 — 링크에서 컴퓨터·정보시스템 과목이 있는지 확인이 필요해요."
+          ],
+          "source": {
+            "value": "https://sheffield.ac.uk/globalopps/inbound/apply/what",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "40 credits for one semester, 100 credits for a year",
+          "max": "60 credits for one semester, 120 credits for a year"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r71"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r71"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-02-08",
+          "end": "2027-06-12"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r71"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r71"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-31",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r71"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://sheffield.ac.uk/globalopps/inbound",
+        "courses": null
+      },
+      "notes": [],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r71"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-north-carolina-state-university",
+      "universityName": "North Carolina State University",
+      "country": "미국",
+      "region": "영미",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r74"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r74"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 1,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r74"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r74"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 별도 GPA 기준 없이 한양대 선발 기준을 따름(엑셀 원문)"
+      },
+      "gpaRaw": "한양대 선발 기준",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 80,
+          "subscoresRequired": null,
+          "raw": "80 or higher"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": 4.5,
+          "subscoresRequired": null,
+          "raw": "4.5 or higher"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6.5,
+          "subscoresRequired": null,
+          "raw": "6.5 or higher"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r74"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "College of Veterinary Medicine and Biomedical Engineering does not accept exchange program students",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r74"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-north-carolina-state-university-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "College of Veterinary Medicine and Biomedical Engineering does not accept exchange program students",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "\"12 (undergrad) 9 (grad)\"",
+          "max": "18"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r74"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r74"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-11",
+          "end": "2027-04-27"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r74"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r74"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r74"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://studyabroad.ncsu.edu/incoming-student/",
+        "courses": "https://studyabroad.ncsu.edu/incoming-student/preparing/course-registration/"
+      },
+      "notes": [
+        "n/a",
+        "Students can take a maximum of 1 online class"
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r74"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-university-of-twente",
+      "universityName": "University of Twente",
+      "country": "네덜란드",
+      "region": "유럽",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r76"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r76"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 2,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r76"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r76"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 별도 GPA 기준 없이 한양대 선발 기준을 따름(엑셀 원문)"
+      },
+      "gpaRaw": "한양대 선발 기준",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": null,
+          "subscoresRequired": null,
+          "raw": "https://www.utwente.nl/en/education/electives/exchange/courses/courses-english-requirements/"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": null,
+          "subscoresRequired": null,
+          "raw": "https://www.utwente.nl/en/education/electives/exchange/courses/courses-english-requirements/"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r76"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "N/A",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r76"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-university-of-twente-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "N/A",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "None",
+          "max": "30 ECTS / semester"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r76"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r76"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-02-01",
+          "end": "2027-07-23"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r76"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-09-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r76"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-09-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r76"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.utwente.nl/en/education/electives/exchange/",
+        "courses": "https://www.utwente.nl/en/education/electives/exchange/courses/"
+      },
+      "notes": [
+        "-",
+        "None"
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r76"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-university-of-malaya",
+      "universityName": "University of Malaya",
+      "country": "말레이시아",
+      "region": "아시아",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r82"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r82"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 6,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r82"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 3,
+          "scale": 4
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r82"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "3.0/4.0",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 80,
+          "subscoresRequired": null,
+          "raw": "80"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": 4,
+          "subscoresRequired": null,
+          "raw": "4"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6,
+          "subscoresRequired": null,
+          "raw": "6"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r82"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "Medicine, Dentistry",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r82"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-university-of-malaya-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Medicine, Dentistry",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "6 UM Credits",
+          "max": "20 UM Credits"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r82"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "unavailable",
+        "source": {
+          "value": "X",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r82"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-03-01",
+          "end": "2027-07-11"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r82"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-31",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r82"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-11-30",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r82"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://studyabroad.um.edu.my/inbound-long-term-home",
+        "courses": "https://studyabroad.um.edu.my/inbound-long-term-module-selection"
+      },
+      "notes": [],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r82"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-university-of-new-south-wales",
+      "universityName": "The University of New South Wales",
+      "country": "호주",
+      "region": "영미",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Trimester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r83"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r83"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 2,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r83"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 3,
+          "scale": 4
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r83"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "3.0/4.0",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 90,
+          "subscoresRequired": null,
+          "raw": "90"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6.5,
+          "subscoresRequired": null,
+          "raw": "6.5"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r83"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "Courses not open for exchange /  / MBA Coursework / Courses that are part of the Honours degree (4xxx) / UNSW Canberra and the Australian Defence Force Academy (all courses starting with ‘z’) / UNSW College / Doctor of Medicine program",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r83"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-university-of-new-south-wales-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Courses not open for exchange /  / MBA Coursework / Courses that are part of the Honours degree (4xxx) / UNSW Canberra and the Australian Defence Force Academy (all courses starting with ‘z’) / UNSW College / Doctor of Medicine program",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "18 UoC (T1) or 24 UoC (ST + T1)",
+          "max": "18 UoC (T1) or 24 UoC (ST + T1)"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r83"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r83"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-05",
+          "end": "2027-05-14"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r83"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-05",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r83"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r83"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.unsw.edu.au/study/international-students/study-abroad",
+        "courses": "https://www.handbook.unsw.edu.au/"
+      },
+      "notes": [
+        "students cannot over or underload - they must take the UoC selected in their study plan"
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r83"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-queensland-university-of-technology",
+      "universityName": "Queensland University of Technology",
+      "country": "호주",
+      "region": "영미",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r96"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r96"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 1,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r96"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 2.5,
+          "scale": 4
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r96"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "2.5/4.0",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 79,
+          "subscoresRequired": true,
+          "raw": "TOEFL iBT: 79 overall (minimum writing 21; reading 16; listening 16; speaking 18)"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": 4,
+          "subscoresRequired": true,
+          "raw": "Overall: 4 (Listening 3.5, Reading 3.5, Writing 4.5, Speaking 3.5)"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6.5,
+          "subscoresRequired": true,
+          "raw": "IELTS (Academic)/One Skill Retake: 6.5 overall, no sub-score below 6.0"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": "파견교 국가 국적자는 지원 불가",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r96"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "closedDepartments": {
+        "value": "Health disciplines – Podiatry, Paramedic Science, Optometry and Vision Science, Medical Imaging, Radiation Therapy, Pharmacy and PG Psychology",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r96"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-queensland-university-of-technology-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Health disciplines – Podiatry, Paramedic Science, Optometry and Vision Science, Medical Imaging, Radiation Therapy, Pharmacy and PG Psychology",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "36 QUT credit points (22.5 ECTS)",
+          "max": "48 QUT credit points (30 ECTS)"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r96"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "unavailable",
+        "source": {
+          "value": "X",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r96"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-02-22",
+          "end": "2027-06-18"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r96"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r96"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-11-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r96"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.qut.edu.au/study/international/study-abroad-program",
+        "courses": "https://www.qut.edu.au/study/international/study-abroad-program/what-can-i-study"
+      },
+      "notes": [],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r96"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-chalmers-university-of-technology",
+      "universityName": "Chalmers University of Technology",
+      "country": "스웨덴",
+      "region": "유럽",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r99"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r99"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 4,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r99"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r99"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 별도 GPA 기준 없이 한양대 선발 기준을 따름(엑셀 원문)"
+      },
+      "gpaRaw": "한양대 선발 기준",
+      "language": [],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r99"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "Architecture",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r99"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-chalmers-university-of-technology-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Architecture",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "30",
+          "max": "45"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r99"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "unavailable",
+        "source": {
+          "value": "X",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r99"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-18",
+          "end": "2027-06-06"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r99"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r99"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r99"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.chalmers.se/en/education/new-student/incoming-exchange-student/",
+        "courses": "https://www.chalmers.se/en/education/your-studies/course-selection-and-registration/select-courses/"
+      },
+      "notes": [],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r99"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-epita",
+      "universityName": "EPITA",
+      "country": "프랑스",
+      "region": "유럽",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r103"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r103"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 1,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r103"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r103"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 별도 GPA 기준 없이 한양대 선발 기준을 따름(엑셀 원문)"
+      },
+      "gpaRaw": "한양대 선발 기준",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 80,
+          "subscoresRequired": null,
+          "raw": "TOEFL 80 IBT"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6,
+          "subscoresRequired": null,
+          "raw": "IELTS 6.0"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r103"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "We only have Computer Sciences department",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r103"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-epita-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "파견교가 컴퓨터과학 학과만 운영한다고 적었어요. 교환학생에게 열린 실제 과목은 따로 확인해야 해요."
+          ],
+          "source": {
+            "value": "We only have Computer Sciences department",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "Minimum depends on home university requirements",
+          "max": "30"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r103"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "unavailable",
+        "source": {
+          "value": "X",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r103"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-11",
+          "end": "2027-07-30"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r103"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r103"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-11-01",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r103"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://sway.cloud.microsoft/pw0vfIJzSxUAjaxp?ref=Link",
+        "courses": "https://sway.cloud.microsoft/pw0vfIJzSxUAjaxp?ref=Link"
+      },
+      "notes": [
+        "Students cannot mix courses from different years due to schedule conflicts"
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r103"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-macquarie-university",
+      "universityName": "Macquarie University",
+      "country": "호주",
+      "region": "영미",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r107"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r107"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 6,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r107"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 2,
+          "scale": 4
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r107"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "2.0/4.0 of US GPA scale",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 83,
+          "subscoresRequired": null,
+          "raw": "83 overall (please see required individual sections via https://www.mq.edu.au/study/admissions-and-entry/apply/international/english-language-requirements)"
+        },
+        {
+          "test": "TOEFL_IBT_2026",
+          "scaleVersion": "6점 만점(2026-01 이후 체계)",
+          "total": 4.4,
+          "subscoresRequired": true,
+          "raw": "4.4 overall with 4 in each section"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6.5,
+          "subscoresRequired": true,
+          "raw": "6.5 overall with 6.0 in each section"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r107"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "https://www.mq.edu.au/study/information-for/international/study-abroad-exchange-and-study-tours/understanding-enrolment/closed-units",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r107"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-macquarie-university-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "수강 제한 목록이 링크로만 제공돼요 — 링크에서 컴퓨터·정보시스템 과목이 있는지 확인이 필요해요."
+          ],
+          "source": {
+            "value": "https://www.mq.edu.au/study/information-for/international/study-abroad-exchange-and-study-tours/understanding-enrolment/closed-units",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "30 credit points per session (3 units)",
+          "max": "40 credit points per session (4 units)"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r107"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "unavailable",
+        "source": {
+          "value": "X",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r107"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-02-15",
+          "end": "2027-06-25"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r107"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r107"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-31",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r107"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.mq.edu.au/study/information-for/international/study-abroad-exchange-and-study-tours/exchange",
+        "courses": "https://www.mq.edu.au/__data/assets/pdf_file/0007/1359340/Exchange-Fact-Sheet-27.1.0.pdf"
+      },
+      "notes": [],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r107"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-new-jersey-institute-of-technology",
+      "universityName": "New Jersey Institute of Technology",
+      "country": "미국",
+      "region": "영미",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Semester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r110"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term",
+          "one_year"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r110"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 1,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r110"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 3,
+          "scale": 4
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r110"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "3.0GPA minimum out of 4.0",
+      "language": [
+        {
+          "test": "TOEFL_IBT",
+          "scaleVersion": "120점 만점(2026-01 이전 체계)",
+          "total": 79,
+          "subscoresRequired": null,
+          "raw": "79"
+        },
+        {
+          "test": "IELTS_ACADEMIC",
+          "scaleVersion": "9.0 만점",
+          "total": 6.5,
+          "subscoresRequired": null,
+          "raw": "6.5"
+        }
+      ],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r110"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "Open to all",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r110"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-new-jersey-institute-of-technology-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Open to all",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "12 for undergraduate, 9 for graduate",
+          "max": "19 for either."
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r110"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r110"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-19",
+          "end": "2027-05-12"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r110"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-09-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r110"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-10-15",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r110"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.njit.edu/global/incoming/j1-students/exchange",
+        "courses": null
+      },
+      "notes": [
+        "Please see here for full information: https://www.njit.edu/global/j1application"
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r110"
+      ],
+      "reviewStatus": "candidate"
+    },
+    {
+      "id": "hy-2027-1-singapore-university-of-technology-and-d",
+      "universityName": "Singapore University of Technology and Design (SUTD)",
+      "country": "싱가포르",
+      "region": "아시아",
+      "applicationCycleId": "hy-2027-1-main",
+      "hostAcademicPeriod": "2027 Spring",
+      "academicSystem": {
+        "value": "Trimester",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r112"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "durationOptions": {
+        "value": [
+          "one_term"
+        ],
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r112"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "quota": {
+        "value": 2,
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r112"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "배정 TO(서울). 정원 정보이며 합격 가능성이 아니에요."
+      },
+      "gpa": {
+        "value": {
+          "min": 3,
+          "scale": 5
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r112"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "gpaRaw": "3.0 out of 5.0 scale",
+      "language": [],
+      "nationalityRestriction": {
+        "value": null,
+        "truth": "unknown",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r112"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "국적 제한 없음(엑셀)"
+      },
+      "closedDepartments": {
+        "value": "Architecture and Sustainable Design (ASD) Department",
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r112"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "courseAccess": [
+        {
+          "id": "hy-2027-1-singapore-university-of-technology-and-d-cs-access",
+          "scope": "department",
+          "target": "컴퓨터·정보시스템 계열",
+          "access": "unknown",
+          "appliesTo": "2027-1(파견교 엑셀 기준)",
+          "effectiveTerm": "2027-1",
+          "conditions": [
+            "엑셀의 수강불가 목록에 컴퓨터 계열이 없지만, 그것만으로 수강 가능을 확정하지 않아요. 최신 교환학생 과목 목록 확인이 필요해요."
+          ],
+          "source": {
+            "value": "Architecture and Sustainable Design (ASD) Department",
+            "truth": "service_analysis",
+            "sourceRefs": [],
+            "validity": {
+              "applicationCycleId": "hy-2027-1-main",
+              "exchangeTermId": "2027-1",
+              "hostAcademicPeriod": null,
+              "effectiveFrom": null,
+              "effectiveUntil": null
+            },
+            "derivation": "엑셀 '수강불가 학과' 셀 원문을 키워드로 분류한 서비스 분석"
+          }
+        }
+      ],
+      "creditLoad": {
+        "value": {
+          "min": "24 SUTD credits (~ 2 courses)",
+          "max": "48 SUTD credits (~ 4 courses)"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r112"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        }
+      },
+      "housing": {
+        "onCampus": "available_not_guaranteed",
+        "source": {
+          "value": "O",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r112"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "엑셀 On-campus 표기. O는 교내 기숙사 신청 가능 여부이며 배정 보장이 아니에요."
+        }
+      },
+      "calendar": {
+        "value": {
+          "start": "2027-01-25",
+          "end": "2027-05-01"
+        },
+        "truth": "verified_official",
+        "sourceRefs": [
+          "hy-2027-1-xlsx-r112"
+        ],
+        "validity": {
+          "applicationCycleId": "hy-2027-1-main",
+          "exchangeTermId": "2027-1",
+          "hostAcademicPeriod": null,
+          "effectiveFrom": null,
+          "effectiveUntil": null
+        },
+        "note": "파견교 2027 Spring 개강·종강(엑셀)"
+      },
+      "deadlines": {
+        "nomination": {
+          "value": "2026-08-25",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r112"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "한양대가 파견교에 추천(노미네이션)하는 마감"
+        },
+        "application": {
+          "value": "2026-08-30",
+          "truth": "verified_official",
+          "sourceRefs": [
+            "hy-2027-1-xlsx-r112"
+          ],
+          "validity": {
+            "applicationCycleId": "hy-2027-1-main",
+            "exchangeTermId": "2027-1",
+            "hostAcademicPeriod": null,
+            "effectiveFrom": null,
+            "effectiveUntil": null
+          },
+          "note": "학생이 파견교에 직접 지원하는 마감"
+        }
+      },
+      "links": {
+        "exchange": "https://www.sutd.edu.sg/campus-life/global-experience-and-exchange/student-exchange/inbound/inbound-exchange/",
+        "courses": "https://bit.ly/SUTDsubjcatalogue"
+      },
+      "notes": [
+        "Students need to be capable of taking courses or research fully delivered in English."
+      ],
+      "sourceRefs": [
+        "hy-2027-1-xlsx-r112"
+      ],
+      "reviewStatus": "candidate"
+    }
+  ],
+  "gpaConversions": {
+    "value": [
+      {
+        "scale": 4.3,
+        "formula": "gpa45 * 4.3 / 4.5"
+      },
+      {
+        "scale": 4,
+        "formula": "gpa45 * 4 / 4.5"
+      },
+      {
+        "scale": 100,
+        "formula": "gpa45 * 100 / 4.5"
+      }
+    ],
+    "truth": "verified_official",
+    "sourceRefs": [
+      "hy-2027-1-xlsx-gpa"
+    ],
+    "validity": {
+      "applicationCycleId": "hy-2027-1-main",
+      "exchangeTermId": "2027-1",
+      "hostAcademicPeriod": null,
+      "effectiveFrom": null,
+      "effectiveUntil": null
+    },
+    "note": "한양대 엑셀의 변환기 수식이에요. 파견교가 이 변환을 그대로 쓰는지는 확인되지 않았어요. 5.0 만점 변환은 없어요."
+  }
+}

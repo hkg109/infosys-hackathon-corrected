@@ -22,7 +22,12 @@ export const INPUT_STEPS = [
   { id: "katusa", title: "카투사", q: "카투사를 생각하고 있나요?" },
   { id: "katusa-evidence", title: "카투사 준비", q: "카투사 지원에 필요한 것만 확인할게요." },
   { id: "leave", title: "휴학", q: "휴학 계획이 있나요?" },
-  { id: "exchange", title: "교환학생", q: "교환학생을 고려하고 있나요?" },
+  { id: "exchange", title: "교환학생", q: "교환학생을 생각하고 있나요?" },
+  { id: "exchange-when", title: "교환 시기", q: "언제 가고 싶나요?" },
+  { id: "exchange-length", title: "교환 기간", q: "얼마나 가고 싶나요?" },
+  { id: "exchange-goal", title: "교환에서 중요한 것", q: "가장 중요한 것은 무엇인가요? (최대 2개)" },
+  { id: "exchange-language", title: "어학·성적", q: "어학성적이 있나요?" },
+  { id: "exchange-life", title: "예산·주거", q: "예산과 주거는 어떻게 생각하나요?" },
   { id: "priority", title: "우선순위", q: "가장 중요한 우선순위는 무엇인가요?" },
   { id: "review", title: "확인", q: "지금까지 입력한 내용을 확인해 주세요." },
 ] as const;
