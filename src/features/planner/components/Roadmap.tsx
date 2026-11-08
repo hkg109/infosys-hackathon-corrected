@@ -160,26 +160,25 @@ function TermPage({
           </li>
         ))}
         {b.placeholders.map((g) => (
-          <li key={g.id} className="flex min-h-[34px] items-center gap-2.5 text-[13.5px]" title={GEN_ED_NOTE}>
+          <li key={g.id} className="flex h-[34px] items-center gap-2.5 text-[13.5px]" title={GEN_ED_NOTE}>
             <span aria-hidden className="inline-block size-[9px] shrink-0 rounded-[2px] border border-dashed border-pen bg-pen/10" />
-            <span className="min-w-0">
-              <span className="font-medium text-pen">{g.label}</span> · {g.credits}학점
-              <span className="block text-[11px] leading-tight text-muted">{GEN_ED_NOTE}</span>
-            </span>
-            {g.origin === "demo" && <span className="text-[10px] text-muted">시연</span>}
+            <span className="min-w-0 truncate font-medium text-pen">{g.label}</span>
+            {g.origin === "demo" && <span className="shrink-0 text-[10px] text-muted">시연</span>}
+            <span className="ml-auto shrink-0 text-[11px] text-muted">교양 자리</span>
             {onRemove && (
-              <button type="button" onClick={() => onRemove(g.id)} className="ml-auto grid size-6 cursor-pointer place-items-center rounded text-muted hover:bg-paper-2 hover:text-red print:hidden" aria-label={`${g.label} 빼기`}>
+              <button type="button" onClick={() => onRemove(g.id)} className="-my-1 grid size-6 shrink-0 cursor-pointer place-items-center rounded text-muted hover:bg-paper-2 hover:text-red print:hidden" aria-label={`${g.label} 빼기`}>
                 <X size={13} aria-hidden />
               </button>
             )}
-            <span className={`w-9 shrink-0 text-right tabular-nums text-ink-soft ${onRemove ? "" : "ml-auto"}`}>{g.credits}</span>
+            <span className="w-9 shrink-0 text-right tabular-nums text-ink-soft">{g.credits}</span>
           </li>
         ))}
         {b.unassigned > 0 && (
           <li className="flex h-[34px] items-center gap-2.5 text-[13px] text-muted">
-            <span aria-hidden className="inline-block size-[9px] rounded-[2px] border border-dashed border-muted" />
-            미지정 전공·교양 자리 (직접 고르기)
-            <span className="ml-auto w-9 text-right tabular-nums">{b.unassigned}</span>
+            <span aria-hidden className="inline-block size-[9px] shrink-0 rounded-[2px] border border-dashed border-muted" />
+            <span className="min-w-0 truncate">미지정 전공·교양 자리</span>
+            <span className="ml-auto shrink-0 text-[11px]">직접 고르기</span>
+            <span className="w-9 shrink-0 text-right tabular-nums">{b.unassigned}</span>
           </li>
         )}
         {t.courses.length === 0 && t.slotCredits === 0 && <li className="flex h-[34px] items-center text-[13px] text-muted">배치할 과목 없음</li>}
@@ -198,8 +197,14 @@ function TermPage({
               <Plus size={12} aria-hidden /> {c}학점 교양
             </button>
           ))}
-          {left < 2 && <span className="self-center text-[11px] text-muted">{left <= 0 ? "남은 미지정 학점 없음" : `남은 미지정 ${left}학점`}</span>}
         </div>
+      )}
+      {onAdd && left < 3 && (
+        <p role="note" className="mx-4 mt-1.5 rounded-[4px] bg-red-soft/40 px-2 py-1 text-[11.5px] text-red print:hidden">
+          {left <= 0
+            ? `이 학기는 최대 ${t.capCredits ?? t.plannedCredits}학점이 다 차서 교양을 더 넣을 수 없어요.`
+            : `남은 자리가 ${left}학점이라 3학점 교양은 넣을 수 없어요(최대 ${t.capCredits ?? t.plannedCredits}학점).`}
+        </p>
       )}
       <div className="flex items-center justify-between gap-2 px-4 pt-1.5 pb-2.5">
         {isCompletion ? <span className="font-hand text-[20px] text-red">여기서 계획 완료!</span> : <span />}
