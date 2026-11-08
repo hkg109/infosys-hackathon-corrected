@@ -85,6 +85,7 @@ function StepFrame({ step, draft, dataset }: { step: StepId; draft: Draft; datas
   // 키보드: Enter = 다음, 숫자키 = 선택지 고르기(입력칸에 쓰는 중이면 무시)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) return;
       const el = e.target as HTMLElement;
       const typing = el.tagName === "TEXTAREA" || (el.tagName === "INPUT" && (el as HTMLInputElement).type !== "checkbox");
       if (e.key === "Enter" && !e.isComposing && el.tagName !== "TEXTAREA" && el.tagName !== "BUTTON" && el.tagName !== "A") {
@@ -176,7 +177,7 @@ function StepFrame({ step, draft, dataset }: { step: StepId; draft: Draft; datas
           <p className="hidden items-center gap-1.5 text-[12px] text-muted lg:flex">
             <CornerDownLeft size={13} aria-hidden /> Enter로 다음 · 숫자키로 선택 · 답한 질문 {answered}개
           </p>
-          <Button kind="ink" onClick={go} className="min-h-[56px] px-8 text-[17px]">
+          <Button data-input-next="true" kind="ink" onClick={go} className="min-h-[56px] px-8 text-[17px]">
             {isReview ? "내 트랙 보러 가기" : flash ? "좋아요!" : "다음"} <ArrowRight size={18} aria-hidden />
           </Button>
         </div>
@@ -447,15 +448,41 @@ function NumberStep({ ctx, field, unit, hint }: { ctx: StepCtx; field: "earnedCr
 function TranscriptStep({ ctx }: { ctx: StepCtx }) {
   const router = useRouter();
   return (
-    <TranscriptImport
-      draft={ctx.d}
-      update={ctx.update}
-      dataset={ctx.dataset}
-      onManual={() => {
-        ctx.set({ progressMode: "manual" });
-        router.push(stepPath("credits"));
-      }}
-    />
+    <div>
+      <TranscriptImport
+        draft={ctx.d}
+        update={ctx.update}
+        dataset={ctx.dataset}
+        onManual={() => {
+          ctx.set({ progressMode: "manual" });
+          router.push(stepPath("credits"));
+        }}
+      />
+      {ctx.d.progressMode === "import" && (ctx.d.earnedCredits === null || ctx.d.earnedMajorCredits === null) && (
+        <div className="mt-6 max-w-[760px] rounded-[10px] border border-red/50 bg-red-soft/20 p-5">
+          <p className="text-[15px] font-semibold">{ctx.d.completedCourseCodes.length > 0 ? "과목은 가져왔어요. " : "가져오기를 확인했어요. "}총·전공 이수학점만 확인해 주세요.</p>
+          <p className="mt-1 text-[13px] text-ink-soft">포털 성적 조회의 취득학점 합계를 적으세요. 과목별 학점 합계로 대신 계산하지 않아요.</p>
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            {(["earnedCredits", "earnedMajorCredits"] as const).map((field) => (
+              <label key={field} className="grid gap-1.5 text-[13px] font-semibold">
+                {field === "earnedCredits" ? "총 이수학점" : "전공 이수학점 (총학점에 포함)"}
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={250}
+                  value={ctx.d[field] ?? ""}
+                  onChange={(e) => ctx.set({ [field]: e.target.value === "" ? null : Number(e.target.value) } as Partial<Draft>)}
+                  aria-label={field === "earnedCredits" ? "총 이수학점" : "전공 이수학점"}
+                  placeholder="직접 입력"
+                  className="!bg-paper !text-[18px]"
+                />
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

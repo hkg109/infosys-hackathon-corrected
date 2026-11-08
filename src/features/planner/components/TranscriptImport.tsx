@@ -2,6 +2,7 @@
 
 import { ImageUp, PencilLine, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import type { Course, DatasetV2, TranscriptImageReply } from "@/contracts/types";
 import { imageProblem, imagesFromClipboard, MAX_IMAGES, toJpegBase64 } from "../importSources";
 import { readTranscriptImage } from "@/client/transcriptImage";
@@ -58,8 +59,12 @@ export function TranscriptImport({
             지금 값 — 총 <b>{draft.earnedCredits}</b>학점 · 전공 <b>{draft.earnedMajorCredits}</b>학점 · 학과 과목 <b>{draft.completedCourseCodes.length}</b>개
             {draft.targetCredits !== null && <> · 목표 {draft.targetCredits}학점</>}
           </span>
-          {applied && <span className="text-sage-ink">{applied}</span>}
         </div>
+      )}
+      {applied && !mode && (
+        <p role="status" className="mb-6 rounded-[8px] border border-sage-ink/40 bg-sage/30 px-5 py-3 text-[14px] text-sage-ink">
+          {applied} · 이제 ‘다음’을 눌러 계속하세요.
+        </p>
       )}
       <div role="radiogroup" aria-label="이수 현황 가져오기 방법" className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
         <BigOption icon={<ImageUp size={22} />} selected={mode === "image"} onClick={() => setMode("image")} title="스크린샷으로 가져오기" desc="포털 성적 조회 화면을 학기별로 캡처해 붙여넣기" />
@@ -74,12 +79,16 @@ export function TranscriptImport({
           draft={draft}
           result={review}
           courses={courses}
-          onCancel={() => setReview(null)}
+          onCancel={() => {
+            setReview(null);
+            requestAnimationFrame(() => document.querySelector<HTMLButtonElement>("[data-read-transcript]")?.focus());
+          }}
           onApply={(next, summary) => {
             update((d) => ({ ...d, ...next, coursesConfirmed: true, targetSource: next.targetCredits !== d.targetCredits ? "graduation_check" : d.targetSource, progressMode: "import" }));
             setReview(null);
             setMode(null);
             setApplied(summary);
+            requestAnimationFrame(() => document.querySelector<HTMLButtonElement>("[data-input-next]")?.focus());
           }}
         />
       )}
@@ -239,7 +248,7 @@ function ImagePanel({ onRows }: { onRows: (rows: SourceRow[], s: TranscriptImpor
       </label>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button kind="ink" disabled={files.length === 0 || !consent || busy !== null} onClick={read}>
+        <Button data-read-transcript="true" kind="ink" disabled={files.length === 0 || !consent || busy !== null} onClick={read}>
           {busy ?? `읽어서 확인하기${files.length > 0 ? ` (${files.length}장)` : ""}`}
         </Button>
         {problem && (
@@ -301,12 +310,36 @@ function ReviewDialog({
   ]);
   const [mode, setMode] = useState<"merge" | "replace">("merge");
   const [tried, setTried] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dialog = useRef<HTMLDivElement>(null);
+  const earnedInput = useRef<HTMLInputElement>(null);
+  const majorInput = useRef<HTMLInputElement>(null);
+  const cancelRef = useRef(onCancel);
+  cancelRef.current = onCancel;
   const courseName = (code: string | null) => courses.find((c) => c.code === code)?.name ?? code ?? "—";
 
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
+    if (!mounted) return;
     dialog.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onCancel();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        cancelRef.current();
+        return;
+      }
+      if (e.key !== "Tab" || !dialog.current) return;
+      const focusable = Array.from(dialog.current.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex]:not([tabindex="-1"])'));
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === dialog.current)) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -314,7 +347,7 @@ function ReviewDialog({
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [onCancel]);
+  }, [mounted]);
 
   const completedCodes = rows.filter((r) => r.status === "completed" && r.chosen).map((r) => r.chosen!);
   const choice = {
@@ -345,21 +378,27 @@ function ReviewDialog({
   const setRow = (id: string, patch: Partial<Row>) => setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   const apply = () => {
     setTried(true);
-    if (problem || unresolved > 0) return;
-    onApply(next, `가져오기 반영 — 과목 +${added}${removed ? ` −${removed}` : ""}${choice.earnedCredits !== null ? ` · 총 ${choice.earnedCredits}학점` : ""}`);
+    if (problem || unresolved > 0) {
+      const missing = earned === null ? earnedInput.current : major === null ? majorInput.current : null;
+      missing?.scrollIntoView({ block: "center" });
+      missing?.focus();
+      return;
+    }
+    onApply(next, `가져오기 반영 — 과목 +${added}${removed ? ` −${removed}` : ""} · 총 ${next.earnedCredits}학점 · 전공 ${next.earnedMajorCredits}학점`);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/40 print:hidden" role="presentation">
+  if (!mounted) return null;
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-ink/40 p-6 print:hidden" role="presentation">
       <div
         ref={dialog}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="import-title"
-        className="mx-auto my-6 w-[min(1100px,calc(100vw-32px))] rounded-[12px] border-[1.5px] border-ink bg-paper shadow-2xl outline-none"
+        className="flex max-h-[calc(100dvh-48px)] w-[min(1100px,calc(100vw-48px))] min-h-0 flex-col rounded-[12px] border-[1.5px] border-ink bg-paper shadow-2xl outline-none"
       >
-        <header className="flex items-start justify-between gap-4 border-b border-line px-7 py-5">
+        <header className="flex shrink-0 items-start justify-between gap-4 border-b border-line px-7 py-5">
           <div className="min-w-0">
             <p className="font-hand text-[20px] leading-none text-pen">가져온 내용 확인</p>
             <h2 id="import-title" className="mt-1 font-serif text-[24px] font-bold">
@@ -374,7 +413,7 @@ function ReviewDialog({
           </button>
         </header>
 
-        <div className="grid gap-8 px-7 py-6">
+        <div className="grid min-h-0 flex-1 gap-8 overflow-y-auto px-7 py-6">
           {result.warnings.length > 0 && (
             <ul className="grid gap-1 border-l-[3px] border-red bg-red-soft/30 px-4 py-2.5 text-[13px]">
               {result.warnings.map((w) => (
@@ -386,8 +425,8 @@ function ReviewDialog({
           <section>
             <h3 className="mb-3 font-serif text-[18px] font-bold">학점</h3>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
-              <NumberField label="총 이수학점" value={earned} onChange={setEarned} found={result.earnedCredits} hint="포털 졸업사정·성적 조회의 취득학점 합계" />
-              <NumberField label="전공 이수학점" value={major} onChange={setMajor} found={result.earnedMajorCredits} hint="총학점에 포함 — 더하지 않아요" />
+              <NumberField label="총 이수학점" value={earned} onChange={setEarned} found={result.earnedCredits} hint="포털 졸업사정·성적 조회의 취득학점 합계" required showError={tried && earned === null} inputRef={earnedInput} />
+              <NumberField label="전공 이수학점" value={major} onChange={setMajor} found={result.earnedMajorCredits} hint="총학점에 포함 — 더하지 않아요" required showError={tried && major === null} inputRef={majorInput} />
               <NumberField label="목표(졸업 기준) 총학점" value={target} onChange={setTarget} found={result.targetCredits} hint="개인 졸업사정 값(모르면 비워 두세요)" />
             </div>
             {showMajorReq && (
@@ -487,7 +526,7 @@ function ReviewDialog({
           )}
         </div>
 
-        <footer className="sticky bottom-0 flex flex-wrap items-center justify-between gap-4 rounded-b-[12px] border-t border-line bg-paper px-7 py-4">
+        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-4 rounded-b-[12px] border-t border-line bg-paper px-7 py-4">
           <fieldset className="flex flex-wrap items-center gap-4 text-[13px]">
             <legend className="sr-only">기존 과목과 합치는 방법</legend>
             <label className="flex cursor-pointer items-center gap-1.5">
@@ -516,22 +555,25 @@ function ReviewDialog({
           </div>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
 type Pick4 = ReturnType<typeof applyTranscriptImport>;
 
-function NumberField({ label, value, onChange, found, hint }: { label: string; value: number | null; onChange: (v: number | null) => void; found: DetectedValue[]; hint: string }) {
+function NumberField({ label, value, onChange, found, hint, required = false, showError = false, inputRef }: { label: string; value: number | null; onChange: (v: number | null) => void; found: DetectedValue[]; hint: string; required?: boolean; showError?: boolean; inputRef?: React.Ref<HTMLInputElement> }) {
   return (
-    <label className="grid min-w-0 gap-1.5 rounded-[8px] border border-line p-4">
-      <span className="text-[14px] font-semibold">{label}</span>
+    <label className={`grid min-w-0 gap-1.5 rounded-[8px] border p-4 ${required && value === null ? "border-red bg-red-soft/20" : "border-line"}`}>
+      <span className="text-[14px] font-semibold">{label}{required && <span className="ml-1 text-[12px] text-red">필수</span>}</span>
       <span className="flex items-baseline gap-2">
         <input
+          ref={inputRef}
           type="number"
           inputMode="numeric"
           min={0}
           max={250}
+          aria-invalid={showError}
           value={value ?? ""}
           placeholder="직접 입력"
           onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
@@ -540,6 +582,8 @@ function NumberField({ label, value, onChange, found, hint }: { label: string; v
         <span className="text-[14px] text-ink-soft">학점</span>
       </span>
       <span className="text-[11px] text-muted">{hint}</span>
+      {required && value === null && <span className="text-[12px] text-red">성적표에서 찾지 못했어요 — 직접 적어 주세요.</span>}
+      {showError && <span role="alert" className="text-[12px] font-medium text-red">반영하려면 이 학점을 적어 주세요.</span>}
       {found.length > 0 && (
         <span className="text-[11px] break-words text-pen">
           성적표에서 찾은 값: {found.map((v) => `${v.value}(행 ${v.sourceRow + 1})`).join(", ")}
