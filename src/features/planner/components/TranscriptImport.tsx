@@ -7,6 +7,7 @@ import { readClipboard } from "../importSources";
 import type { Draft } from "../plan";
 import {
   applyTranscriptImport,
+  isPersonalRow,
   type CourseStatus,
   type DetectedCourseRow,
   type DetectedValue,
@@ -18,7 +19,7 @@ import {
   type TranscriptImportDraft,
   type TranscriptImportSource,
 } from "../transcriptImport";
-import { Button, Tag } from "./ui";
+import { Button } from "./ui";
 
 type Mode = "paste" | null;
 
@@ -110,45 +111,58 @@ function BigOption({ icon, title, desc, selected, onClick }: { icon: ReactNode; 
 
 function PastePanel({ onRows }: { onRows: (rows: SourceRow[], s: TranscriptImportSource) => void }) {
   const [text, setText] = useState("");
+  const [pastes, setPastes] = useState(0);
   const [note, setNote] = useState<string | null>(null);
+  // 붙여넣을 때마다 아래에 이어 붙인다(학기마다 따로 복사해 여러 번 붙여넣기). 확인 창은 버튼을 눌러야 열린다.
+  const append = (chunk: string, label: string) => {
+    if (!chunk.trim()) return;
+    setText((t) => (t.trim() ? `${t.replace(/\s+$/, "")}\n${chunk}` : chunk));
+    setPastes((n) => n + 1);
+    setNote(label);
+  };
   return (
     <div className="mt-6 max-w-[860px]">
       <textarea
         autoFocus
         value={text}
-        rows={7}
+        rows={9}
         aria-label="성적표 붙여넣기"
-        placeholder={"포털 성적 조회·졸업사정 화면에서 Ctrl+A → Ctrl+C 한 뒤, 여기를 누르고 Ctrl+V — 붙여넣으면 바로 읽어요.\n예)  학수번호  과목명  학점  성적\n     CSE1002  전산학개론  3  A+"}
+        placeholder={"포털 성적 조회 화면에서 한 학기씩 Ctrl+A → Ctrl+C 한 뒤, 여기에 Ctrl+V 하세요.\n여러 학기는 붙여넣기를 반복하면 아래로 이어 붙어요. 다 붙였으면 ‘읽어서 확인하기’를 누르세요."}
         onChange={(e) => setText(e.target.value)}
         onPaste={(e) => {
           const c = readClipboard(e.clipboardData);
+          e.preventDefault();
           if (c.kind === "image") {
-            e.preventDefault();
             setNote("이미지는 읽지 않아요. 포털 화면에서 Ctrl+A → Ctrl+C로 글자를 복사해 붙여넣어 주세요.");
             return;
           }
-          if (c.kind === "text") {
-            // 글자로 붙여넣으면 바로 읽어서 확인 창을 연다(입력칸에는 원문을 남긴다)
-            onRows(c.rows, "clipboard_text");
-            setNote(`${c.rows.length}줄을 읽었어요. 확인 창에서 검토하세요.`);
-            return;
-          }
-          if (c.kind === "html") {
-            // 표 구조가 있으면 셀 위치를 그대로 쓴다
-            // 원문(이름·학번이 섞였을 수 있음)을 입력칸에 펼치지 않는다
-            e.preventDefault();
-            setText("");
-            setNote(`표 ${c.rows.length}행을 읽었어요. 확인 창에서 검토하세요.`);
-            onRows(c.rows, "clipboard_html");
-          }
+          // 이름·학번 같은 개인정보 행은 입력칸에 펼치지 않는다. 표는 셀을 탭으로 이어 행 구조를 유지한다
+          const rows = c.rows.filter((r) => !isPersonalRow(r));
+          append(rows.map((r) => r.cells.join("\t")).join("\n"), `${pastes + 1}번째 붙여넣기 — ${rows.length}줄을 더했어요. 더 붙이거나 ‘읽어서 확인하기’를 누르세요.`);
         }}
         className="w-full resize-y font-mono !text-[13px]"
       />
-      <div className="mt-3 flex items-center gap-3">
+      <div className="mt-3 flex flex-wrap items-center gap-3">
         <Button kind="ink" disabled={!text.trim()} onClick={() => onRows(rowsFromText(text), "clipboard_text")}>
-          읽어서 확인하기
+          읽어서 확인하기{pastes > 1 ? ` (${pastes}번 붙여넣음)` : ""}
         </Button>
-        {note && <span className="text-[13px] text-ink-soft">{note}</span>}
+        {text.trim() && (
+          <Button
+            kind="ghost"
+            onClick={() => {
+              setText("");
+              setPastes(0);
+              setNote(null);
+            }}
+          >
+            모두 지우기
+          </Button>
+        )}
+        {note && (
+          <span role="status" className="text-[13px] text-ink-soft">
+            {note}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -156,7 +170,6 @@ function PastePanel({ onRows }: { onRows: (rows: SourceRow[], s: TranscriptImpor
 
 // ── 검토 ─────────────────────────────────────────────────
 
-type Pick = { kind: "detected"; index: number } | { kind: "custom"; value: number | null } | { kind: "keep" };
 type Row = DetectedCourseRow & { group: "completed" | "inProgress" | "notCompleted" | "ambiguous"; status: CourseStatus | "exclude"; chosen: string | null };
 
 const STATUS_LABEL: Record<CourseStatus | "exclude", string> = {
@@ -168,9 +181,9 @@ const STATUS_LABEL: Record<CourseStatus | "exclude", string> = {
   exclude: "넣지 않음",
 };
 
-function initialPick(values: DetectedValue[]): Pick {
-  if (values.length === 1 && values[0].confidence !== "low") return { kind: "detected", index: 0 };
-  return { kind: "keep" };
+/** 성적표에서 확실히 하나만 찾았으면 그 값, 아니면 지금 입력값을 기본으로 */
+function initialNumber(values: DetectedValue[], current: number | null): number | null {
+  return values.length === 1 && values[0].confidence !== "low" ? values[0].value : current;
 }
 
 function ReviewDialog({
@@ -186,9 +199,9 @@ function ReviewDialog({
   onCancel: () => void;
   onApply: (next: Pick4, summary: string) => void;
 }) {
-  const [earned, setEarned] = useState<Pick>(initialPick(result.earnedCredits));
-  const [major, setMajor] = useState<Pick>(initialPick(result.earnedMajorCredits));
-  const [target, setTarget] = useState<Pick>(initialPick(result.targetCredits));
+  const [earned, setEarned] = useState<number | null>(initialNumber(result.earnedCredits, draft.earnedCredits));
+  const [major, setMajor] = useState<number | null>(initialNumber(result.earnedMajorCredits, draft.earnedMajorCredits));
+  const [target, setTarget] = useState<number | null>(initialNumber(result.targetCredits, draft.targetCredits));
   const [rows, setRows] = useState<Row[]>(() => [
     ...result.completed.map((r) => ({ ...r, group: "completed" as const, status: "completed" as const, chosen: r.matchedCourseCode })),
     ...result.ambiguous.map((r) => ({ ...r, group: "ambiguous" as const, status: "exclude" as const, chosen: r.matchKind === "ocr_suggestion" ? null : r.matchedCourseCode })),
@@ -212,12 +225,11 @@ function ReviewDialog({
     };
   }, [onCancel]);
 
-  const valueOf = (p: Pick, values: DetectedValue[]) => (p.kind === "detected" ? values[p.index].value : p.kind === "custom" ? p.value : null);
   const completedCodes = rows.filter((r) => r.status === "completed" && r.chosen).map((r) => r.chosen!);
   const choice = {
-    earnedCredits: valueOf(earned, result.earnedCredits),
-    earnedMajorCredits: valueOf(major, result.earnedMajorCredits),
-    targetCredits: valueOf(target, result.targetCredits),
+    earnedCredits: earned,
+    earnedMajorCredits: major,
+    targetCredits: target,
     completedCodes,
     mode,
   };
@@ -272,9 +284,9 @@ function ReviewDialog({
           <section>
             <h3 className="mb-3 font-serif text-[18px] font-bold">학점</h3>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
-              <NumberPick label="총 이수학점" current={draft.earnedCredits} values={result.earnedCredits} pick={earned} onPick={setEarned} />
-              <NumberPick label="전공 이수학점" current={draft.earnedMajorCredits} values={result.earnedMajorCredits} pick={major} onPick={setMajor} note="총학점에 포함 — 더하지 않아요" />
-              <NumberPick label="목표(졸업 기준) 총학점" current={draft.targetCredits} values={result.targetCredits} pick={target} onPick={setTarget} note="개인 졸업사정 값. 학교 공통 기준이 아니에요" />
+              <NumberField label="총 이수학점" value={earned} onChange={setEarned} found={result.earnedCredits} hint="포털 졸업사정·성적 조회의 취득학점 합계" />
+              <NumberField label="전공 이수학점" value={major} onChange={setMajor} found={result.earnedMajorCredits} hint="총학점에 포함 — 더하지 않아요" />
+              <NumberField label="목표(졸업 기준) 총학점" value={target} onChange={setTarget} found={result.targetCredits} hint="개인 졸업사정 값(모르면 비워 두세요)" />
             </div>
             <p className="mt-2 text-[12px] text-muted">찾은 학과 과목의 학점 합은 {result.courseCreditSum}학점이에요(교양·타과·인정 학점이 빠져 있어 총 이수학점으로 쓰지 않아요).</p>
           </section>
@@ -397,43 +409,29 @@ function ReviewDialog({
 
 type Pick4 = ReturnType<typeof applyTranscriptImport>;
 
-function NumberPick({ label, current, values, pick, onPick, note }: { label: string; current: number | null; values: DetectedValue[]; pick: Pick; onPick: (p: Pick) => void; note?: string }) {
-  const name = `pick-${label}`;
+function NumberField({ label, value, onChange, found, hint }: { label: string; value: number | null; onChange: (v: number | null) => void; found: DetectedValue[]; hint: string }) {
   return (
-    <fieldset className="min-w-0 rounded-[8px] border border-line p-4">
-      <legend className="px-1 text-[14px] font-semibold">{label}</legend>
-      {note && <p className="-mt-1 mb-2 text-[11px] text-muted">{note}</p>}
-      <div className="grid gap-1.5 text-[13px]">
-        {values.map((v, i) => (
-          <label key={i} className="flex cursor-pointer items-start gap-2">
-            <input type="radio" name={name} className="mt-1" checked={pick.kind === "detected" && pick.index === i} onChange={() => onPick({ kind: "detected", index: i })} />
-            <span className="min-w-0">
-              <b className="font-serif text-[16px] tabular-nums">{v.value}</b>학점 {v.confidence === "low" && <Tag tone="red">열 확인 필요</Tag>}
-              <span className="block break-words text-[11px] text-muted">
-                행 {v.sourceRow + 1} · {v.rawText}
-              </span>
-            </span>
-          </label>
-        ))}
-        {values.length === 0 && <p className="text-[12px] text-muted">찾지 못했어요.</p>}
-        <label className="flex cursor-pointer items-center gap-2">
-          <input type="radio" name={name} checked={pick.kind === "custom"} onChange={() => onPick({ kind: "custom", value: current })} />
-          직접
-          <input
-            type="number"
-            min={0}
-            aria-label={`${label} 직접 입력`}
-            value={pick.kind === "custom" ? (pick.value ?? "") : ""}
-            onFocus={() => pick.kind !== "custom" && onPick({ kind: "custom", value: current })}
-            onChange={(e) => onPick({ kind: "custom", value: e.target.value === "" ? null : Number(e.target.value) })}
-            className="!w-[90px] !py-1 !text-[13px]"
-          />
-        </label>
-        <label className="flex cursor-pointer items-center gap-2 text-ink-soft">
-          <input type="radio" name={name} checked={pick.kind === "keep"} onChange={() => onPick({ kind: "keep" })} />
-          지금 값 유지 ({current === null ? "비어 있음" : `${current}학점`})
-        </label>
-      </div>
-    </fieldset>
+    <label className="grid min-w-0 gap-1.5 rounded-[8px] border border-line p-4">
+      <span className="text-[14px] font-semibold">{label}</span>
+      <span className="flex items-baseline gap-2">
+        <input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={250}
+          value={value ?? ""}
+          placeholder="직접 입력"
+          onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+          className="!w-[140px] font-serif !text-[22px] font-bold tabular-nums"
+        />
+        <span className="text-[14px] text-ink-soft">학점</span>
+      </span>
+      <span className="text-[11px] text-muted">{hint}</span>
+      {found.length > 0 && (
+        <span className="text-[11px] break-words text-pen">
+          성적표에서 찾은 값: {found.map((v) => `${v.value}(행 ${v.sourceRow + 1})`).join(", ")}
+        </span>
+      )}
+    </label>
   );
 }

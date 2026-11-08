@@ -270,7 +270,8 @@ function findName(cells: string[], byName: Map<string, Course>, byLoose: Map<str
 function creditsNear(cells: string[], from: number): number | null {
   for (let i = from + 1; i < cells.length; i++) {
     const t = cells[i].trim();
-    if (/^[1-4](\.0)?$/.test(t)) return Number(t);
+    // "3", "3.0", "2.00" 모두 학점으로(평점 "4.50"·점수 "96.7"은 범위·형식이 달라 제외)
+    if (/^[1-4](\.0+)?$/.test(t)) return Number(t);
   }
   return null;
 }
@@ -283,6 +284,9 @@ const isTermHeader = (raw: string) => /^\d{4}\s*(학년도|년)?\s*[-.]?\s*(1|2|
  * 학수번호처럼 보이는 줄에서 새 행을 시작해 다음 학수번호 줄 전까지 묶는다.
  * 학수번호 줄이 거의 없으면 원래 행을 그대로 쓴다.
  */
+/** 이름·학번 등 개인정보 행(계산·입력칸에 쓰지 않는다) */
+export const isPersonalRow = (r: SourceRow) => PERSONAL.test(r.cells[0] ?? "") || (PERSONAL.test(r.raw) && !looksLikeCourseRow(r));
+
 export function regroupVertical(rows: SourceRow[]): { rows: SourceRow[]; layout: "table" | "vertical" } {
   if (rows.length < 6) return { rows, layout: "table" };
   // 한 줄에 셀 하나(공백이 든 과목명·레이블은 공백 하나로 나뉘어도 탭·2칸 공백이 없으면 한 셀로 본다)
