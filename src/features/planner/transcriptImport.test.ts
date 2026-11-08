@@ -201,3 +201,19 @@ describe("붙여넣기 형식 견고성", () => {
     expect(codes(parse("CSE1002\t전산학개론\t3\tA+ / 4.5").completed)).toEqual(["CSE1002"]);
   });
 });
+
+describe("한양인 포털 성적 조회 행 형식(가상 값)", () => {
+  const row = (term: string, cat: string, code: string, name: string, credits: string, grade: string) => [term, cat, code, name, credits, "96.7", "96.7", "4.50", grade, "Excellent", "N"].join("\t");
+  it("'2.00' 학점, 점수·평점 열과 섞여도 학점과 성적을 바르게 읽고 여러 학기를 이어 붙여도 된다", () => {
+    const text = [
+      row("2026년-1학년-1학기", "교양필수", "CUL0203", "AI시대쓰기의힘", "2.00", "A+"),
+      row("2026년-1학년-1학기", "전공기초(필수)", "CSE1002", "전산학개론", "3.00", "B0"),
+      "",
+      row("2026년-1학년-2학기", "전공핵심", "ITE1012", "정보시스템개론", "3.00", "A0"),
+    ].join("\n");
+    const d = parse(text);
+    expect(codes(d.completed)).toEqual(["CSE1002", "CUL0203", "ITE1012"]);
+    expect(d.completed.find((c) => c.matchedCourseCode === "CUL0203")!.detectedCredits).toBe(2);
+    expect(d.courseCreditSum).toBe(8);
+  });
+});
