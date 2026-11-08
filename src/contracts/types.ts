@@ -1359,3 +1359,12 @@ export interface FeedbackApiReply {
   /** 지금 계획 모델로는 할 수 없는 요청(계절학기, 교수 선택 등) */
   notSupported: string[];
 }
+
+// ── 성적표 스크린샷 읽기(Claude 이미지 인식) ─────────────
+/** /api/transcript-image 응답. 화면은 이 값을 바로 반영하지 않고 검토 창을 거친다 */
+export interface TranscriptImageReply {
+  rows: Array<{ term: string | null; category: string | null; code: string | null; name: string | null; credits: number | null; grade: string | null }>;
+  summary: { earnedCredits: number | null; majorCredits: number | null; targetCredits: number | null };
+  /** 성적표로 보이지 않거나 글자를 읽을 수 없으면 true */
+  unreadable: boolean;
+}
