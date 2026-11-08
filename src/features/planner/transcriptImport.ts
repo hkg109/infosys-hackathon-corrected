@@ -25,6 +25,8 @@ export interface SourceRow {
   index: number;
   cells: string[];
   raw: string;
+  /** 이미지 인식의 성적 열. null도 구조화된 미확인 값이므로 과목명에서 추정하지 않는다. */
+  grade?: string | null;
 }
 
 export interface DetectedValue {
@@ -114,22 +116,27 @@ export function rowsFromTable(table: string[][]): SourceRow[] {
  * 그 뒤는 붙여넣기와 같은 파서·검토 창을 거친다(학과 자료 매칭·사용자 확인).
  */
 export function rowsFromVision(replies: TranscriptImageReply[]): SourceRow[] {
-  const lines: string[][] = [];
+  const rows: SourceRow[] = [];
+  const add = (cells: string[], grade?: string | null) => {
+    const visible = cells.filter((c) => c !== "");
+    if (visible.length === 0) return;
+    rows.push({ index: rows.length, cells: visible, raw: visible.join("\t"), ...(grade !== undefined ? { grade } : {}) });
+  };
   for (const r of replies) {
     for (const x of r.rows) {
       const cells = [x.term, x.category, x.code, x.name, x.credits === null ? null : String(x.credits), x.grade].map((c) => (c ?? "").toString().trim());
-      if (cells.some((c) => c)) lines.push(cells);
+      add(cells, x.grade);
     }
     const s = r.summary;
-    if (s.earnedCredits !== null) lines.push(["총 이수학점", String(s.earnedCredits)]);
-    if (s.majorCredits !== null) lines.push(["전공 이수학점", String(s.majorCredits)]);
-    if (s.targetCredits !== null) lines.push(["졸업학점", String(s.targetCredits)]);
-    if (s.majorRequiredCredits != null) lines.push(["전공학점 기준", String(s.majorRequiredCredits)]);
-    if (s.majorLowerRequiredCredits != null) lines.push(["전공 100~300단위 기준", String(s.majorLowerRequiredCredits)]);
-    if (s.majorUpperRequiredCredits != null) lines.push(["전공 400단위 기준", String(s.majorUpperRequiredCredits)]);
-    if (s.majorUpperEarnedCredits != null) lines.push(["전공 400단위 취득", String(s.majorUpperEarnedCredits)]);
+    if (s.earnedCredits !== null) add(["총 이수학점", String(s.earnedCredits)]);
+    if (s.majorCredits !== null) add(["전공 이수학점", String(s.majorCredits)]);
+    if (s.targetCredits !== null) add(["졸업학점", String(s.targetCredits)]);
+    if (s.majorRequiredCredits != null) add(["전공학점 기준", String(s.majorRequiredCredits)]);
+    if (s.majorLowerRequiredCredits != null) add(["전공 100~300단위 기준", String(s.majorLowerRequiredCredits)]);
+    if (s.majorUpperRequiredCredits != null) add(["전공 400단위 기준", String(s.majorUpperRequiredCredits)]);
+    if (s.majorUpperEarnedCredits != null) add(["전공 400단위 취득", String(s.majorUpperEarnedCredits)]);
   }
-  return lines.map((cells, index) => ({ index, cells: cells.filter((c) => c !== ""), raw: cells.filter((c) => c !== "").join("\t") }));
+  return rows;
 }
 
 // ── 정규화 ───────────────────────────────────────────────
@@ -172,17 +179,32 @@ const UNKNOWN_GRADE = /^(I|IP|N|R|E|AU|T)$/i;
 const CATEGORY = /^(전공(기초|핵심|심화|필수|선택)?(\(필수\))?|교양(필수|선택|핵심)?|핵심교양|기초필수|일반선택|일반교양|타전공|복수전공|부전공|교직)$/;
 
 function statusOf(cells: string[]): { grade: string | null; status: CourseStatus } {
-  // "A+ / 4.5"처럼 한 셀에 성적과 다른 값이 같이 있으면 조각으로 나눠 본다
-  const tokens = cells.flatMap((c) => [c, ...c.split(/[\s/|()]+/)]).filter(Boolean);
-  for (const c of tokens) {
-    const t = c.trim();
+  const classify = (cell: string): { grade: string; status: CourseStatus } | null => {
+    const t = cell.trim();
     if (IN_PROGRESS.test(t)) return { grade: t, status: "in_progress" };
     if (WITHDRAWN.test(t)) return { grade: t, status: "withdrawn" };
     if (FAIL_GRADE.test(t)) return { grade: t.toUpperCase(), status: "failed" };
     if (PASS_GRADE.test(t)) return { grade: t.toUpperCase(), status: "completed" };
     if (UNKNOWN_GRADE.test(t)) return { grade: t.toUpperCase(), status: "unknown" };
-  }
-  return { grade: null, status: "unknown" };
+    return null;
+  };
+
+  // 성적 열은 보통 오른쪽에 있다. 셀 전체와 일치하는 확정 상태를 먼저 찾고,
+  // I·N 등 미확인 표기는 다른 모든 확정 상태를 확인한 뒤에만 사용한다.
+  const whole = [...cells].reverse().map(classify).filter((v) => v !== null);
+  const fullKnown = whole.find((v) => v.status !== "unknown");
+  if (fullKnown) return fullKnown;
+
+  // "A+ / 4.5"처럼 성적과 숫자로만 구성된 셀만 분해한다.
+  // 과목명 셀의 "I", "S", "P" 등은 조각으로 분해하지 않는다.
+  const mixed = [...cells].reverse().flatMap((cell) => {
+    if (!/^[A-Za-z0-9+.\s/|()\-]+$/.test(cell)) return [];
+    const tokens = cell.split(/[\s/|()]+/).filter(Boolean);
+    if (tokens.length < 2 || !tokens.every((t) => classify(t) || /^\d+(?:\.\d+)?$/.test(t))) return [];
+    return tokens.map(classify).filter((v) => v !== null);
+  });
+  const mixedKnown = mixed.find((v) => v.status !== "unknown");
+  return mixedKnown ?? whole[0] ?? mixed[0] ?? { grade: null, status: "unknown" };
 }
 
 // ── 학점 요약 ────────────────────────────────────────────
@@ -445,8 +467,12 @@ export function parseTranscriptRows(rawRows: SourceRow[], courses: Course[], sou
     if (summaryRows.has(r.index) || header(r) || (isTermHeader(r.raw) && r.cells.length <= 2 && !looksLikeCourseRow(r))) continue;
     if (r.cells.some((c) => COLUMN_WORDS.test(c.trim())) && !looksLikeCourseRow(r)) continue;
     const code = findCode(r.cells, byCode);
-    const name = code?.course ? null : findName(r.cells, byName, byLoose);
-    const { grade, status } = statusOf(r.cells);
+    const matchedName = findName(r.cells, byName, byLoose);
+    const name = code?.course ? null : matchedName;
+    const gradeCells = r.grade !== undefined
+      ? r.grade === null ? [] : [r.grade]
+      : r.cells.filter((_, i) => !matchedName || i < matchedName.cell || i >= matchedName.cell + matchedName.len);
+    const { grade, status } = statusOf(gradeCells);
     const category = r.cells.find((c) => CATEGORY.test(c.trim()))?.trim() ?? null;
     const base = {
       id: `row-${r.index}`,
@@ -460,9 +486,8 @@ export function parseTranscriptRows(rawRows: SourceRow[], courses: Course[], sou
     if (code?.course || name) {
       const course = (code?.course ?? name!.course)!;
       if (code?.course) {
-        const other = findName(r.cells.filter((_, i) => i !== code.cell), byName, byLoose);
-        if (other && other.course.code !== course.code)
-          warnings.push(`행 ${r.index + 1}: 학수번호(${course.code} ${course.name})와 과목명(${other.course.name})이 달라요. 학수번호 기준으로 넣었어요 — 확인해 주세요.`);
+        if (matchedName && matchedName.course.code !== course.code)
+          warnings.push(`행 ${r.index + 1}: 학수번호(${course.code} ${course.name})와 과목명(${matchedName.course.name})이 달라요. 학수번호 기준으로 넣었어요 — 확인해 주세요.`);
       }
       const at = code?.course ? code.cell : name!.cell + name!.len - 1;
       detected.push({
@@ -520,8 +545,9 @@ export function parseTranscriptRows(rawRows: SourceRow[], courses: Course[], sou
       inProgress.push(d);
       continue;
     }
-    if (d.detectedStatus === "unknown" && d.detectedGrade !== null) {
-      // 성적 표기가 이 학교 규칙으로 확인되지 않음 → 완료로 단정하지 않는다
+    if (d.detectedStatus === "unknown" && (d.detectedGrade !== null || source === "image_ai")) {
+      // 이미지 성적 열을 못 읽었거나 성적 표기가 확인되지 않음 → 완료로 단정하지 않는다.
+      // 성적 없이 과목만 붙여넣는 이전 흐름은 기존의 검토 기본값을 유지한다.
       ambiguous.push({ ...d, selected: false });
       continue;
     }
@@ -600,6 +626,7 @@ export function importProblem(choice: ImportChoice, current: ProgressFields): st
   const major = choice.earnedMajorCredits ?? current.earnedMajorCredits;
   for (const v of [choice.earnedCredits, choice.earnedMajorCredits, choice.targetCredits, choice.majorRequired ?? null, choice.majorLowerRequired ?? null, choice.majorUpperRequired ?? null, choice.earnedUpperMajorCredits ?? null])
     if (v !== null && (!Number.isFinite(v) || v < 0)) return "학점은 0 이상이어야 해요.";
+  if (total === null || major === null) return "총 이수학점과 전공 이수학점을 적어 주세요. 포털 성적 조회의 취득학점 합계를 확인해 주세요.";
   const upper = choice.earnedUpperMajorCredits ?? current.earnedUpperMajorCredits ?? null;
   if (upper !== null && major !== null && upper > major) return "전공 400단위 이수학점은 전공 이수학점 안에 포함돼요.";
   if (total !== null && major !== null && major > total) return "전공학점은 총 이수학점 안에 포함돼요. 총학점보다 클 수 없어요.";

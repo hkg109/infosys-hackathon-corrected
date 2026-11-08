@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Course } from "@/contracts/types";
 import { fixtureDataset } from "@/data/fixtures";
-import { applyTranscriptImport, importProblem, parseTranscriptRows, rowsFromTable, rowsFromText } from "./transcriptImport";
+import { applyTranscriptImport, importProblem, parseTranscriptRows, rowsFromTable, rowsFromText, rowsFromVision } from "./transcriptImport";
 
 // 모두 가상 자료. 실제 학생 성적표가 아니다.
 const courses = fixtureDataset.courses;
@@ -181,6 +181,16 @@ describe("applyTranscriptImport", () => {
     expect(importProblem({ earnedCredits: null, earnedMajorCredits: 40, targetCredits: null, completedCodes: [], mode: "merge" }, current)).toContain("포함");
     expect(importProblem({ earnedCredits: 36, earnedMajorCredits: 9, targetCredits: 130, completedCodes: [], mode: "merge" }, current)).toBeNull();
   });
+
+  it("이미지에서 총·전공 학점을 못 읽고 기존 값도 없으면 반영을 막는다", () => {
+    const noProgress = { ...current, earnedCredits: null, earnedMajorCredits: null };
+    const empty = { earnedCredits: null, earnedMajorCredits: null, targetCredits: null, completedCodes: ["CSE1002"], mode: "merge" as const };
+    expect(importProblem(empty, noProgress)).toContain("총 이수학점과 전공 이수학점");
+    expect(importProblem({ ...empty, earnedCredits: 30 }, noProgress)).toContain("전공 이수학점");
+    expect(importProblem({ ...empty, earnedMajorCredits: 6 }, noProgress)).toContain("총 이수학점");
+    expect(importProblem(empty, current)).toBeNull();
+    expect(importProblem({ ...empty, earnedCredits: 30, earnedMajorCredits: 6 }, noProgress)).toBeNull();
+  });
 });
 
 describe("붙여넣기 형식 견고성", () => {
@@ -230,5 +240,47 @@ describe("rowsFromVision(스크린샷 인식 결과)", () => {
     expect(codes(d.notCompleted)).toEqual(["ITE1012"]);
     expect(d.earnedCredits.map((v) => v.value)).toEqual([21]);
     expect(d.earnedMajorCredits.map((v) => v.value)).toEqual([6]);
+  });
+
+  const romanCourses: Course[] = [
+    ...courses,
+    { ...courses[0], code: "PHY0001", name: "기초물리학 II" },
+    { ...courses[0], code: "CUL0001", name: "글쓰기 S" },
+  ];
+  const imageCourse = (code: string, name: string, grade: string | null) =>
+    parseTranscriptRows(rowsFromVision([{ rows: [{ term: "2026년-1학년-1학기", category: "교양필수", code, name, credits: 1, grade }], summary: { earnedCredits: null, majorCredits: null, targetCredits: null }, unreadable: false }]), romanCourses, "image_ai");
+
+  it("과목명 속 로마숫자 I와 실제 A+를 분리하고 완료로 기본 선택한다", () => {
+    for (const name of ["커리어개발 I :취.창업진로로드맵", "커리어개발I:취.창업진로로드맵"]) {
+      const d = imageCourse("GEN5029", name, "A+");
+      expect(d.completed.find((r) => r.matchedCourseCode === "GEN5029")).toMatchObject({ detectedGrade: "A+", selected: true });
+      expect(d.ambiguous).toHaveLength(0);
+    }
+  });
+
+  it("다른 로마숫자와 한 글자 과목명 조각은 성적 열을 오염시키지 않는다", () => {
+    expect(imageCourse("PHY0001", "기초물리학 II", "B0").completed[0].detectedGrade).toBe("B0");
+    const ungraded = imageCourse("CUL0001", "글쓰기 S", null);
+    expect(ungraded.completed).toHaveLength(0);
+    expect(ungraded.ambiguous[0]).toMatchObject({ detectedGrade: null, detectedStatus: "unknown", selected: false });
+  });
+
+  it("실제 성적 열의 I·F·W·P는 기존 상태대로 해석한다", () => {
+    const unknown = imageCourse("GEN5029", "커리어개발 I :취.창업진로로드맵", "I");
+    expect(unknown.ambiguous[0]).toMatchObject({ detectedGrade: "I", detectedStatus: "unknown" });
+    expect(imageCourse("GEN5029", "커리어개발 I :취.창업진로로드맵", "F").notCompleted[0].detectedStatus).toBe("failed");
+    expect(imageCourse("GEN5029", "커리어개발 I :취.창업진로로드맵", "W").notCompleted[0].detectedStatus).toBe("withdrawn");
+    expect(imageCourse("GEN5029", "커리어개발 I :취.창업진로로드맵", "P").completed[0].detectedStatus).toBe("completed");
+  });
+
+  it("구조 없는 행에서도 과목명 속 I보다 오른쪽 성적을 우선하고 숫자 병합 셀을 읽는다", () => {
+    const roman = parse("2026-1\tGEN5029\t커리어개발 I :취.창업진로로드맵\t1\tA+");
+    expect(roman.completed[0]).toMatchObject({ detectedGrade: "A+", detectedStatus: "completed" });
+    const splitRoman = parseTranscriptRows(rowsFromTable([["GEN5029", "커리어개발", "I", ":취.창업진로로드맵", "1", "A+"]]), romanCourses, "clipboard_html");
+    expect(splitRoman.completed[0]).toMatchObject({ detectedGrade: "A+", detectedStatus: "completed" });
+    const compound = parse("CSE1002\t전산학개론\t3\tA+ / 4.5");
+    expect(compound.completed[0]).toMatchObject({ detectedGrade: "A+", detectedStatus: "completed" });
+    const splitCompound = parseTranscriptRows(rowsFromTable([["GEN5029", "커리어개발", "I", ":취.창업진로로드맵", "1", "A+ / 4.5"]]), romanCourses, "clipboard_html");
+    expect(splitCompound.completed[0]).toMatchObject({ detectedGrade: "A+", detectedStatus: "completed" });
   });
 });
