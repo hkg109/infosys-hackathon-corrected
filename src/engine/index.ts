@@ -42,3 +42,4 @@ export {
 export type { GenEdState, AddGenEdResult, TermCreditBreakdown } from "./genEd";
 export { planStats } from "./stats";
 export type { PlanStats } from "./stats";
+export { buildMilitaryStrategies, selectBranchPeriod, nextCycle, concurrencyFor, GOAL_LABEL, BRANCH_LABEL, PROGRAM } from "./militaryStrategy";
