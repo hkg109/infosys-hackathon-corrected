@@ -5,17 +5,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { CAREER_LABEL, CAREER_TRACKS } from "@/contracts/careers";
-import type { CareerTrack, DatasetV2, KatusaStatus, PriorityKey, Term } from "@/contracts/types";
-import { formatTerm, KATUSA_STATUS_LABEL, LATE_LIGHT_CONFIG, paceBandsFor } from "@/engine";
+import type { CareerTrack, DatasetV2, PriorityKey, Term } from "@/contracts/types";
+import { formatTerm, GOAL_LABEL, LATE_LIGHT_CONFIG, paceBandsFor } from "@/engine";
 import { usePlanner } from "../PlannerApp";
 import { parseGraduationCheck, type GraduationCheckParse } from "../graduationCheck";
 import { INPUT_STEPS, type StepId, stepPath } from "../inputSteps";
-import { findCoursesInText } from "../parseTranscript";
 import { blankDraft, type Draft, draftProblem, needsMilitary } from "../plan";
+import { type MilitaryPrefs, parseMilitarySentence, prefsOf, type SentenceParse } from "../militaryPrefs";
 import { completedTermsLabel, curriculumCovers } from "../profile";
 import { stepAnswered, stepProblem, visibleSteps } from "../questions";
 import { QUIZ } from "../recommend";
 import { SAMPLE_GRADUATION_CHECK } from "../testProfiles";
+import { TranscriptImport } from "./TranscriptImport";
 import { Button, Choice, Tag } from "./ui";
 
 /** 01 아 — 한 화면에 질문 하나. 입력은 바로 이 브라우저에 저장된다. */
@@ -31,7 +32,7 @@ export function InputStep({ step }: { step: StepId }) {
 }
 
 /** 단일 선택 질문: 고르면 짧게 표시한 뒤 다음 질문으로 넘어간다 */
-const AUTO_ADVANCE: StepId[] = ["admission", "completed", "start", "career", "pace", "military", "katusa", "katusa-status", "priority"];
+const AUTO_ADVANCE: StepId[] = ["admission", "completed", "start", "career", "pace", "military-branch", "katusa", "priority"];
 const ADVANCE_MS = 220;
 
 interface StepCtx {
@@ -193,6 +194,8 @@ function StepBody({ step, ctx }: { step: StepId; ctx: StepCtx }) {
       return <CompletedStep ctx={ctx} />;
     case "start":
       return <StartStep ctx={ctx} />;
+    case "transcript":
+      return <TranscriptStep ctx={ctx} />;
     case "credits":
       return <NumberStep ctx={ctx} field="earnedCredits" unit="학점" hint="성적표의 ‘취득학점’ 합계예요. 신입생이면 0을 적어 주세요." />;
     case "major":
@@ -211,14 +214,14 @@ function StepBody({ step, ctx }: { step: StepId; ctx: StepCtx }) {
       return <LateStep ctx={ctx} />;
     case "military":
       return <MilitaryStep ctx={ctx} />;
-    case "military-track":
-      return <MilitaryTrackStep ctx={ctx} />;
-    case "military-timing":
-      return <MilitaryTimingStep ctx={ctx} />;
+    case "military-branch":
+      return <MilitaryBranchStep ctx={ctx} />;
+    case "military-goal":
+      return <MilitaryGoalStep ctx={ctx} />;
     case "katusa":
       return <KatusaStep ctx={ctx} />;
-    case "katusa-status":
-      return <KatusaStatusStep ctx={ctx} />;
+    case "katusa-evidence":
+      return <KatusaEvidenceStep ctx={ctx} />;
     case "leave":
       return <LeaveStep ctx={ctx} />;
     case "exchange":
@@ -430,10 +433,23 @@ function NumberStep({ ctx, field, unit, hint }: { ctx: StepCtx; field: "earnedCr
   );
 }
 
+function TranscriptStep({ ctx }: { ctx: StepCtx }) {
+  const router = useRouter();
+  return (
+    <TranscriptImport
+      draft={ctx.d}
+      update={ctx.update}
+      dataset={ctx.dataset}
+      onManual={() => {
+        ctx.set({ progressMode: "manual" });
+        router.push(stepPath("credits"));
+      }}
+    />
+  );
+}
+
 function CoursesStep({ ctx }: { ctx: StepCtx }) {
   const { d, update } = ctx;
-  const [paste, setPaste] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
   const courses = ctx.dataset ? [...ctx.dataset.courses].sort((a, b) => (a.recommendedYear ?? 9) - (b.recommendedYear ?? 9)) : [];
   const toggle = (code: string) =>
     update((x) => ({
@@ -441,29 +457,16 @@ function CoursesStep({ ctx }: { ctx: StepCtx }) {
       coursesConfirmed: true,
       completedCourseCodes: x.completedCourseCodes.includes(code) ? x.completedCourseCodes.filter((c) => c !== code) : [...x.completedCourseCodes, code],
     }));
-  const applyPaste = () => {
-    const found = findCoursesInText(paste, courses);
-    update((x) => ({ ...x, coursesConfirmed: true, completedCourseCodes: [...new Set([...x.completedCourseCodes, ...found])] }));
-    setMsg(found.length === 0 ? "학과 과목을 찾지 못했어요. 학수번호나 과목명이 들어가게 복사해 주세요." : `과목 ${found.length}개를 찾아 체크했어요.`);
-  };
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-10">
       <div>
         <p className="flex items-center gap-2 text-[16px] font-semibold">
-          <ClipboardPaste size={17} aria-hidden /> 성적표 붙여넣기
+          <ClipboardPaste size={17} aria-hidden /> 성적표로 한 번에
         </p>
-        <p className="mt-1 mb-3 text-[13px] text-muted">성적 조회 표를 복사해 붙여넣으면 학과 과목만 골라 체크해요. 성적은 읽지 않고 이 브라우저 밖으로 보내지 않아요.</p>
-        <textarea value={paste} onChange={(e) => setPaste(e.target.value)} rows={6} placeholder={"예)  CSE1002  전산학개론  3  A+"} className="w-full resize-y" aria-label="성적표 붙여넣기" />
-        <div className="mt-3 flex items-center gap-3">
-          <Button onClick={applyPaste} disabled={!paste.trim()}>
-            과목 찾기
-          </Button>
-          {msg && (
-            <span role="status" className="text-[13px] text-ink-soft">
-              {msg}
-            </span>
-          )}
-        </div>
+        <p className="mt-1 mb-3 text-[13px] text-muted">하나씩 고르기 번거로우면 성적표를 붙여넣거나 캡처로 가져와요. 확인한 뒤에만 반영해요.</p>
+        <Link href={stepPath("transcript")} className="inline-flex items-center gap-2 text-[14px] font-semibold text-pen underline-offset-4 hover:underline">
+          성적표 가져오기로 가기 <ArrowRight size={15} aria-hidden />
+        </Link>
         <Button
           kind="ghost"
           className="mt-6"
@@ -679,146 +682,219 @@ function LateStep({ ctx }: { ctx: StepCtx }) {
   );
 }
 
+function setPrefs(ctx: StepCtx, patch: Partial<MilitaryPrefs>) {
+  ctx.update((x) => ({ ...x, militaryPrefs: { ...prefsOf(x), ...patch } }));
+}
+
 function MilitaryStep({ ctx }: { ctx: StepCtx }) {
   const setMil = (status: Draft["military"]["status"]) => ctx.update((x) => ({ ...x, military: { ...x.military, status } }));
+  const [text, setText] = useState("");
+  const [parsed, setParsed] = useState<SentenceParse | null>(null);
   return (
     <div>
       <BigChoices
         ctx={ctx}
-        label="군 복무"
+        label="군 복무 계획"
         cols={4}
         options={[
-          { value: "planned" as const, label: "다녀올 예정이에요" },
-          { value: "undecided" as const, label: "고민 중이에요", desc: "언제·어떻게 갈지 비교" },
-          { value: "done" as const, label: "마쳤어요" },
+          { value: "planned" as const, label: "필요해요", desc: "앞으로 다녀올 예정" },
+          { value: "done" as const, label: "이미 마쳤어요" },
           { value: "none" as const, label: "해당 없어요", desc: "면제 등" },
+          { value: "undecided" as const, label: "아직 모르겠어요", desc: "필요할 수 있다고 보고 비교" },
         ]}
         selected={(v) => ctx.d.military.status === v}
         onPick={setMil}
       />
-      <InfoLink href="/info/military" title="군대 트랙 자세히 알아보기" desc="육군 현역병·기술행정병·카투사의 지원자격, 선발 방식, 자격증 반영을 병무청 원문 기준으로 정리했어요." />
+      <div className="mt-8 max-w-[760px] rounded-[10px] border border-line bg-paper-2/40 p-4">
+        <label className="block text-[14px] font-semibold" htmlFor="mil-sentence">
+          한 줄로 말해도 돼요 <span className="font-normal text-muted">(선택)</span>
+        </label>
+        <div className="mt-2 flex gap-2">
+          <input
+            id="mil-sentence"
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              setParsed(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.nativeEvent.isComposing && text.trim()) {
+                e.preventDefault();
+                e.stopPropagation();
+                setParsed(parseMilitarySentence(text));
+              }
+            }}
+            placeholder="예) 육군 일반병을 생각하고 있고 카투사도 지원해 보고 싶어요"
+            className="min-w-0 flex-1"
+          />
+          <Button onClick={() => setParsed(parseMilitarySentence(text))} disabled={!text.trim()}>
+            알아듣기
+          </Button>
+        </div>
+        {parsed &&
+          (parsed.understood.length > 0 ? (
+            <div className="mt-3" aria-live="polite">
+              <p className="text-[14px]">
+                이렇게 이해했어요: <b>{parsed.understood.join(" · ")}</b>
+              </p>
+              <div className="mt-2 flex gap-2">
+                <Button
+                  kind="ink"
+                  onClick={() => {
+                    const { status, ...prefs } = parsed.patch;
+                    ctx.update((x) => ({ ...x, military: { ...x.military, status: status ?? x.military.status }, militaryPrefs: { ...prefsOf(x), ...prefs } }));
+                    setParsed(null);
+                    setText("");
+                  }}
+                >
+                  맞아요, 반영
+                </Button>
+                <Button kind="ghost" onClick={() => setParsed(null)}>
+                  아니에요
+                </Button>
+              </div>
+              <p className="mt-1 text-[12px] text-muted">정해진 표현만 알아듣는 규칙 기반 해석이에요(생성형 AI 아님). 남은 건 다음 질문에서 골라요.</p>
+            </div>
+          ) : (
+            <p className="mt-3 text-[13px] text-ink-soft">
+              알아들은 게 없어요. 위에서 ‘필요해요’를 고르고 다음 질문(선호하는 군)에서 이어서 골라 주세요.
+            </p>
+          ))}
+      </div>
+      <InfoLink href="/info/military" title="군대 트랙 자세히 알아보기" desc="육군 현역병·기술행정병·공군 기술병·카투사의 지원자격, 선발 방식, 모집 일정 근거를 병무청 원문 기준으로 정리했어요." />
     </div>
   );
 }
 
-function MilitaryTrackStep({ ctx }: { ctx: StepCtx }) {
-  const { d, update } = ctx;
-  const tracks = ctx.dataset?.military?.tracks ?? [];
-  const toggle = (id: string) =>
-    update((x) => ({
-      ...x,
-      military: { ...x.military, trackIds: x.military.trackIds.includes(id) ? x.military.trackIds.filter((t) => t !== id) : [...x.military.trackIds, id] },
-    }));
-  useEffect(() => {
-    ctx.registerKeys(tracks.map((t) => () => toggle(t.id)));
-  });
+function MilitaryBranchStep({ ctx }: { ctx: StepCtx }) {
+  const p = prefsOf(ctx.d);
   return (
     <div>
-      <p className="mb-3 text-[14px] text-muted">여러 개 골라도 돼요. 고른 트랙마다 따로 계산해 비교해요.</p>
-      <div className="grid grid-cols-3 gap-3">
-        {tracks.map((t, i) => (
-          <BigChoice key={t.id} n={i + 1} role="checkbox" selected={d.military.trackIds.includes(t.id)} onClick={() => toggle(t.id)}>
-            <span className="block text-[18px] font-semibold">{t.officialName}</span>
-            <span className="mt-0.5 block text-[13px] text-ink-soft">
-              복무기간 {t.serviceMonths !== null && t.serviceMonthsStatus === "verified" ? `${t.serviceMonths}개월(공식 확인)` : "확인 필요"}
-            </span>
-          </BigChoice>
-        ))}
-      </div>
-      {tracks.length === 0 && <p className="text-[15px] text-ink-soft">군 복무 트랙 자료를 불러오지 못했어요. 트랙 없이 기간만으로 계산해요.</p>}
-      <div className="mt-8 flex items-end gap-6">
-        <label className="grid gap-1 text-[13px] text-muted">
-          직접 확인한 예상 복무기간(선택)
-          <span className="flex items-baseline gap-2">
-            <input
-              type="number"
-              min={1}
-              max={48}
-              value={d.military.months ?? ""}
-              placeholder="개월"
-              onChange={(e) => update((x) => ({ ...x, military: { ...x.military, months: e.target.value === "" ? null : Number(e.target.value) } }))}
-              className="!w-[120px] !text-[20px]"
-            />
-            <span className="text-[15px] text-ink-soft">개월</span>
-          </span>
-        </label>
-        <p className="max-w-[560px] pb-1 text-[13px] text-ink-soft">
-          공식 자료로 복무기간을 확인한 트랙은 그 값을 쓰고, 확인하지 못한 트랙에는 여기 적은 값을 <b>사용자 가정</b>으로 써요. 비워 두면 그 트랙의 완료 학기는 ‘확인 필요’로 남겨요.
-        </p>
-      </div>
-      <InfoLink href="/info/military" title="군대 트랙 비교·보유 자격증 확인" desc="트랙별 지원자격·선발 방식·공식 출처와, 보유 자격증의 공식 관련성을 확인해요." />
+      <BigChoices
+        ctx={ctx}
+        label="선호하는 군"
+        cols={3}
+        options={[
+          { value: "army" as const, label: "육군", desc: "일반 입영·기술행정병·카투사" },
+          { value: "air_force" as const, label: "공군", desc: "기술병(정보보호병·IT개발관리병 등)" },
+          { value: "navy" as const, label: "해군", desc: "아직 자료 검토 전 — 공고 확인 안내만" },
+          { value: "marine" as const, label: "해병대", desc: "아직 자료 검토 전 — 공고 확인 안내만" },
+          { value: "any" as const, label: "상관없어요" },
+          { value: "unknown" as const, label: "아직 모르겠어요" },
+        ]}
+        selected={(v) => p.branch === v}
+        onPick={(v) => setPrefs(ctx, { branch: v })}
+      />
+      <Help>복무기간·모집 일정·중복지원 규칙은 묻지 않아요. 고른 군에 맞춰 서비스가 병무청 원문으로 계산해요.</Help>
     </div>
   );
 }
 
-function MilitaryTimingStep({ ctx }: { ctx: StepCtx }) {
+function MilitaryGoalStep({ ctx }: { ctx: StepCtx }) {
+  const p = prefsOf(ctx.d);
   const { d, update } = ctx;
   const setMil = (patch: Partial<Draft["military"]>) => update((x) => ({ ...x, military: { ...x.military, ...patch } }));
   return (
     <div>
       <BigChoices
         ctx={ctx}
-        label="입대 시점"
-        cols={2}
+        label="군 복무에서 가장 중요한 것"
+        cols={3}
         autoAdvance={false}
         options={[
-          { value: "recommend" as const, label: "아직이에요 — 시기별로 비교해 주세요", desc: "학년을 마친 시점마다 트랙을 따로 계산해요" },
-          { value: "fixed" as const, label: "입영일이 정해졌어요", desc: "날짜를 직접 적을게요" },
+          { value: "fast_stable" as const, label: "빠르고 안정적인 입대", desc: "입영일을 직접 골라 바로" },
+          { value: "it_experience" as const, label: "IT·개발 관련 경험", desc: "기술행정병·공군 IT 특기 도전" },
+          { value: "katusa" as const, label: "카투사 우선", desc: "선발·미선발 분기를 함께" },
+          { value: "return_predictable" as const, label: "학업 복귀 시점 예측", desc: "복무기간이 확인된 경로 위주" },
+          { value: "unknown" as const, label: "아직 모르겠어요" },
         ]}
-        selected={(v) => d.military.timing === v}
-        onPick={(v) => setMil({ timing: v, ...(v === "recommend" ? { startDate: null } : {}) })}
+        selected={(v) => p.goal === v}
+        onPick={(v) => setPrefs(ctx, { goal: v, ...(v === "it_experience" ? { it: "high" as const } : {}) })}
       />
-      {d.military.timing === "fixed" && (
-        <label className="mt-6 grid w-[280px] gap-1 text-[13px] text-muted">
-          입영일
-          <input type="date" value={d.military.startDate ?? ""} onChange={(e) => setMil({ startDate: e.target.value || null })} className="!text-[18px]" />
-        </label>
-      )}
+      <details className="mt-8 max-w-[760px] text-[14px]" open={d.military.timing === "fixed"}>
+        <summary className="cursor-pointer font-medium text-ink-soft">이미 정해진 일정이 있어요(선택)</summary>
+        <div className="mt-3 grid gap-4 rounded-[10px] border border-line p-4">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={d.military.timing === "fixed"} onChange={(e) => setMil({ timing: e.target.checked ? "fixed" : "recommend", ...(e.target.checked ? {} : { startDate: null }) })} />
+            입영일이 이미 정해졌어요
+          </label>
+          {d.military.timing === "fixed" && (
+            <label className="grid w-[260px] gap-1 text-[13px] text-muted">
+              입영일
+              <input type="date" value={d.military.startDate ?? ""} onChange={(e) => setMil({ startDate: e.target.value || null })} />
+            </label>
+          )}
+          <p className="text-[12px] text-muted">정해진 날짜가 없으면 비워 두세요. 학년을 마친 시점마다 서비스가 비교해요.</p>
+        </div>
+      </details>
     </div>
   );
 }
 
 function KatusaStep({ ctx }: { ctx: StepCtx }) {
+  const p = prefsOf(ctx.d);
   return (
     <div>
       <BigChoices
         ctx={ctx}
-        label="카투사 우선"
+        label="카투사"
         cols={2}
         options={[
-          { value: true, label: "네, 카투사에 선발된다면 다른 군 복무 트랙보다 카투사를 우선하겠습니다." },
-          { value: false, label: "아니요, 우선하지 않아요", desc: "고른 군 복무 트랙을 그대로 비교해요" },
+          { value: "first_priority" as const, label: "최우선으로 생각해요", desc: "선발되면 카투사로, 안 되면 다른 경로로" },
+          { value: "consider" as const, label: "가능하면 고려해요" },
+          { value: "exclude" as const, label: "생각하지 않아요" },
+          { value: "unknown" as const, label: "아직 모르겠어요" },
         ]}
-        selected={(v) => ctx.d.katusa.priority === v}
-        onPick={(v) => ctx.update((x) => ({ ...x, katusa: { ...x.katusa, priority: v } }))}
+        selected={(v) => p.katusa === v}
+        onPick={(v) => ctx.update((x) => ({ ...x, militaryPrefs: { ...prefsOf(x), katusa: v }, katusa: { ...x.katusa, priority: v === "first_priority" || v === "consider" } }))}
       />
-      <Help>
-        우선을 고르면 선발 결과에 따라 계획을 나눠 보여 드려요. 결과가 나오기 전이면 ‘카투사 선발 시’와 ‘선발되지 않을 경우’ 두 트랙을 함께 보여 드리고, 합격 가능성은 계산하지 않아요.
-      </Help>
+      <Help>카투사는 추첨으로 선발해요. 합격 가능성은 계산하지 않고, 선발·미선발·모두 안 될 때의 경로를 나눠 보여 드려요.</Help>
     </div>
   );
 }
 
-const KATUSA_DESC: Record<KatusaStatus, string> = {
-  not_applying: "카투사를 기본 후보에서 빼요",
-  preparing: "선발 시·미선발 시를 함께 보여 줘요",
-  applied_waiting: "선발 시·미선발 시를 함께 보여 줘요",
-  selected: "카투사로 기본 계획을 세워요",
-  not_selected: "카투사를 빼고 다른 트랙으로 비교해요",
-  undecided: "선발 시·미선발 시를 함께 보여 줘요",
-};
-
-function KatusaStatusStep({ ctx }: { ctx: StepCtx }) {
-  const order: KatusaStatus[] = ["preparing", "applied_waiting", "selected", "not_selected", "not_applying", "undecided"];
+function KatusaEvidenceStep({ ctx }: { ctx: StepCtx }) {
+  const p = prefsOf(ctx.d);
+  const history: Array<[NonNullable<MilitaryPrefs["katusaHistory"]>, string]> = [
+    ["none", "지원한 적 없어요"],
+    ["waiting", "지원했고 결과 기다려요"],
+    ["selected", "선발됐어요"],
+    ["not_selected", "지원했지만 선발되지 않았어요"],
+    ["cancelled", "접수를 취소했어요"],
+    ["medical", "신체검사에서 불합격했어요"],
+  ];
   return (
-    <BigChoices
-      ctx={ctx}
-      label="카투사 상태"
-      cols={3}
-      options={order.map((s) => ({ value: s, label: KATUSA_STATUS_LABEL[s], desc: KATUSA_DESC[s] }))}
-      selected={(v) => ctx.d.katusa.status === v}
-      onPick={(v) => ctx.update((x) => ({ ...x, katusa: { ...x.katusa, status: v } }))}
-    />
+    <div className="grid gap-8">
+      <div>
+        <p className="mb-3 text-[16px] font-semibold">카투사 기준을 넘는 영어 정기시험 성적(접수일 기준 5년 이내)이 있나요?</p>
+        <BigChoices
+          ctx={ctx}
+          label="영어 성적"
+          cols={3}
+          autoAdvance={false}
+          options={[
+            { value: "yes" as const, label: "있어요" },
+            { value: "no" as const, label: "아직 없어요", desc: "접수 전까지 준비하는 것으로 계산" },
+            { value: "unknown" as const, label: "잘 모르겠어요" },
+          ]}
+          selected={(v) => p.english === v}
+          onPick={(v) => setPrefs(ctx, { english: v })}
+        />
+        <p className="mt-2 text-[12px] text-muted">기준 점수와 인정 시험은 2026년 모집 원문 표를 따라요(예: TOEIC 780점 이상). 다음 연도 기준은 공고 확인이 필요해요.</p>
+      </div>
+      <label className="grid max-w-[420px] gap-1 text-[14px]">
+        <span className="font-semibold">예전에 카투사에 지원한 적이 있나요?</span>
+        <select value={p.katusaHistory ?? ""} onChange={(e) => setPrefs(ctx, { katusaHistory: (e.target.value || null) as MilitaryPrefs["katusaHistory"] })}>
+          <option value="">고르지 않음</option>
+          {history.map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+        <span className="text-[12px] text-muted">카투사 지원은 1회에 한해요(접수취소·신체검사 불합격은 재지원 가능, 원문).</span>
+      </label>
+    </div>
   );
 }
 
@@ -912,9 +988,8 @@ function PriorityStep({ ctx }: { ctx: StepCtx }) {
 }
 
 function ReviewStep({ ctx }: { ctx: StepCtx }) {
-  const { d, dataset } = ctx;
+  const { d } = ctx;
   const steps = visibleSteps(d).filter((s) => s !== "review");
-  const mil = dataset?.military?.tracks ?? [];
   const value = (s: StepId): string => {
     switch (s) {
       case "name":
@@ -925,6 +1000,8 @@ function ReviewStep({ ctx }: { ctx: StepCtx }) {
         return d.completedTerms === null ? "—" : completedTermsLabel(d.completedTerms);
       case "start":
         return d.startTerm ? formatTerm(d.startTerm) : "—";
+      case "transcript":
+        return d.earnedCredits === null ? "—" : `총 ${d.earnedCredits} · 전공 ${d.earnedMajorCredits ?? "—"}학점 · 학과 과목 ${d.completedCourseCodes.length}개${d.progressMode === "import" ? " (가져오기)" : ""}`;
       case "credits":
         return d.earnedCredits === null ? "—" : `${d.earnedCredits}학점`;
       case "major":
@@ -943,14 +1020,14 @@ function ReviewStep({ ctx }: { ctx: StepCtx }) {
         return d.paceStyle === "compare" ? "균형형·후반 여유형 비교" : d.paceStyle === "late_light" ? "후반 여유형" : d.paceStyle === "custom" ? `직접 설정 ${d.customPace?.early}/${d.customPace?.year3}/${d.customPace?.year4}` : d.paceStyle === "balanced" ? "균형형" : "—";
       case "military":
         return { planned: "다녀올 예정", undecided: "고민 중", done: "마침", none: "해당 없음" }[d.military.status ?? "none"] ?? "—";
-      case "military-track":
-        return d.military.trackIds.map((id) => mil.find((t) => t.id === id)?.officialName ?? id).join(", ") || "아직 모름";
-      case "military-timing":
-        return d.military.timing === "fixed" ? `입영일 ${d.military.startDate ?? "—"}` : "시기별 비교";
+      case "military-branch":
+        return { army: "육군", air_force: "공군", navy: "해군", marine: "해병대", any: "상관없음", unknown: "아직 모름" }[prefsOf(d).branch ?? "unknown"];
+      case "military-goal":
+        return (prefsOf(d).goal ? GOAL_LABEL[prefsOf(d).goal!] : "—") + (d.military.timing === "fixed" ? ` · 입영일 ${d.military.startDate ?? "—"}` : "");
       case "katusa":
-        return d.katusa.priority === null ? "—" : d.katusa.priority ? "선발되면 카투사 우선" : "우선 안 함";
-      case "katusa-status":
-        return KATUSA_STATUS_LABEL[d.katusa.status];
+        return { first_priority: "최우선", consider: "가능하면 고려", exclude: "생각 안 함", unknown: "아직 모름" }[prefsOf(d).katusa ?? "unknown"];
+      case "katusa-evidence":
+        return `영어 성적 ${{ yes: "있음", no: "없음", unknown: "모름" }[prefsOf(d).english ?? "unknown"]}`;
       case "leave":
         return d.leave.mode === "pick" ? `${ORDINAL_CHOICES.find(([o]) => o === d.leave.ordinal)?.[1] ?? "?"} 한 학기` : d.leave.mode === "none" ? "없음" : "—";
       case "exchange":

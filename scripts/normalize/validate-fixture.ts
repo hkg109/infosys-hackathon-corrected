@@ -123,6 +123,38 @@ export function validateMilitary(m: MilitaryCatalog): string[] {
     if (!s.appliesTo) errors.push(`배점 기준 ${s.id}: 적용 범위가 없음`);
   }
 
+  // 모집회차·중복지원·선발 처리·추가모집: 공고가 없는 회차에 날짜를 만들지 않고, 회차를 정하지 않은 중복지원 규칙을 두지 않는다
+  const cycleIds = new Set((m.recruitmentCycles ?? []).map((c) => c.id));
+  const okUrl = (u: string) => /^https:\/\//.test(u);
+  for (const c of m.recruitmentCycles ?? []) {
+    const at = `모집회차 ${c.id}`;
+    if (!trackIds.has(c.programId)) errors.push(`${at}: 존재하지 않는 군 트랙`);
+    const dates = [c.applicationStart, c.applicationEnd, c.resultDate, c.enlistment];
+    if (c.publicationStatus === "unknown" && dates.some((d) => d !== null)) errors.push(`${at}: 공고 미발표 회차에 날짜가 있음`);
+    if (c.publicationStatus === "official" && (!c.source || !okUrl(c.source.url) || !isDate(c.source.checkedAt))) errors.push(`${at}: 공식 회차에 출처·확인일이 없음`);
+    if (c.publicationStatus === "expected" && !c.note) errors.push(`${at}: 예상 회차에 근거 설명이 없음`);
+    for (const d of dates) if (d !== null && !isDate(d)) errors.push(`${at}: 날짜 형식 오류 ${d}`);
+  }
+  for (const r of m.concurrentRules ?? []) {
+    const at = `중복지원 규칙 ${r.id}`;
+    if (!trackIds.has(r.leftProgramId) || (r.rightProgramId !== "*" && !trackIds.has(r.rightProgramId))) errors.push(`${at}: 존재하지 않는 군 트랙`);
+    if (r.appliesToCycleIds.length === 0) errors.push(`${at}: 적용 회차가 없음(다른 연도에 일반화 금지)`);
+    for (const id of r.appliesToCycleIds) if (!cycleIds.has(id)) errors.push(`${at}: 없는 회차 ${id}`);
+    if (!okUrl(r.source.url) || !isDate(r.source.checkedAt)) errors.push(`${at}: 출처·확인일 없음`);
+  }
+  for (const r of m.selectionRules ?? []) {
+    const at = `선발 처리 규칙 ${r.id}`;
+    if (!trackIds.has(r.whenSelectedProgramId) || !trackIds.has(r.affectedProgramId)) errors.push(`${at}: 존재하지 않는 군 트랙`);
+    for (const id of r.appliesToCycleIds) if (!cycleIds.has(id)) errors.push(`${at}: 없는 회차 ${id}`);
+    if (!okUrl(r.source.url)) errors.push(`${at}: 출처 없음`);
+  }
+  for (const r of m.supplementalRules ?? []) {
+    const at = `추가모집 규칙 ${r.id}`;
+    if (!trackIds.has(r.programId)) errors.push(`${at}: 존재하지 않는 군 트랙`);
+    if (r.guaranteeSpecificProgram !== false) errors.push(`${at}: 특정 특기를 보장하면 안 됨`);
+    if (!okUrl(r.source.url)) errors.push(`${at}: 출처 없음`);
+  }
+
   for (const r of m.careerCertificates) {
     if (!CAREER_TRACKS.includes(r.career)) errors.push(`진로 자격증 추천: 알 수 없는 진로 ${r.career}`);
     if (!certIds.has(r.certificateId)) errors.push(`진로 자격증 추천: 존재하지 않는 자격증 ${r.certificateId}`);

@@ -1,7 +1,6 @@
 "use client";
 
 import { MessageSquareText, Printer, Undo2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import { CAREER_LABEL } from "@/contracts/careers";
 import type { DatasetV2 } from "@/contracts/types";
@@ -13,9 +12,10 @@ import { usePlanner } from "../PlannerApp";
 import { militarySummary } from "../plan";
 import type { PlanState } from "../storage";
 import { Roadmap } from "./Roadmap";
-import { Button, Empty, Hand, LinkButton, PageTitle } from "./ui";
+import { FeedbackChat } from "./FeedbackChat";
+import { Button, Empty, Hand, PageTitle } from "./ui";
 
-export function OutputScreen() {
+export function OutputScreen({ initialChat = false }: { initialChat?: boolean } = {}) {
   const { mounted, plan, dataset, catalog } = usePlanner();
   if (!mounted) return <div className="h-96 animate-pulse rounded bg-paper-2" aria-busy="true" />;
   if (!plan)
@@ -30,12 +30,12 @@ export function OutputScreen() {
         {catalog?.warnings.join(" ")}
       </Empty>
     );
-  return <Output plan={plan} dataset={dataset} />;
+  return <Output plan={plan} dataset={dataset} initialChat={initialChat} />;
 }
 
-function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
+function Output({ plan, dataset, initialChat }: { plan: PlanState; dataset: DatasetV2; initialChat: boolean }) {
   const { draft, setPlan, checked, toggleChecked, today } = usePlanner();
-  const router = useRouter();
+  const [chat, setChat] = useState(initialChat && plan.confirmedAt === null);
   const { input } = plan;
   const result = useMemo(() => simulatePlan(input, dataset), [input, dataset]);
   const guidance = useMemo(() => {
@@ -81,10 +81,13 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
   const certName = (id: string) => dataset.military?.certificates.find((x) => x.id === id)?.officialName ?? id;
   const capRules = [...new Set(result.terms.flatMap((t) => (t.capRuleId ? [t.capRuleId] : [])))];
 
-  const confirm = () => setPlan({ ...plan, confirmedAt: today || new Date().toISOString().slice(0, 10) });
+  const confirm = () => {
+    setChat(false);
+    setPlan({ ...plan, confirmedAt: today || new Date().toISOString().slice(0, 10) });
+  };
   const reopen = () => {
     setPlan({ ...plan, confirmedAt: null });
-    router.push("/output/feedback");
+    setChat(true);
   };
   const undo = () =>
     prev && setPlan({ ...plan, input: prev.input, previous: null, lastChanges: [], confirmedAt: null, genEd: plan.previousGenEd ?? plan.genEd, previousGenEd: null });
@@ -158,7 +161,7 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
         </div>
       )}
 
-      <div className="grid grid-cols-[minmax(0,1fr)_280px] gap-10 print:block">
+      <div className={`grid gap-10 print:block ${chat ? "grid-cols-[minmax(0,1fr)_400px] gap-8" : "grid-cols-[minmax(0,1fr)_280px]"}`}>
         <div>
           {!confirmed && (
             <p className="mb-3 text-[13px] text-ink-soft print:hidden" role="status">
@@ -177,7 +180,8 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
           />
         </div>
 
-        <aside className="grid content-start gap-8 print:mt-6">
+        {chat && <FeedbackChat plan={plan} dataset={dataset} onClose={() => setChat(false)} onUndo={undo} />}
+        <aside className={`grid content-start gap-8 print:mt-6 ${chat ? "hidden print:grid" : ""}`}>
           <section>
             <h2 className="mb-2 font-serif text-[18px] font-bold">준비할 것</h2>
             <ul className="border-t border-rule">
@@ -275,9 +279,9 @@ function Output({ plan, dataset }: { plan: PlanState; dataset: DatasetV2 }) {
               <Hand className="mr-2 text-[20px]">듣기 싫은 수업, 계절학기…</Hand>하고 싶은 말을 적으면 기본 트랙을 나에게 맞게 고쳐 드려요.
             </p>
             <div className="flex gap-2">
-              <LinkButton href="/output/feedback">
-                <MessageSquareText size={16} aria-hidden /> 피드백으로 맞춤화
-              </LinkButton>
+              <Button kind={chat ? "ghost" : "line"} onClick={() => setChat((c) => !c)} aria-pressed={chat}>
+                <MessageSquareText size={16} aria-hidden /> {chat ? "채팅 닫기" : "채팅으로 맞춤화"}
+              </Button>
               <Button kind="stamp" onClick={confirm} disabled={!!result.error} className="px-7 font-serif text-[17px] font-bold tracking-wide">
                 아 맞다!
               </Button>

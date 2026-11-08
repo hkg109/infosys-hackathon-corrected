@@ -3,17 +3,48 @@
 import { ArrowLeft, BadgeCheck, Check, CircleAlert, CircleHelp, ExternalLink, Lightbulb, Plane, Shield, UserPen } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 import { CAREER_LABEL } from "@/contracts/careers";
 import type { DatasetV2 } from "@/contracts/types";
 import { emptyGenEd, formatTerm, matchCertificates, PACE_STYLE_LABEL, simulatePlan, termBreakdown, termIndex, termRange } from "@/engine";
 import { CAREER_INFO } from "../careerInfo";
 import { demoGenEd, evidenceFor } from "../evidence";
 import { usePlanner } from "../PlannerApp";
-import { candidatePlanInput, type Draft, gradeLabel, termMonths } from "../plan";
+import { strategiesFor } from "../militaryPrefs";
+import { candidatePlanInput, type Draft, gradeLabel, needsMilitary, termMonths } from "../plan";
+import { MilitaryCompare } from "./MilitaryCompare";
 import type { Track } from "../tracks";
 import { returnTerm, TrackCard, TrackThumb } from "./TrackGallery";
 import { Button, Empty, GroupDot, Hand, LinkButton, Tag } from "./ui";
+
+/** 트랙을 기본 트랙으로 정하고 03 다로 이동(결과 화면·상세 화면 공용) */
+export function useChooseTrack() {
+  const { setPlan } = usePlanner();
+  const router = useRouter();
+  return (track: Track, draft: Draft, dataset: DatasetV2) => {
+    const c = track.candidate;
+    const input = candidatePlanInput(c);
+    if (!input) return;
+    const result = simulatePlan(input, dataset);
+    const mil = track.militaryTrackId ? dataset.military?.tracks.find((t) => t.id === track.militaryTrackId) : null;
+    setPlan({
+      schemaVersion: 4,
+      input,
+      trackId: track.id,
+      trackTitle: track.title,
+      exchange: track.exchangeTerm ? { startDate: termRange(track.exchangeTerm).start, endDate: termRange(track.exchangeTerm).end } : null,
+      military: track.militaryLabel
+        ? { label: track.militaryLabel, conditional: track.militaryRole === "conditional", monthsStatus: mil?.serviceMonthsStatus ?? "unknown" }
+        : null,
+      previous: null,
+      lastChanges: [],
+      confirmedAt: null,
+      genEd: demoGenEd(result, draft.demo),
+      previousGenEd: null,
+    });
+    router.push("/output");
+  };
+}
 
 export function TrackDetail({ trackId }: { trackId: string }) {
   const { mounted, tracks, draft, dataset } = usePlanner();
@@ -29,8 +60,8 @@ export function TrackDetail({ trackId }: { trackId: string }) {
 }
 
 function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; draft: Draft; dataset: DatasetV2 }) {
-  const { plan, setPlan } = usePlanner();
-  const router = useRouter();
+  const { plan, today } = usePlanner();
+  const strategies = useMemo(() => (needsMilitary(draft) ? strategiesFor(draft, dataset, today) : null), [draft, dataset, today]);
   const c = track.candidate;
   const res = c.result;
   const info = CAREER_INFO[track.career];
@@ -59,37 +90,18 @@ function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; dr
   const myCertMatches = track.militaryTrackId ? matchCertificates(track.militaryTrackId, draft.military.certificateIds, dataset.military) : [];
   const scoring = (dataset.military?.scoringRules ?? []).filter((r) => r.militaryTrackId === track.militaryTrackId);
 
-  const decide = () => {
-    const input = candidatePlanInput(c);
-    if (!input) return;
-    const result = simulatePlan(input, dataset);
-    setPlan({
-      schemaVersion: 4,
-      input,
-      trackId: track.id,
-      trackTitle: track.title,
-      exchange: track.exchangeTerm ? { startDate: termRange(track.exchangeTerm).start, endDate: termRange(track.exchangeTerm).end } : null,
-      military: track.militaryLabel
-        ? { label: track.militaryLabel, conditional: track.militaryRole === "conditional", monthsStatus: mil?.serviceMonthsStatus ?? "unknown" }
-        : null,
-      previous: null,
-      lastChanges: [],
-      confirmedAt: null,
-      genEd: demoGenEd(result, draft.demo),
-      previousGenEd: null,
-    });
-    router.push("/output");
-  };
+  const choose = useChooseTrack();
+  const decide = () => choose(track, draft, dataset);
 
   let ord = draft.completedTerms ?? 0;
 
   return (
     <div>
       <Link href="/match" className="mb-6 inline-flex items-center gap-2 text-[14px] text-ink-soft hover:text-ink">
-        <ArrowLeft size={15} aria-hidden /> 트랙 목록
+        <ArrowLeft size={15} aria-hidden /> 결과로
       </Link>
 
-      <section className="grid grid-cols-[320px_minmax(0,1fr)] gap-12">
+      <section className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)] lg:gap-12">
         <TrackThumb track={track} big />
         <div className="flex flex-col">
           <p className="flex items-center gap-2 text-[13px] text-muted">
@@ -97,7 +109,7 @@ function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; dr
             <span>·</span>
             <GroupDot group={track.career} /> {CAREER_LABEL[track.career]}
           </p>
-          <h1 className="mt-2 font-serif text-[38px] leading-tight font-bold tracking-tight">{track.title}</h1>
+          <h1 className="mt-2 font-serif text-[32px] leading-tight font-bold tracking-tight break-keep lg:text-[38px]">{track.title}</h1>
           <p className="mt-2 text-[17px] text-ink-soft">
             {/* 한 줄 요약 */}
             {info.tagline}을 위한 트랙 — {track.subtitle}
@@ -111,7 +123,7 @@ function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; dr
             {c.status !== "computable" && track.militaryRole !== "conditional" && <Tag tone="red">확인 필요 있음</Tag>}
           </div>
 
-          <dl className="mt-6 grid grid-cols-5 border-y-[1.5px] border-ink">
+          <dl className="mt-6 grid grid-cols-2 border-y-[1.5px] border-ink md:grid-cols-5">
             <Stat label="예상 계획 완료" strong>
               {res?.expectedCompletion ? formatTerm(res.expectedCompletion) : "확인 필요"}
             </Stat>
@@ -125,7 +137,7 @@ function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; dr
             <Stat label="확인 필요">{s.checkCount}건</Stat>
           </dl>
 
-          <div className="mt-auto flex items-center gap-3 pt-7">
+          <div className="mt-auto flex flex-wrap items-center gap-3 pt-7">
             <Button kind="stamp" onClick={decide} className="min-h-[56px] px-8 font-serif text-[18px] font-bold">
               {isBase ? "이 트랙으로 다시 시작" : "이 트랙을 기본으로 선택"}
             </Button>
@@ -137,7 +149,7 @@ function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; dr
         </div>
       </section>
 
-      <div className="mt-12 grid grid-cols-[minmax(0,1fr)_400px] gap-12">
+      <div className="mt-12 grid grid-cols-1 gap-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,400px)]">
         <div className="grid content-start gap-10">
           <Block title="이 트랙이 추천된 이유">
             <ul className="grid gap-2 text-[15px]">
@@ -207,6 +219,13 @@ function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; dr
               )}
             </div>
           </Block>
+
+          {strategies && strategies.strategies.length > 0 && (
+            <Block title="군 복무 전략 비교">
+              <p className="mb-3 text-[13px] text-ink-soft">카투사 여부와 중복지원 규칙에 따라 달라지는 행동과 실패 시 경로예요. 공식 공고 날짜만 날짜로 쓰고, 나머지는 ‘공고 확인 필요’로 남겨요.</p>
+              <MilitaryCompare set={strategies} dataset={dataset} today={today} />
+            </Block>
+          )}
 
           <Block title="전공·교양 학점 구성">
             <div className="grid grid-cols-4 border-y border-line text-center">

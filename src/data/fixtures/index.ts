@@ -1,6 +1,6 @@
 import type { DatasetV2, MilitaryCatalog } from "@/contracts/types";
 import raw from "./infosys-2024-2027.json";
-import militaryRaw from "./military-2026-11-07.json";
+import militaryRaw from "./military-2026-11-08.json";
 
 /**
  * 개발용 fixture. 공개 교육과정 화면에서 확인한 표본이며 DB 게시본이 아니다.

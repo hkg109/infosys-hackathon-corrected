@@ -1,5 +1,5 @@
-import { TrackGallery } from "@/features/planner/components/TrackGallery";
+import { MatchResults } from "@/features/planner/components/MatchResults";
 
 export default function Page() {
-  return <TrackGallery />;
+  return <MatchResults />;
 }

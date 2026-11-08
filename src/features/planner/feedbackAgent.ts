@@ -2,7 +2,7 @@ import type { DatasetV2, PlanInput } from "@/contracts/types";
 import type { PlanState } from "./storage";
 
 /**
- * 피드백 채팅 → 개인 맞춤 트랙. 화면(FeedbackScreen)은 이 함수만 부른다.
+ * 피드백 채팅 → 개인 맞춤 트랙. 화면(FeedbackChat — 03 다 로드맵 옆 채팅)은 이 함수만 부른다.
  *
  * TODO(피드백 담당): 아직 구현하지 않았다. 시연에서는 정해진 입력 → 정해진 결과로 채운다.
  *  - 예: "계절학기 듣고 싶어요" → nextInput의 학기 배치를 바꾼 계획 + changes 문구
