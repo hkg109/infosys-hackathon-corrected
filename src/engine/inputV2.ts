@@ -105,9 +105,23 @@ export function validatePlanInputV2(input: PlanInputV2, opts: { today?: ISODate 
         `${label} 기간 확인이 필요합니다.`,
         "이 기간을 반영하지 못해 완료 학기를 계산하지 않습니다.",
       );
-    if (p.kind === "exchange" && (p.exchange?.credits ?? null) === null)
-      miss(`${f}.exchange`, "교환학생 인정학점이 미정입니다.", "교환 이후 학점 진행과 완료 학기를 확정하지 않습니다.");
+    if (p.kind !== "exchange" && p.exchange) return err(`${f}.exchange`, `${label} 기간에는 교환 인정 정보를 넣을 수 없습니다.`);
+    if (p.kind === "exchange") {
+      const credits = p.exchange?.credits ?? null;
+      // null = 미정, 0 = 확인된 0학점. 둘을 구분한다.
+      if (credits !== null && (!Number.isFinite(credits) || credits < 0)) return err(`${f}.exchange.credits`, "교환 인정학점은 0 이상의 숫자여야 합니다.");
+      if (credits === null) miss(`${f}.exchange`, "교환학생 인정학점이 미정입니다.", "교환 이후 학점 진행과 완료 학기를 확정하지 않습니다.");
+      if ((p.exchange?.countsAsTerm ?? null) === null)
+        miss(`${f}.exchange.countsAsTerm`, "교환 학기의 유효학기 인정 여부가 미정입니다.", "권장 학년·학기 순번과 졸업 최소 등록학기를 확정하지 않습니다.");
+    }
   });
+  const ids = input.periods.map((p) => p.id);
+  ids.forEach((id, i) => {
+    if (ids.indexOf(id) !== i) err(`periods[${i}].id`, `기간 ID가 중복됩니다: ${id}`);
+  });
+  const hasExchange = input.periods.some((p) => p.kind === "exchange");
+  if (input.exchange === "none" && hasExchange) err("exchange", "교환학생 없음으로 했는데 교환 기간이 있습니다.");
+  if (input.exchange === "included" && !hasExchange) err("exchange", "교환학생을 포함했는데 교환 기간이 없습니다.");
   return issues;
 }
 
