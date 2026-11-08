@@ -2,10 +2,9 @@ import { describe, expect, it } from "vitest";
 import { fixtureDataset } from "@/data/fixtures";
 import { simulatePlan, staleGenEd } from "@/engine";
 import { demoGenEd } from "./evidence";
-import { parseGraduationCheck } from "./graduationCheck";
 import { candidatePlanInput, draftProblem } from "./plan";
 import { migrateDraftV3 } from "./storage";
-import { SAMPLE_GRADUATION_CHECK, TEST_PROFILES } from "./testProfiles";
+import { TEST_PROFILES } from "./testProfiles";
 import { buildTracks } from "./tracks";
 
 const TODAY = "2026-11-07";
@@ -64,25 +63,7 @@ describe("테스트 프로필", () => {
   });
 });
 
-describe("졸업사정 붙여넣기(프로필 D)", () => {
-  it("분명한 값만 읽고, 열이 모호한 줄은 확정하지 않는다", () => {
-    const p = parseGraduationCheck(SAMPLE_GRADUATION_CHECK);
-    expect(p.columns).toEqual(["배당", "취득"]);
-    expect(p.target).toEqual({ value: 130, status: "clear" });
-    expect(p.earned).toEqual({ value: 18, status: "clear" });
-    expect(p.majorEarned).toEqual({ value: 6, status: "clear" });
-    const eng = p.rows.find((r) => r.label === "영어전용강좌")!;
-    expect(eng.status).toBe("ambiguous");
-    expect(eng.values).toEqual({});
-    expect(p.rows.find((r) => r.label === "졸업작품")?.status).toBe("missing");
-  });
-
-  it("열 이름이 없으면 아무 값도 확정하지 않는다", () => {
-    const p = parseGraduationCheck("졸업학점 130 18\n전공 81 6");
-    expect(p.target.status).toBe("ambiguous");
-    expect(p.target.value).toBeNull();
-  });
-
+describe("졸업 기준", () => {
   it("개인 졸업사정 값을 학교 공통 규칙으로 쓰지 않는다(fixture 규칙은 미확인 그대로)", () => {
     const rule = fixtureDataset.rules.find((r) => r.key === "graduation.totalCredits")!;
     expect(rule.status).toBe("unknown");

@@ -14,20 +14,6 @@ export interface TestProfile {
   draft: (today: string) => Draft;
 }
 
-/**
- * 가상 졸업사정 조회 결과(프로필 D). 원본 화면 형식을 흉내 낸 예시이며 실제 학생 자료가 아니다.
- * 영어전용강좌 줄은 숫자 하나만 있어 어느 열 값인지 모호하다 → 자동 확정하지 않아야 한다.
- */
-export const SAMPLE_GRADUATION_CHECK = `[가상 예시 · 실제 학생 자료가 아닙니다]
-구분\t배당\t취득
-졸업학점\t130\t18
-전공\t81\t6
-핵심교양\t10\t5
-영어전용강좌\t\t1
-사회봉사\t1\t0
-IC-PBL\t
-졸업작품\t미이수`;
-
 const answersFor = (index: number) => Object.fromEntries(QUIZ.map((q) => [q.id, q.options[index].id]));
 
 export const TEST_PROFILES: TestProfile[] = [
@@ -151,8 +137,8 @@ export const TEST_PROFILES: TestProfile[] = [
   },
   {
     id: "D",
-    title: "D · 졸업사정 결과 붙여넣기",
-    summary: "가상 졸업사정 조회 표를 붙여넣어 분명한 값만 읽고, 모호한 줄은 직접 확인 · 데이터·AI 관심(질문으로 추천)",
+    title: "D · 목표학점 미입력",
+    summary: "1학기만 마친 신입생, 목표 총학점을 비워 두면 예상 완료가 ‘확인 필요’로 보임 · 데이터·AI 관심(질문으로 추천)",
     landing: "target",
     draft: (today) => ({
       ...blankDraft(today),
