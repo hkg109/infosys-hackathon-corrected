@@ -144,7 +144,7 @@ function StepFrame({ step, draft, dataset }: { step: StepId; draft: Draft; datas
       )}
 
       <section key={step} className="step-in flex flex-1 flex-col pt-10" aria-labelledby="q-title">
-        <p className="text-[14px] text-muted">{cur.title}</p>
+        {!("eyebrow" in cur && cur.eyebrow === false) && <p className="text-[14px] text-muted">{cur.title}</p>}
         <h1 id="q-title" className="mt-1 max-w-[980px] font-serif text-[44px] leading-[1.2] font-bold tracking-tight">
           {cur.q}
         </h1>
@@ -337,7 +337,7 @@ function BigNumber({ value, onChange, unit, label, min = 0, max = 250 }: { value
 }
 
 function Help({ children }: { children: ReactNode }) {
-  return <p className="mt-6 max-w-[760px] text-[15px] leading-relaxed text-ink-soft">{children}</p>;
+  return <p className="mt-6 max-w-[760px] text-[15px] leading-relaxed text-balance text-ink-soft">{children}</p>;
 }
 
 function InfoLink({ href, title, desc }: { href: string; title: string; desc: string }) {
@@ -815,7 +815,6 @@ function MilitaryGoalStep({ ctx }: { ctx: StepCtx }) {
         options={[
           { value: "fast_stable" as const, label: "빠르고 안정적인 입대", desc: "입영일을 직접 골라 바로" },
           { value: "it_experience" as const, label: "IT·개발 관련 경험", desc: "기술행정병·공군 IT 특기 도전" },
-          { value: "katusa" as const, label: "카투사 우선", desc: "선발·미선발 분기를 함께" },
           { value: "return_predictable" as const, label: "학업 복귀 시점 예측", desc: "복무기간이 확인된 경로 위주" },
           { value: "unknown" as const, label: "아직 모르겠어요" },
         ]}

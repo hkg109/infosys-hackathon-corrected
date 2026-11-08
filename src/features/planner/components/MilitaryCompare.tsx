@@ -51,7 +51,7 @@ export function MilitaryCompare({ set, dataset, today }: { set: MilitaryStrategy
               ["모든 지원 실패", branch("none_selected") ? `${name(branch("none_selected")!.selectedProgramId)} (${branch("none_selected")!.serviceMonths ?? "?"}개월)` : "안전장치 없음"],
               ["학업 영향", s.metrics.worstServiceMonths !== null ? `분기별 최대 ${s.metrics.worstServiceMonths}개월 중단` : "일부 분기 복무기간 미확인 — 조건부"],
               ["장점", s.reasons[0] ?? "—"],
-              ["단점·위험", s.warnings[0] ?? (s.metrics.uncertainty > 0 ? `확인 필요 ${s.metrics.uncertainty}건` : "—")],
+              ["단점·위험", s.risks.slice(0, 2).join(" ") || "눈에 띄는 위험이 없어요."],
             ]
           : [];
         return (

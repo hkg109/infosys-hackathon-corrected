@@ -619,6 +619,8 @@ export interface MilitaryStrategyCandidate {
     worstServiceMonths: number | null;
   };
   reasons: string[];
+  /** 사용자가 바로 알아듣는 위험 문장(중요한 것부터) */
+  risks: string[];
   warnings: string[];
   sources: OfficialSource[];
 }

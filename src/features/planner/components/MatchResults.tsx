@@ -173,10 +173,7 @@ function StrategyBlock({ strategy, set, all, track }: { strategy: MilitaryStrate
   const roadmapFor = (b: MilitaryOutcomeBranch) =>
     b.selectedProgramId ? all.find((t) => t.career === track.career && t.militaryTrackId === b.selectedProgramId && (b.condition !== "katusa_selected" || t.militaryRole === "conditional")) : undefined;
   const now = [...new Set(strategy.branches.flatMap((b) => b.nextActions))].slice(0, 6);
-  const unknowns = [
-    ...strategy.eligibility.filter((e) => e.status !== "eligible").map((e) => `${name(e.programId)}: ${e.reasons[0]}`),
-    ...strategy.warnings,
-  ];
+  const unknowns = [...new Set([...strategy.risks, ...strategy.warnings])].slice(0, 6);
   return (
     <div className="mt-8 border-t-[1.5px] border-ink pt-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -252,7 +249,7 @@ function StrategyBlock({ strategy, set, all, track }: { strategy: MilitaryStrate
         </div>
         <div className="min-w-0">
           <h4 className="mb-2 flex items-center gap-1 text-[13px] font-semibold text-muted">
-            <CircleHelp size={14} aria-hidden /> 아직 확인되지 않은 조건
+            <CircleHelp size={14} aria-hidden /> 주의할 점
           </h4>
           {unknowns.length === 0 ? (
             <p className="text-[13px] text-ink-soft">없어요.</p>

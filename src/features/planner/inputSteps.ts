@@ -25,7 +25,7 @@ export const INPUT_STEPS = [
   { id: "exchange", title: "교환학생", q: "교환학생을 생각하고 있나요?" },
   { id: "exchange-when", title: "교환 시기", q: "언제 가고 싶나요?" },
   { id: "exchange-length", title: "교환 기간", q: "얼마나 가고 싶나요?" },
-  { id: "exchange-goal", title: "교환에서 중요한 것", q: "가장 중요한 것은 무엇인가요? (최대 2개)" },
+  { id: "exchange-goal", title: "교환에서 중요한 것", q: "교환학생을 갈 때 가장 중요한 것은 무엇인가요? (최대 2개)", eyebrow: false },
   { id: "exchange-language", title: "어학·성적", q: "어학성적이 있나요?" },
   { id: "exchange-life", title: "예산·주거", q: "예산과 주거는 어떻게 생각하나요?" },
   { id: "priority", title: "우선순위", q: "가장 중요한 우선순위는 무엇인가요?" },
