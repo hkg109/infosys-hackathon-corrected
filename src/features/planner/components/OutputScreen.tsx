@@ -16,6 +16,10 @@ import { Roadmap } from "./Roadmap";
 import { FeedbackChat } from "./FeedbackChat";
 import { Button, Empty, Hand, PageTitle } from "./ui";
 
+/** 학년별 상한 규칙 이름: 유효학기 1~4 → 1·2학년, 5~ → 3·4학년 */
+const capYearLabel = (r: { appliesTo: { termOrdinalFrom: number | null; termOrdinalTo: number | null } }) =>
+  (r.appliesTo.termOrdinalFrom ?? 1) >= 5 ? "3·4학년" : r.appliesTo.termOrdinalTo !== null && r.appliesTo.termOrdinalTo <= 4 ? "1·2학년" : `${r.appliesTo.termOrdinalFrom ?? 1}번째 학기부터`;
+
 export function OutputScreen({ initialChat = false }: { initialChat?: boolean } = {}) {
   const { mounted, plan, dataset, catalog } = usePlanner();
   if (!mounted) return <div className="h-96 animate-pulse rounded bg-paper-2" aria-busy="true" />;
@@ -82,7 +86,12 @@ function Output({ plan, dataset, initialChat }: { plan: PlanState; dataset: Data
   const stale = staleGenEd(plan.genEd, result.terms);
   const careerCerts = (dataset.military?.careerCertificates ?? []).filter((x) => x.career === input.track);
   const certName = (id: string) => dataset.military?.certificates.find((x) => x.id === id)?.officialName ?? id;
-  const capRules = [...new Set(result.terms.flatMap((t) => (t.capRuleId ? [t.capRuleId] : [])))];
+  const capRules = [...new Set(result.terms.flatMap((t) => (t.capRuleId ? [t.capRuleId] : [])))]
+    .map((id) => dataset.creditCapRules?.find((r) => r.id === id))
+    .filter((r): r is NonNullable<typeof r> => !!r)
+    .sort((a, b) => (a.appliesTo.termOrdinalFrom ?? 0) - (b.appliesTo.termOrdinalFrom ?? 0));
+  const verifiedCaps = capRules.filter((r) => r.status === "verified");
+  const serviceCaps = capRules.filter((r) => r.status === "user_assumption");
 
   const confirm = () => {
     setChat(false);
@@ -232,10 +241,12 @@ function Output({ plan, dataset, initialChat }: { plan: PlanState; dataset: Data
             <h2 className="mb-1 font-serif text-[16px] font-bold text-ink">공식 자료와 사용자 가정</h2>
             <p>
               <b className="text-sage-ink">공식</b> 과목·학점: {dataset.department} {dataset.curriculum} 교육과정 자료
-              {capRules.length > 0 && ` · 학기 상한: ${capRules.map((id) => dataset.creditCapRules?.find((r) => r.id === id)).filter(Boolean).map((r) => `${r!.maxCredits}학점(${r!.sourceRef.sourceId} ${r!.sourceRef.pages.join("·")}쪽)`).join(", ")}`}
+              {verifiedCaps.length > 0 && ` · 학기 상한: ${verifiedCaps.map((r) => `${r.maxCredits}학점(${r.sourceRef.sourceId} ${r.sourceRef.pages.join("·")}쪽)`).join(", ")}`}
             </p>
             <p className="mt-1">
-              <b className="text-pen">가정</b> 학기당 계획 학점 · 학기 구간(3~6월/9~12월) · {input.targetCredits === null ? "목표학점 없음" : `목표 ${input.targetCredits}학점(내 입력)`}
+              <b className="text-pen">가정</b> 학기당 계획 학점 · 학기 구간(3~6월/9~12월)
+              {serviceCaps.length > 0 && ` · 학기 상한 ${serviceCaps.map((r) => `${capYearLabel(r)} ${r.maxCredits}`).join(" · ")}학점(${serviceCaps[0].sourceRef.sourceId} ${serviceCaps[0].sourceRef.pages.join("·")}쪽 기준을 서비스 기준으로 적용)`}
+              {result.terms.some((t) => (t.capExemptCredits ?? 0) > 0) && " · 커리어개발 학기 +1(서비스 기준, 안내문 쪽수 미확인)"} · {input.targetCredits === null ? "목표학점 없음" : `목표 ${input.targetCredits}학점(내 입력)`}
               {plan.military && ` · ${plan.military.label} ${plan.military.monthsStatus === "verified" ? "복무기간(공식 확인)" : "복무기간(확인 필요 또는 내 입력)"}`}
             </p>
           </section>

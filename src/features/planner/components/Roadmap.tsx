@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import type { BreakPeriod, CourseGroup, Dataset, PlanInput, PlannedTerm, PlanResult, Term } from "@/contracts/types";
-import { emptyGenEd, GEN_ED_NOTE, type GenEdState, isBlocked, termBreakdown, termIndex } from "@/engine";
+import { CAP_EXEMPT_NOTE, emptyGenEd, GEN_ED_NOTE, type GenEdState, isBlocked, isCapExempt, termBreakdown, termIndex } from "@/engine";
 import { gradeLabel, termMonths } from "../plan";
 import { GroupDot, groupLabel } from "./ui";
 
@@ -155,7 +155,10 @@ function TermPage({
                 가정
               </span>
             )}
-            <span className="ml-auto shrink-0 text-[11px] text-muted">{category(c.code)}</span>
+            <span className="ml-auto shrink-0 text-[11px] text-muted" title={isCapExempt(c.code) ? CAP_EXEMPT_NOTE : undefined}>
+              {category(c.code)}
+              {isCapExempt(c.code) && <span className="text-pen"> · 상한 제외</span>}
+            </span>
             <span className="w-9 shrink-0 text-right tabular-nums text-ink-soft">{c.credits}</span>
           </li>
         ))}
@@ -212,8 +215,8 @@ function TermPage({
       {onAdd && left < 3 && (
         <p role="note" className="mx-4 mt-1.5 rounded-[4px] bg-red-soft/40 px-2 py-1 text-[11.5px] text-red print:hidden">
           {left <= 0
-            ? `이 학기는 최대 ${t.capCredits ?? t.plannedCredits}학점이 다 차서 교양을 더 넣을 수 없어요.`
-            : `남은 자리가 ${left}학점이라 3학점 교양은 넣을 수 없어요(최대 ${t.capCredits ?? t.plannedCredits}학점).`}
+            ? `이 학기 계획 ${t.plannedCredits}학점의 미지정 자리가 다 차서 교양을 더 넣을 수 없어요${t.capCredits !== undefined ? `(상한 ${t.capCredits}학점)` : ""}.`
+            : `남은 자리가 ${left}학점이라 3학점 교양은 넣을 수 없어요(계획 ${t.plannedCredits}학점${t.capCredits !== undefined ? ` · 상한 ${t.capCredits}학점` : ""}).`}
         </p>
       )}
       <div className="flex items-center justify-between gap-2 px-4 pt-1.5 pb-2.5">
@@ -222,6 +225,12 @@ function TermPage({
           전공 {b.major + b.majorSlot} · 교양 {b.generalEducation}
           {b.unassigned > 0 ? ` · 미지정 ${b.unassigned}` : ""} · 합계 <b className="text-[14px] text-ink">{b.total}</b>
           {t.capCredits !== undefined && <span className="text-muted"> / 상한 {t.capCredits}</span>}
+          {(t.capExemptCredits ?? 0) > 0 && (
+            <span className="text-[11px] text-muted" title={CAP_EXEMPT_NOTE}>
+              {" "}
+              (커리어개발 +{t.capExemptCredits})
+            </span>
+          )}
         </span>
       </div>
     </div>

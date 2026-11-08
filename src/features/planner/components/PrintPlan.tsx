@@ -1,6 +1,6 @@
 import { CAREER_LABEL } from "@/contracts/careers";
 import type { BreakPeriod, DatasetV2, PlannedTerm, PlanResult } from "@/contracts/types";
-import { courseLevel, formatTerm, isMajorCourse, termBreakdown, termIndex } from "@/engine";
+import { courseLevel, formatTerm, isCapExempt, isMajorCourse, termBreakdown, termIndex } from "@/engine";
 import type { ExchangeChoice } from "../plan";
 import { militarySummary } from "../plan";
 import type { PlanState } from "../storage";
@@ -236,7 +236,13 @@ export function PrintPlan({
             const lines: Array<{ kind: string; text: string; credits: number }> = [];
             if (r.majorNames.length > 0) lines.push({ kind: "전공", text: r.majorNames.join(", "), credits: r.majorCourses });
             if (r.majorSlot > 0) lines.push({ kind: "전공 선택", text: `전공 선택 과목${r.upperSlot > 0 ? ` (400단위 ${r.upperSlot}학점 포함)` : ""} — 수강신청 때 고르기`, credits: r.majorSlot });
-            if (r.general > 0) lines.push({ kind: "교양·선택", text: "교양·선택 과목 — 수강신청 때 고르기", credits: r.general });
+            const exempt = r.t.courses.filter((c) => isCapExempt(c.code));
+            if (r.general > 0)
+              lines.push({
+                kind: "교양·선택",
+                text: `교양·선택 과목 — 수강신청 때 고르기${exempt.length > 0 ? ` (${exempt.map((c) => `${c.name.split(":")[0]} ${c.credits}`).join(", ")} 포함 · 상한 제외)` : ""}`,
+                credits: r.general,
+              });
             if (lines.length === 0) lines.push({ kind: "—", text: "배치할 과목 없음", credits: 0 });
             return (
               <tbody key={r.key} className={`pd-term${r.completion ? " pd-final" : ""}`}>
