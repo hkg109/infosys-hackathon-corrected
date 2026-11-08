@@ -130,7 +130,7 @@ export function HomeScreen() {
             </ol>
 
             <div className="mt-12">
-              <p className="mb-3 text-[13px] font-medium text-muted">트랙을 이루는 진로 다섯 갈래</p>
+              <p className="mb-3 text-[13px] font-medium text-muted">트랙을 이루는 진로 {CAREER_TRACKS.length}개</p>
               <ul className="flex flex-wrap gap-x-6 gap-y-2">
                 {CAREER_TRACKS.map((t) => (
                   <li key={t} className="flex items-center gap-2 text-[15px]">
