@@ -1034,3 +1034,298 @@ export interface GuidanceItemV2 extends GuidanceItem {
 export interface GuidanceResultV2 {
   items: GuidanceItemV2[];
 }
+
+// ── 교환학생(파견교환) 계획 ─────────────────────────────
+// 명세: ah-matda-exchange-student-planner-prompt.md, 범위: docs/PLAN.md 10장.
+// 공식 사실·공식 값 계산·서비스 분석·예상·사용자 입력·이전 회차·충돌·미정을 구분한다.
+
+export type TruthState =
+  | "verified_official"
+  | "derived"
+  | "service_analysis"
+  | "forecast"
+  | "user_provided"
+  | "stale"
+  | "source_conflict"
+  | "unknown";
+
+export type ExchangeEvidenceKind =
+  | "hanyang_notice"
+  | "hanyang_attachment_pdf"
+  | "hanyang_partner_xlsx"
+  | "hanyang_credit_policy"
+  | "host_official_page"
+  | "host_course_catalog"
+  | "host_fact_sheet"
+  | "test_provider_official"
+  | "ranking_provider"
+  | "user_document"
+  | "service_rule";
+
+export interface ExchangeSourceRef {
+  id: string;
+  title: string;
+  url: string | null;
+  evidenceKind: ExchangeEvidenceKind;
+  publishedAt: ISODate | null;
+  updatedAt: ISODate | null;
+  checkedAt: ISODate;
+  fileName?: string;
+  page?: number;
+  sheet?: string;
+  cellRange?: string;
+  excerptSummary: string;
+  /** 사람 검토자. 자동 추출만 했으면 null(검토 전) */
+  reviewer: string | null;
+}
+
+export interface ValidityScope {
+  applicationCycleId: string | null;
+  exchangeTermId: string | null;
+  hostAcademicPeriod: string | null;
+  effectiveFrom: ISODate | null;
+  effectiveUntil: ISODate | null;
+}
+
+export interface SourcedValue<T> {
+  value: T | null;
+  truth: TruthState;
+  sourceRefs: string[];
+  validity: ValidityScope;
+  derivation?: string;
+  note?: string;
+}
+
+export type ExchangeRuleKind =
+  | "campus"
+  | "enrollment"
+  | "completed_terms_min"
+  | "completed_terms_max"
+  | "gpa_min"
+  | "language"
+  | "major_restriction"
+  | "prior_exchange"
+  | "consecutive_exchange"
+  | "final_regular_term"
+  | "transfer_terms"
+  | "citizenship"
+  | "other";
+
+export interface ExchangeEligibilityRule {
+  id: string;
+  owner: "hanyang" | "host";
+  kind: ExchangeRuleKind;
+  operator: "gte" | "lte" | "eq" | "in" | "not_in" | "custom";
+  /** 비교 값(예: 2, 2.5). 사람이 읽는 조건은 source.value */
+  operand: number | string | string[] | null;
+  /** 만점 체계 등 비교 단위(예: GPA 4.5) */
+  scale?: number | null;
+  source: SourcedValue<string>;
+  blocking: boolean;
+}
+
+export interface HanyangExchangeCycle {
+  id: string;
+  label: string;
+  /** 파견 학기(한양대 학기 기준) */
+  targetHomeTerm: Term;
+  /** announced = 공고 중, closed = 마감, forecast = 과거 패턴 예상(학교 확정 불가), unknown */
+  officialStatus: "announced" | "closed" | "forecast" | "unknown";
+  postedAt: SourcedValue<ISODate>;
+  applicationWindow: SourcedValue<{ start: ISODate; end: ISODate }>;
+  resultDate: SourcedValue<ISODate>;
+  selectionMethod: SourcedValue<string>;
+  commonEligibilityRules: ExchangeEligibilityRule[];
+  cancellationRules: SourcedValue<string[]>;
+  tuition: SourcedValue<string>;
+  creditRecognition: SourcedValue<string[]>;
+  sourceRefs: string[];
+}
+
+export interface ExchangeLanguageRequirement {
+  test: "TOEFL_IBT" | "TOEFL_IBT_2026" | "IELTS_ACADEMIC" | "TOEIC" | "OTHER";
+  /** 점수 체계 버전(예: "120점 만점", "6점 만점(2026-01 이후)") */
+  scaleVersion: string;
+  /** 숫자로 확인된 총점 하한. 원문이 숫자가 아니면 null */
+  total: number | null;
+  /** 영역별 최소점수 요구가 있는지(원문 문장 기준) */
+  subscoresRequired: boolean | null;
+  raw: string;
+}
+
+export interface CourseAccessRule {
+  id: string;
+  scope: "faculty" | "department" | "subject" | "course";
+  target: string;
+  access: "open" | "limited" | "closed" | "unknown";
+  appliesTo: string;
+  effectiveTerm: string | null;
+  conditions: string[];
+  source: SourcedValue<string>;
+}
+
+export interface PartnerOffering {
+  id: string;
+  universityName: string;
+  country: string;
+  /** 엑셀 언어권(영미·유럽·아시아 등) */
+  region: string;
+  applicationCycleId: string;
+  hostAcademicPeriod: string;
+  academicSystem: SourcedValue<string>;
+  durationOptions: SourcedValue<Array<"one_term" | "one_year">>;
+  quota: SourcedValue<number>;
+  gpa: SourcedValue<{ min: number; scale: number } | null>;
+  gpaRaw: string;
+  language: ExchangeLanguageRequirement[];
+  nationalityRestriction: SourcedValue<string>;
+  closedDepartments: SourcedValue<string>;
+  courseAccess: CourseAccessRule[];
+  creditLoad: SourcedValue<{ min: string; max: string }>;
+  housing: { onCampus: "available_not_guaranteed" | "unavailable" | "unknown"; source: SourcedValue<string> };
+  calendar: SourcedValue<{ start: ISODate; end: ISODate }>;
+  deadlines: { nomination: SourcedValue<ISODate>; application: SourcedValue<ISODate> };
+  links: { exchange: string | null; courses: string | null };
+  /** 엑셀 비고·특이사항 원문 */
+  notes: string[];
+  sourceRefs: string[];
+  reviewStatus: "candidate" | "reviewed" | "rejected" | "stale";
+}
+
+export interface ExchangeCatalog {
+  catalogVersion: string;
+  reviewedAt: ISODate;
+  sources: ExchangeSourceRef[];
+  cycles: HanyangExchangeCycle[];
+  offerings: PartnerOffering[];
+  /** 한양대가 파견교 엑셀에 넣은 GPA 변환식(4.5 → 다른 만점). 파견교가 이 값을 받는다는 보장은 아니다 */
+  gpaConversions: SourcedValue<Array<{ scale: number; formula: string }>>;
+}
+
+export type ExchangePriority = "major_course_access" | "prestige" | "graduation_fit" | "low_cost" | "language_fit" | "housing" | "country_culture";
+
+export interface ExchangeLanguageEvidence {
+  test: "IELTS_ACADEMIC" | "TOEFL_IBT" | "TOEFL_IBT_2026" | "TOEIC" | "OTHER";
+  total: number | null;
+  testedAt: ISODate | null;
+  evidenceStatus: "user_entered" | "planned" | "unknown";
+}
+
+/** 사용자가 알려주는 최소 정보. 학교별 TO·마감·GPA 기준·과목 제한은 묻지 않는다 */
+export interface ExchangePlanningInput {
+  intent: "committed" | "conditional" | "considering" | "none";
+  targetTerm: { mode: "fixed"; term: Term } | { mode: "next_spring" | "next_fall" | "recommend" | "unknown" };
+  duration: "one_term" | "one_year" | "either" | "recommend";
+  /** 첫 번째가 최우선. 최대 2개 */
+  priorities: ExchangePriority[];
+  languageStatus: "has_score" | "preparing" | "none" | "unknown";
+  languageEvidence: ExchangeLanguageEvidence[];
+  budget: "save" | "moderate" | "flexible" | "unknown";
+  housing: "guaranteed_required" | "preferred" | "off_campus_ok" | "unknown";
+  academic: {
+    campus: string | null;
+    completedTermsNow: number | null;
+    /** 4.5 만점 누적 GPA. 모르면 null */
+    cumulativeGpa: number | null;
+    majorArrangement: "single" | "multiple_major" | "minor" | "double_degree" | "unknown";
+    transferStudent: boolean | null;
+    priorExchangeTerms: number | null;
+    /** 계획 시작 학기 */
+    planStartTerm: Term | null;
+  };
+}
+
+export interface EligibilityEvaluation {
+  ruleId: string;
+  owner: "hanyang" | "host";
+  label: string;
+  result: "pass" | "fail" | "unknown";
+  reason: string;
+  /** 판정에 더 필요한 입력 */
+  missingInputIds: string[];
+  truth: TruthState;
+  sourceRefs: string[];
+}
+
+export interface ExchangePeriodConflict {
+  /** 군 전략 분기 ID(없으면 고정 기간) */
+  branchId: string | null;
+  label: string;
+  kind: "hard" | "conditional";
+  detail: string;
+}
+
+export interface ExchangeMatchCandidate {
+  /** 결정적 ID: offering + 파견 학기 + 기간 + 인정 상태 */
+  id: string;
+  offeringId: string;
+  inputFingerprint: string;
+  exchangeTerm: Term;
+  duration: "one_term" | "one_year";
+  status: "eligible" | "conditional" | "ineligible" | "deadline_passed" | "schedule_conflict";
+  /** 후보 자료가 목표 회차 자료가 아니면 true(이전 회차 기준) */
+  staleCycle: boolean;
+  eligibility: EligibilityEvaluation[];
+  courseAccess: { status: "limited" | "unknown" | "closed"; reasons: string[] };
+  recognitionSummary: { confirmedCredits: number | null; countsAsTerm: boolean | null; status: "unknown" };
+  militaryConflicts: ExchangePeriodConflict[];
+  /** 정렬·백업 다양화에 쓰는 핵심 위험 키 */
+  riskKeys: Array<"course_access" | "language" | "housing" | "gpa" | "stale" | "quota_small" | "schedule">;
+  reasons: string[];
+  risks: string[];
+  sourceRefs: string[];
+}
+
+export interface ExchangeAction {
+  id: string;
+  checkKey: string;
+  title: string;
+  detail: string;
+  timing: "before_application" | "after_home_selection" | "before_exchange" | "during_exchange" | "after_exchange";
+  dueAt: SourcedValue<ISODate>;
+  status: "todo" | "blocked" | "done" | "not_applicable";
+  blockingReason: string | null;
+  sourceRefs: string[];
+}
+
+export interface ExchangeOutcomeBranch {
+  id: string;
+  parentId: string | null;
+  event:
+    | "hanyang_selected"
+    | "hanyang_not_selected"
+    | "host_accepted"
+    | "host_rejected"
+    | "primary_courses_approved"
+    | "backup_courses_required"
+    | "housing_secured"
+    | "housing_not_secured"
+    | "credit_fully_recognized"
+    | "credit_partially_recognized"
+    | "credit_pending"
+    | "policy_changed"
+    | "user_cancelled";
+  title: string;
+  /** 확률 근거가 없으므로 항상 null */
+  probability: null;
+  nextActions: string[];
+}
+
+export interface ExchangeCandidateSet {
+  catalogVersion: string;
+  inputFingerprint: string;
+  /** 목표로 본 회차와 그 상태 */
+  targetCycle: { id: string; label: string; officialStatus: HanyangExchangeCycle["officialStatus"] } | null;
+  /** 학교 자료를 가져온 회차(목표 회차가 forecast면 이전 회차) */
+  dataCycleId: string | null;
+  common: { status: "eligible" | "conditional" | "ineligible"; evaluations: EligibilityEvaluation[] };
+  primary: ExchangeMatchCandidate | null;
+  backups: ExchangeMatchCandidate[];
+  /** 정렬된 전체 후보(학교 탐색 화면용) */
+  all: ExchangeMatchCandidate[];
+  /** 세 후보가 같은 미확인 자료에 의존하면 true */
+  wholeSetConditional: boolean;
+  emptyReason: string | null;
+  branches: ExchangeOutcomeBranch[];
+  actions: ExchangeAction[];
+}
