@@ -55,7 +55,9 @@ describe("테스트 프로필", () => {
     const res = t.candidate.result!;
     expect(res.terms[0].termOrdinal).toBe(7);
     for (const term of res.terms) for (const x of term.courses) expect(d.completedCourseCodes).not.toContain(x.code);
-    expect(res.terms.every((x) => x.status !== "study" || (x.capCredits ?? 99) <= 12)).toBe(true);
+    expect(res.terms.every((x) => x.status !== "study" || (x.planLimitCredits ?? 99) <= 12)).toBe(true);
+    // 학교 상한은 3·4학년 18(계획 한도 12와 별개)
+    expect(res.terms.filter((x) => x.status === "study").every((x) => x.capCredits === 18)).toBe(true);
     // 남은 30학점을 학기당 12학점 이하로 → 3학기
     expect(res.terms.filter((x) => x.status === "study").length).toBe(3);
     expect(res.expectedCompletion).toEqual({ year: 2028, season: 1 });

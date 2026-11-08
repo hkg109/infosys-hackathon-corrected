@@ -30,7 +30,7 @@ describe("generateCandidates", () => {
     // 각 후보는 펼친 값으로 엔진을 실제 실행한 결과다.
     for (const c of set.candidates) {
       expect(c.input.careers).toEqual([c.key.career]);
-      expect(Math.max(...c.result!.terms.map((t) => t.plannedCredits))).toBeLessThanOrEqual(c.key.paceCredits);
+      expect(Math.max(...c.result!.terms.map((t) => t.plannedCredits - (t.capExemptCredits ?? 0)))).toBeLessThanOrEqual(c.key.paceCredits);
     }
   });
 

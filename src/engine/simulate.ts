@@ -12,7 +12,7 @@ import type {
   UnplacedCourse,
 } from "@/contracts/types";
 import { estimateUpperEarned, hasMajorRequirement, majorShortfall, sumMajorLevels } from "./majorReq";
-import { maxUserCap, schoolMinFor, termCapFor } from "./pace";
+import { isCapExempt, maxUserCap, schoolMinFor, termCapFor, usesServiceCap } from "./pace";
 import { formatTerm, isBlocked, isValidDate, nextTerm, termIndex } from "./terms";
 
 export const ENGINE_VERSION = "0.2.0";
@@ -97,7 +97,7 @@ function pruneUnplaceable(
     for (const c of rest) {
       const missing = c.prerequisites.filter((p) => !reachable.has(p));
       const reason =
-        c.credits > creditCap
+        c.credits > creditCap && !isCapExempt(c.code)
           ? `학점(${c.credits})이 학기당 상한(${creditCap})보다 큽니다.`
           : missing.length > 0
             ? `선수과목(${missing.join(", ")})이 이수 완료나 계획 대상에 없습니다.`
@@ -133,7 +133,11 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
   }
 
   const done = new Set(input.completedCourseCodes);
-  const recommended = recommendedCourses(dataset, input.track);
+  // 진로 추천 과목 + 모든 학생 공통 교양필수인 상한 제외 과목(커리어개발Ⅰ·Ⅱ). careerTags(서비스 진로 분류)는 건드리지 않는다
+  const tagged = recommendedCourses(dataset, input.track);
+  const recommended = [...tagged, ...dataset.courses.filter((c) => isCapExempt(c.code) && !tagged.some((t) => t.code === c.code))].sort(
+    (a, b) => (a.recommendedYear ?? 99) - (b.recommendedYear ?? 99) || semesterOrder(a.semester) - semesterOrder(b.semester) || a.code.localeCompare(b.code),
+  );
   const excluded = new Set((input.courseRules ?? []).filter((r) => r.action === "exclude").map((r) => r.code));
   const notBefore = new Map((input.courseRules ?? []).filter((r) => r.action === "not_before" && r.term).map((r) => [r.code, termIndex(r.term!)]));
   const pruned = pruneUnplaceable(
@@ -169,20 +173,23 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
     }
 
     const studentYear = Math.floor((input.completedTerms + activeTerms) / 2) + 1;
-    // 유효학기 순번(1부터)에 맞는 계획 상한: 후반 여유형 구간·확인된 학교 상한 중 작은 값
+    // 유효학기 순번(1부터). 학교 상한(1·2학년 20, 3·4학년 18)과 계획 한도(페이스·사용자 학기 제한)를 나눈다
     const base = termCapFor(input, dataset, input.completedTerms + activeTerms + 1);
     const userTermCap = (input.termCaps ?? []).find((t) => t.term.year === term.year && t.term.season === term.season)?.credits ?? null;
     const cap = userTermCap === null ? base.cap : Math.min(base.cap, userTermCap);
     const ruleId = base.ruleId;
     const placed: PlacedCourse[] = [];
     let used = 0;
+    // 상한 제외 과목(커리어개발) 학점: 상한 비교에 넣지 않고, 다른 과목·자리가 쓰지 못한다
+    let exemptUsed = 0;
 
     for (const c of queue) {
       if ((c.recommendedYear ?? 1) > studentYear) continue;
       if ((c.semester === 1 || c.semester === 2) && c.semester !== term.season) continue;
       if (!c.prerequisites.every((p) => done.has(p))) continue;
       if ((notBefore.get(c.code) ?? -Infinity) > termIndex(term)) continue;
-      if (used + c.credits > cap) continue;
+      const exempt = isCapExempt(c.code);
+      if (!exempt && used + c.credits > cap) continue;
 
       const assumptions: PlacedCourse["assumptions"] = [];
       if (c.semester === null) assumptions.push("semester_unknown");
@@ -195,7 +202,18 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
         group: groupOf(c.code, dataset, input.track) ?? "common",
         assumptions,
       });
-      used += c.credits;
+      if (exempt) {
+        exemptUsed += c.credits;
+        const expected = ((c.recommendedYear ?? 1) - 1) * 2 + (c.semester === 2 ? 2 : 1);
+        const ord = input.completedTerms + activeTerms + 1;
+        if (ord > expected)
+          warnings.push({
+            code: "CAP_EXEMPT_LATE",
+            message: `${c.name}은 ${c.recommendedYear ?? 1}학년 ${c.semester ?? 1}학기 과목인데 아직 이수 기록이 없어 ${formatTerm(term)}에 넣었어요. 이수했다면 이수 현황에서 체크하세요.`,
+            term,
+            courseCode: c.code,
+          });
+      } else used += c.credits;
     }
 
     const placedCodes = new Set(placed.map((p) => p.code));
@@ -212,12 +230,13 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
     majorLeft -= majorSlot;
 
     const fixed = used + majorSlot;
-    let planned = remaining === null ? fixed : Math.min(cap, Math.max(fixed, remaining));
+    // planned = 상한 제외 과목을 뺀 이 학기 학점. 남은 학점에서 커리어개발 학점은 먼저 뺀다
+    let planned = remaining === null ? fixed : Math.min(cap, Math.max(fixed, remaining - exemptUsed));
     // 학교 최소 신청학점(1~7번째 학기 10학점, S2 17~18쪽)보다 적으면 미지정 자리로 채운다. 학기 상한·사용자 학기 제한이 더 작으면 그 값까지만.
     const ordinal = input.completedTerms + activeTerms + 1;
     const minRule = schoolMinFor(dataset.creditCapRules, input.admissionYear, ordinal);
-    if (minRule && planned < minRule.min) {
-      const filled = Math.min(cap, minRule.min);
+    if (minRule && planned + exemptUsed < minRule.min) {
+      const filled = Math.min(cap, minRule.min - exemptUsed);
       if (filled > planned) {
         warnings.push({
           code: "MIN_CREDITS_FILLED",
@@ -226,14 +245,14 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
         });
         planned = filled;
       }
-      if (filled < minRule.min)
+      if (filled + exemptUsed < minRule.min)
         warnings.push({
           code: "MIN_CREDITS_FILLED",
-          message: `${formatTerm(term)} 계획 학점(${filled})이 최소 신청학점 ${minRule.min}학점보다 적어요. 학기 학점 제한을 확인하세요.`,
+          message: `${formatTerm(term)} 계획 학점(${filled + exemptUsed})이 최소 신청학점 ${minRule.min}학점보다 적어요. 학기 학점 제한을 확인하세요.`,
           term,
         });
     }
-    if (remaining !== null) remaining = Math.max(0, remaining - planned);
+    if (remaining !== null) remaining = Math.max(0, remaining - planned - exemptUsed);
 
     for (const p of placed) {
       if (p.assumptions.includes("semester_unknown"))
@@ -258,8 +277,11 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
       courses: placed,
       slotCredits: planned - used,
       ...(req ? { majorSlotCredits: majorSlot, upperMajorSlotCredits: upperSlot } : {}),
-      plannedCredits: planned,
-      capCredits: cap,
+      plannedCredits: planned + exemptUsed,
+      capCredits: (base.schoolCap ?? cap) + exemptUsed,
+      baseCapCredits: base.schoolCap,
+      capExemptCredits: exemptUsed,
+      planLimitCredits: cap,
       capRuleId: ruleId,
     });
     activeTerms++;
@@ -267,6 +289,12 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
     finished = queue.length === 0 && (remaining === null || remaining === 0) && majorLeft === 0;
   }
 
+  // 학년별 서비스 기준 상한(3·4학년 18)은 2026학년도 신입생 안내를 전 학생에 적용한 것 → 이전 입학자는 현행표와 다를 수 있다
+  if (usesServiceCap(dataset.creditCapRules) && input.admissionYear != null && input.admissionYear <= 2025 && input.completedTerms + activeTerms >= 5)
+    warnings.push({
+      code: "CAP_RULE_ASSUMED",
+      message: `3·4학년 18학점 상한은 2026학년도 신입생 기준 안내를 적용했어요. ${input.admissionYear}학번은 수강신청 안내문 17쪽 현행 기준(20학점)일 수 있어요.`,
+    });
   const unplaced: UnplacedCourse[] = [
     ...pruned.unplaced,
     ...queue.map((c) => ({

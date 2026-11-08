@@ -200,7 +200,9 @@ export type WarningCode =
   | "USER_EXCLUDED"
   | "MAJOR_EXTRA"
   | "MAJOR_LEVEL_ESTIMATED"
-  | "MIN_CREDITS_FILLED";
+  | "MIN_CREDITS_FILLED"
+  | "CAP_RULE_ASSUMED"
+  | "CAP_EXEMPT_LATE";
 
 export interface PlanWarning {
   code: WarningCode;
@@ -229,9 +231,18 @@ export interface PlannedTerm {
   /** majorSlotCredits 중 400단위 자리 */
   upperMajorSlotCredits?: number;
   plannedCredits: number;
-  /** 이 학기에 쓴 계획 상한 = min(학점 페이스, 확인된 학교 상한). 중단 학기는 없음 */
+  /**
+   * 학기 상한(학교 기준 최대 신청학점 + 상한 제외 과목 학점). 화면 “/ 상한 N”은 이 값만 쓴다.
+   * 학교 기준 규칙이 없으면 계획 한도(planLimitCredits + 상한 제외 학점). 중단 학기는 없음
+   */
   capCredits?: number;
-  /** 상한에 학교 규칙을 썼으면 그 규칙 ID */
+  /** 상한 제외(커리어개발) 가산 전 학교 기본 상한(1·2학년 20, 3·4학년 18). 규칙이 없으면 null */
+  baseCapCredits?: number | null;
+  /** 상한 밖으로 더한 커리어개발 학점(0 또는 1) */
+  capExemptCredits?: number;
+  /** 이 학기 계획 한도 = min(학점 페이스, 사용자 학기 제한, 학교 기본 상한). 상한 제외 학점 미포함 */
+  planLimitCredits?: number;
+  /** 상한에 쓴 학교 기준 규칙 ID */
   capRuleId?: string | null;
 }
 

@@ -54,26 +54,47 @@ export function maxUserCap(input: Pick<PlanInput, "creditCap" | "paceBands">): n
 }
 
 /**
- * 확인된(verified) 학교 상한 중 이 학생·학기에 적용되는 것. 입학연도를 모르면 적용하지 않는다(미확인).
- * planned(예정) 규칙은 계획 상한에 쓰지 않는다.
+ * 상한 제외 과목: 커리어개발Ⅰ·Ⅱ(교양필수 1학점). 총학점에는 들어가지만 학기 최대 신청학점에 넣지 않아
+ * 그 학기에 상한 위로 더할 수 있다. 서비스 기준(사용자 확인) — 학교 안내문 쪽수는 확인하지 못했다.
+ * 과목명이 아니라 학수번호로만 판정한다.
+ */
+export const CAP_EXEMPT_COURSES: readonly string[] = ["GEN5029", "GEN5100"];
+export const isCapExempt = (code: string) => CAP_EXEMPT_COURSES.includes(code);
+export const CAP_EXEMPT_NOTE = "커리어개발은 학기 최대학점에 포함되지 않아 1학점을 더 들을 수 있어요(서비스 기준 · 안내문 쪽수 미확인).";
+
+const ordinalHit = (r: CreditCapRule, ordinal: number) =>
+  (r.appliesTo.termOrdinalFrom === null || ordinal >= r.appliesTo.termOrdinalFrom) &&
+  (r.appliesTo.termOrdinalTo === null || ordinal <= r.appliesTo.termOrdinalTo);
+
+/**
+ * 이 학생·학기에 적용할 학교 기준 최대학점 규칙.
+ * - 서비스 기준 규칙(status "user_assumption", 학년별 1·2학년 20 / 3·4학년 18)이 자료에 있으면 그것만 쓴다.
+ *   입학연도와 관계없이 유효학기 순번으로 적용한다(사용자 결정 — data-sources.md).
+ * - 없으면 확인된(verified) 규칙만, 입학연도를 알 때만 쓴다. planned(예정) 규칙은 쓰지 않는다.
  */
 export function schoolCapFor(
   rules: CreditCapRule[] | undefined,
   admissionYear: number | null | undefined,
   ordinal: number,
 ): CreditCapRule | null {
-  if (!rules || admissionYear === null || admissionYear === undefined) return null;
-  const hits = rules.filter((r) => {
-    if (r.status !== "verified") return false;
-    const a = r.appliesTo;
-    if (a.admissionYearFrom !== null && admissionYear < a.admissionYearFrom) return false;
-    if (a.admissionYearTo !== null && admissionYear > a.admissionYearTo) return false;
-    if (a.termOrdinalFrom !== null && ordinal < a.termOrdinalFrom) return false;
-    if (a.termOrdinalTo !== null && ordinal > a.termOrdinalTo) return false;
-    return true;
-  });
-  return hits.sort((x, y) => x.maxCredits - y.maxCredits || x.id.localeCompare(y.id))[0] ?? null;
+  if (!rules) return null;
+  const pick = (xs: CreditCapRule[]) => xs.sort((x, y) => x.maxCredits - y.maxCredits || x.id.localeCompare(y.id))[0] ?? null;
+  const service = rules.filter((r) => r.status === "user_assumption");
+  if (service.length > 0) return pick(service.filter((r) => ordinalHit(r, ordinal)));
+  if (admissionYear === null || admissionYear === undefined) return null;
+  return pick(
+    rules.filter((r) => {
+      if (r.status !== "verified") return false;
+      const a = r.appliesTo;
+      if (a.admissionYearFrom !== null && admissionYear < a.admissionYearFrom) return false;
+      if (a.admissionYearTo !== null && admissionYear > a.admissionYearTo) return false;
+      return ordinalHit(r, ordinal);
+    }),
+  );
 }
+
+/** 자료에 학년별 서비스 기준 상한이 있는가(입학연도별 현행표와 다를 수 있음 경고용) */
+export const usesServiceCap = (rules: CreditCapRule[] | undefined) => !!rules?.some((r) => r.status === "user_assumption");
 
 /**
  * 학교 최소 신청학점(S2 17~18쪽): 현행표(2025학년도 입학자까지)와 2026학년도 신입생 표 모두
@@ -105,14 +126,18 @@ export function schoolMinFor(
   return { min: r.minCredits!, ruleId: r.id };
 }
 
-/** 학기 계획 상한 = min(사용자 페이스 구간, 확인된 학교 상한) */
+/**
+ * 학기 상한과 계획 한도를 나눠 돌려준다.
+ * - schoolCap: 학교 기준 최대학점(규칙이 없으면 null). 화면의 “상한”
+ * - cap: 계획 한도 = min(학점 페이스, 학교 기준). 사용자 학기 제한(termCaps)은 호출하는 쪽에서 더 줄인다
+ */
 export function termCapFor(
   input: PlanInput,
   dataset: Pick<DatasetV2, "creditCapRules">,
   ordinal: number,
-): { cap: number; ruleId: string | null } {
+): { cap: number; schoolCap: number | null; ruleId: string | null } {
   const user = userCapFor(input, ordinal);
   const rule = schoolCapFor(dataset.creditCapRules, input.admissionYear, ordinal);
-  if (rule && rule.maxCredits < user) return { cap: rule.maxCredits, ruleId: rule.id };
-  return { cap: user, ruleId: null };
+  if (!rule) return { cap: user, schoolCap: null, ruleId: null };
+  return { cap: Math.min(user, rule.maxCredits), schoolCap: rule.maxCredits, ruleId: rule.id };
 }
