@@ -151,11 +151,11 @@ function TermPage({
             <GroupDot group={c.group} />
             <span className="min-w-0 truncate">{c.name}</span>
             {c.assumptions.length > 0 && (
-              <span className="text-[11px] text-red" title="개설 시기를 가정해 배치했어요">
+              <span className="shrink-0 text-[11px] leading-none whitespace-nowrap text-red" title="개설 시기를 가정해 배치했어요">
                 가정
               </span>
             )}
-            <span className="ml-auto shrink-0 text-[11px] text-muted" title={isCapExempt(c.code) ? CAP_EXEMPT_NOTE : undefined}>
+            <span className="ml-auto shrink-0 text-[11px] whitespace-nowrap text-muted" title={isCapExempt(c.code) ? CAP_EXEMPT_NOTE : undefined}>
               {category(c.code)}
               {isCapExempt(c.code) && <span className="text-pen"> · 상한 제외</span>}
             </span>
