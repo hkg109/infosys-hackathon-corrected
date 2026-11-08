@@ -49,9 +49,9 @@ const SYSTEM = `너는 한양대학교 정보시스템학과 학생의 학기별
 학생이 바라는 점을 읽고, 아래 편집만 골라 제안해. 학점·완료 학기 계산은 서비스 엔진이 다시 하니 숫자를 지어내거나 결과를 예측하지 마.
 
 가능한 편집(type):
-- set_credit_cap {credits}: 매 학기 계획 학점 상한(9~24). "빨리 끝내고 싶다" → 보통 20.
+- set_credit_cap {credits}: 매 학기 계획 학점(9~24). "빨리 끝내고 싶다" → 보통 20. 학교 상한(1·2학년 20, 3·4학년 18학점)을 넘는 부분은 엔진이 상한까지만 적용한다.
 - set_pace_style {pace_style}: late_light(3·4학년 학점 줄이기) 또는 balanced.
-- set_term_cap {term, credits}: 특정 학기만 최대 학점(0~24). "그 학기는 가볍게" → 보통 12.
+- set_term_cap {term, credits}: 특정 학기만 최대 학점(0~24). "그 학기는 가볍게" → 보통 12. 학교 상한(1·2학년 20, 3·4학년 18학점)을 넘게 요청하면 상한까지만 적용되니 reply에서 "학교 상한 N학점까지만 반영했어요"라고 알려. 커리어개발 학기는 상한 밖으로 1학점이 더 들어간다.
 - clear_term_cap {term}
 - add_leave {term} / remove_leave {term}: 휴학 추가·취소(군 복무 학기는 바꾸지 않음).
 - exclude_course {course_code}: 이 계획에서 과목 빼기. 필수 과목이면 reply에서 졸업요건 확인이 필요하다고 알려.

@@ -1,5 +1,5 @@
 import type { BreakPeriod, CourseGroup, DatasetV2, PlannedTerm, PlanResult } from "@/contracts/types";
-import { courseLevel, formatTerm, isMajorCourse, termBreakdown, termIndex } from "@/engine";
+import { courseLevel, formatTerm, isCapExempt, isMajorCourse, termBreakdown, termIndex } from "@/engine";
 import type { ExchangeChoice } from "../plan";
 import { militarySummary } from "../plan";
 import type { PlanState } from "../storage";
@@ -254,7 +254,11 @@ export function PrintPlan({
                             {r.general > 0 && (
                               <div className="pd-course-line pd-course-line-general">
                                 <span className="pd-course-dot pd-course-dot-general" aria-hidden />
-                                <span className="pd-course-name">교양·선택 {r.general}학점</span>
+                                <span className="pd-course-name">
+                                  교양·선택 {r.general}학점
+                                  {r.t.courses.some((c) => isCapExempt(c.code)) &&
+                                    ` (${r.t.courses.filter((c) => isCapExempt(c.code)).map((c) => `${c.name.split(":")[0]} ${c.credits}`).join(", ")} 포함 · 상한 제외)`}
+                                </span>
                                 <span className="pd-course-category">직접 고르기</span>
                                 <span className="pd-course-credit">{r.general}</span>
                               </div>
@@ -263,7 +267,11 @@ export function PrintPlan({
                           </div>
                           <div className="pd-sem-foot">
                             {r.completion && <span className="pd-finish">여기서 계획 완료!</span>}
-                            <span className="pd-sem-total">전공 {r.lower + r.upper} · 교양·기타 {r.general} · 합계 <b>{r.total}</b></span>
+                            <span className="pd-sem-total">
+                              전공 {r.lower + r.upper} · 교양·기타 {r.general} · 합계 <b>{r.total}</b>
+                              {r.t.capCredits !== undefined && ` / 상한 ${r.t.capCredits}`}
+                              {(r.t.capExemptCredits ?? 0) > 0 && ` (커리어개발 +${r.t.capExemptCredits})`}
+                            </span>
                           </div>
                         </>
                       ) : (

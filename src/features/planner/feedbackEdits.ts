@@ -31,7 +31,7 @@ export function applyEdits(input: PlanInput, edits: PlanEdit[], dataset: Dataset
           break;
         }
         next = { ...next, creditCap: e.credits, paceBands: next.paceStyle === "late_light" ? paceBandsFor("late_light", e.credits) : next.paceBands };
-        changes.push(`학기당 계획 학점: ${e.credits}학점(학교 상한이 더 작으면 그 값)`);
+        changes.push(`학기당 계획 학점: ${e.credits}학점${e.credits > 18 ? `(학교 상한 1·2학년 20 · 3·4학년 18학점까지만 반영)` : ""}`);
         break;
       }
       case "set_pace_style": {
@@ -45,7 +45,7 @@ export function applyEdits(input: PlanInput, edits: PlanEdit[], dataset: Dataset
           break;
         }
         next.termCaps = [...next.termCaps!.filter((t) => !sameTerm(t.term, e.term)), { term: e.term, credits: e.credits }];
-        changes.push(`${formatTerm(e.term)} 최대 ${e.credits}학점`);
+        changes.push(`${formatTerm(e.term)} 최대 ${e.credits}학점${e.credits > 18 ? "(학교 상한 1·2학년 20 · 3·4학년 18학점을 넘는 부분은 반영되지 않아요)" : ""}`);
         break;
       }
       case "clear_term_cap": {

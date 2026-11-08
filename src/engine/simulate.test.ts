@@ -9,6 +9,7 @@ import type { Dataset } from "@/contracts/types";
 import { fixtureDataset } from "@/data/fixtures";
 import { diffPlans } from "./diff";
 import { MAX_FUTURE_TERMS, simulatePlan } from "./simulate";
+import { isCapExempt } from "./pace";
 import { isBlocked } from "./terms";
 
 const codesOf = (r: ReturnType<typeof simulatePlan>) =>
@@ -26,7 +27,8 @@ describe("simulatePlan", () => {
 
   it("학기당 상한을 넘지 않는다", () => {
     const r = simulatePlan({ ...sampleInputNoBreak, creditCap: 9 }, fixtureDataset);
-    for (const t of r.terms) expect(t.plannedCredits).toBeLessThanOrEqual(9);
+    // 커리어개발(상한 제외 과목) 학점은 계획 한도 밖으로 더해진다
+    for (const t of r.terms) expect(t.plannedCredits - (t.capExemptCredits ?? 0)).toBeLessThanOrEqual(9);
   });
 
   it("중단 기간과 겹치는 학기는 배치하지 않는다", () => {
@@ -237,7 +239,8 @@ describe("simulatePlan 경계 상황", () => {
   it("학기당 상한보다 학점이 큰 과목은 이유와 함께 미배치로 둔다", () => {
     // 목표학점을 빼서 학점 슬롯 때문에 생기는 SEARCH_LIMIT와 구분한다.
     const r = simulatePlan({ ...sampleInputNoBreak, creditCap: 2, targetCredits: null }, fixtureDataset);
-    expect(codesOf(r)).toEqual(["ITE4088"]);
+    // 커리어개발(1학점, 상한 제외)은 상한 2에서도 배치된다
+    expect(codesOf(r).filter((c) => !isCapExempt(c))).toEqual(["ITE4088"]);
     expect(r.unplaced.length).toBeGreaterThan(0);
     expect(r.unplaced.every((u) => u.reason.includes("상한"))).toBe(true);
     expect(r.warnings.map((w) => w.code)).not.toContain("SEARCH_LIMIT");
@@ -275,8 +278,9 @@ describe("사용자 요청: 학기별 학점 제한·과목 빼기·미루기", 
     const { fixtureDataset } = await import("@/data/fixtures");
     const t = sampleInputNoBreak.startTerm;
     const r = simulatePlan({ ...sampleInputNoBreak, termCaps: [{ term: t, credits: 6 }] }, fixtureDataset);
-    expect(r.terms[0].plannedCredits).toBeLessThanOrEqual(6);
-    expect(r.terms[1].capCredits).toBe(sampleInputNoBreak.creditCap);
+    expect(r.terms[0].plannedCredits - (r.terms[0].capExemptCredits ?? 0)).toBeLessThanOrEqual(6);
+    expect(r.terms[0].planLimitCredits).toBe(6);
+    expect(r.terms[1].planLimitCredits).toBe(sampleInputNoBreak.creditCap);
   });
   it("과목을 빼면 배치하지 않고 경고를 남긴다", async () => {
     const { simulatePlan } = await import("./simulate");

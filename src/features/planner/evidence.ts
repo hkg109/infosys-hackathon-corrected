@@ -26,8 +26,13 @@ export function evidenceFor(track: Track, draft: Draft, dataset: DatasetV2): Evi
   const capRuleIds = [...new Set(res?.terms.flatMap((t) => (t.capRuleId ? [t.capRuleId] : [])) ?? [])];
   for (const id of capRuleIds) {
     const rule = dataset.creditCapRules?.find((r) => r.id === id);
-    if (rule) out.verified.push({ text: `학기당 최대 ${rule.maxCredits}학점(${rule.sourceRef.sourceId} ${rule.sourceRef.pages.join("·")}쪽) — 계획 학점보다 작아 적용` });
+    if (!rule) continue;
+    const text = `학기당 최대 ${rule.maxCredits}학점(${rule.sourceRef.sourceId} ${rule.sourceRef.pages.join("·")}쪽)`;
+    if (rule.status === "user_assumption")
+      out.assumption.push(`${text} — ${(rule.appliesTo.termOrdinalFrom ?? 1) >= 5 ? "3·4학년" : "1·2학년"} 학기 상한(2026학년도 신입생 기준 안내를 서비스 기준으로 적용)`);
+    else out.verified.push({ text: `${text} — 학기 상한으로 적용` });
   }
+  if (res?.terms.some((t) => (t.capExemptCredits ?? 0) > 0)) out.assumption.push("커리어개발 학기는 상한 밖 +1학점(서비스 기준 · 안내문 쪽수 미확인)");
   const mil = track.militaryTrackId ? dataset.military?.tracks.find((t) => t.id === track.militaryTrackId) : null;
   if (mil) {
     for (const s of mil.sources) out.verified.push({ text: `${mil.officialName}: ${s.locator} (${s.checkedAt} 확인)`, href: s.url });
@@ -60,7 +65,7 @@ export function evidenceFor(track: Track, draft: Draft, dataset: DatasetV2): Evi
   if (track.exchangeTerm) out.unknown.push("교환학생 인정학점(더하지 않음)");
   const covers = curriculumCovers(dataset.curriculum, draft.admissionYear);
   if (covers !== true) out.unknown.push(`자료 범위 확인 필요 — ${dataset.curriculum} 교육과정이 내 입학연도에 적용되는지`);
-  if (!capRuleIds.length) out.unknown.push("나에게 적용되는 학교 최대 수강학점(입학연도·학기로 확인된 규칙이 없으면 계획 상한만 사용)");
+  if (!capRuleIds.length) out.unknown.push("나에게 적용되는 학교 최대 수강학점(확인된 규칙이 없으면 내 계획 학점만 사용)");
   out.unknown = [...new Set(out.unknown)];
   return out;
 }

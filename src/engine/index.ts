@@ -18,7 +18,7 @@ export { validatePlanInputV2, toEngineInput, resolvePeriodRange, addMonths } fro
 export { versionFromCandidate, applyFeedback, reviseVersion, diffVersions } from "./versions";
 export type { VersionIds, VersionAttempt } from "./versions";
 export type { DiffablePlan } from "./diff";
-export { LATE_LIGHT_CONFIG, PACE_STYLE_LABEL, paceBandsFor, userCapFor, schoolCapFor, termCapFor } from "./pace";
+export { CAP_EXEMPT_COURSES, CAP_EXEMPT_NOTE, isCapExempt, LATE_LIGHT_CONFIG, PACE_STYLE_LABEL, paceBandsFor, userCapFor, schoolCapFor, termCapFor, usesServiceCap } from "./pace";
 export {
   resolveMilitaryScenarios,
   matchCertificates,

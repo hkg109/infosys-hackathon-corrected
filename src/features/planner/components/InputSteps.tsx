@@ -704,7 +704,7 @@ function PaceStep({ ctx }: { ctx: StepCtx }) {
         selected={(v) => ctx.d.paceCredits === v}
         onPick={(v) => ctx.set({ paceCredits: v })}
       />
-      <Help>내가 정하는 계획 상한이에요(학교 승인값 아님). 확인된 학교 최대 수강학점이 더 작으면 그 값을 써요.</Help>
+      <Help>내가 정하는 학기당 계획 학점이에요(학교 승인값 아님). 학교 상한(1·2학년 20 · 3·4학년 18학점)을 넘으면 상한까지만 써요 — 20을 골라도 3·4학년은 18학점이에요. 커리어개발 학기는 상한 밖으로 1학점을 더 들어요.</Help>
     </div>
   );
 }
