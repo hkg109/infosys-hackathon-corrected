@@ -1,5 +1,5 @@
 import type { BreakPeriod, CourseGroup, DatasetV2, PlannedTerm, PlanResult } from "@/contracts/types";
-import { courseLevel, formatTerm, isCapExempt, isMajorCourse, termBreakdown, termIndex } from "@/engine";
+import { courseLevel, fillGenEd, formatTerm, isCapExempt, isMajorCourse, termBreakdown, termIndex } from "@/engine";
 import type { ExchangeChoice } from "../plan";
 import { militarySummary } from "../plan";
 import type { PlanState } from "../storage";
@@ -26,6 +26,8 @@ interface TermRow {
   lower: number;
   upper: number;
   general: number;
+  /** 교양 자리(사용자 + 임시 교양 A·B…) */
+  genEdEntries: Array<{ label: string; credits: number }>;
   total: number;
   cumulative: number;
   completion: boolean;
@@ -62,6 +64,7 @@ export function PrintPlan({
   const course = (code: string) => dataset.courses.find((c) => c.code === code);
 
   // ── 학기별 행(엔진 결과 그대로 나눠 담기) ──
+  const shownGenEd = fillGenEd(plan.genEd, result.terms);
   let ordinal = input.completedTerms;
   let cumulative = input.earnedCredits;
   const rows: TermRow[] = result.terms.map((t) => {
@@ -80,11 +83,12 @@ export function PrintPlan({
         lower: 0,
         upper: 0,
         general: 0,
+        genEdEntries: [],
         total: 0,
         cumulative,
         completion: false,
       };
-    const b = termBreakdown(t, plan.genEd, dataset);
+    const b = termBreakdown(t, shownGenEd, dataset);
     const majors = t.courses.filter((c) => isMajorCourse(course(c.code)));
     const upperSlot = t.upperMajorSlotCredits ?? 0;
     const lower = majors.filter((c) => courseLevel(c.code) !== "upper").reduce((a, c) => a + c.credits, 0) + (b.majorSlot - upperSlot);
@@ -111,6 +115,7 @@ export function PrintPlan({
       lower,
       upper,
       general: t.plannedCredits - majors.reduce((a, c) => a + c.credits, 0) - b.majorSlot,
+      genEdEntries: b.placeholders.map((g) => ({ label: g.label, credits: g.credits })),
       total: t.plannedCredits,
       cumulative,
       completion: idx === completionIdx,
@@ -251,16 +256,24 @@ export function PrintPlan({
                                 <span className="pd-course-credit">{r.majorSlot}</span>
                               </div>
                             )}
-                            {r.general > 0 && (
+                            {r.genEdEntries.map((g, index) => (
+                              <div className="pd-course-line pd-course-line-general" key={`${r.key}-ge-${index}`}>
+                                <span className="pd-course-dot pd-course-dot-general" aria-hidden />
+                                <span className="pd-course-name">{g.label}</span>
+                                <span className="pd-course-category">임시 교양</span>
+                                <span className="pd-course-credit">{g.credits}</span>
+                              </div>
+                            ))}
+                            {r.general - r.genEdEntries.reduce((a, g) => a + g.credits, 0) > 0 && (
                               <div className="pd-course-line pd-course-line-general">
                                 <span className="pd-course-dot pd-course-dot-general" aria-hidden />
                                 <span className="pd-course-name">
-                                  교양·선택 {r.general}학점
+                                  교양·선택 {r.general - r.genEdEntries.reduce((a, g) => a + g.credits, 0)}학점
                                   {r.t.courses.some((c) => isCapExempt(c.code)) &&
                                     ` (${r.t.courses.filter((c) => isCapExempt(c.code)).map((c) => `${c.name.split(":")[0]} ${c.credits}`).join(", ")} 포함 · 상한 제외)`}
                                 </span>
                                 <span className="pd-course-category">직접 고르기</span>
-                                <span className="pd-course-credit">{r.general}</span>
+                                <span className="pd-course-credit">{r.general - r.genEdEntries.reduce((a, g) => a + g.credits, 0)}</span>
                               </div>
                             )}
                             {r.majorEntries.length === 0 && r.majorSlot === 0 && r.general === 0 && <p className="pd-empty">배치할 과목 없음</p>}

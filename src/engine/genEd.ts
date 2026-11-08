@@ -77,6 +77,35 @@ export function addGenEd(
   return { ok: true, item, state: { items: [...state.items, item], nextSeq: seq + 1 } };
 }
 
+/** 남은 미지정 학점을 3·2학점 조각으로 나눈다(1학점이 남으면 그대로 둔다). 예: 5 → [3, 2], 4 → [2, 2], 7 → [3, 2, 2] */
+export function splitGenEdCredits(n: number): Array<2 | 3> {
+  if (n < 2) return [];
+  const r = n % 3;
+  const twos = r === 0 ? 0 : r === 2 ? 1 : n >= 4 ? 2 : 0;
+  const threes = Math.floor((n - twos * 2) / 3);
+  return [...Array<3>(threes).fill(3), ...Array<2>(twos).fill(2)];
+}
+
+/**
+ * 화면에 보일 교양 자리 = 사용자가 넣은 자리 + 남은 미지정 학점을 채우는 임시 자리(origin "engine").
+ * 저장하지 않고 매번 계산한다. 임시 자리 라벨은 사용자 자리 다음 글자부터 학기 순서로 붙인다.
+ * 전공 선택 자리는 건드리지 않는다(freeSlotCredits 안에서만).
+ */
+export function fillGenEd(state: GenEdState, terms: TermLike[]): GenEdState {
+  const valid = new Set(state.items.filter((g) => !staleGenEd(state, terms).includes(g)).map((g) => g.id));
+  let seq = state.nextSeq;
+  const auto: GeneralEducationPlaceholder[] = [];
+  for (const t of [...terms].sort((a, b) => termIndex(a.term) - termIndex(b.term))) {
+    if (t.status !== "study") continue;
+    const used = state.items.filter((g) => valid.has(g.id) && sameTerm(g.term, t.term)).reduce((a, g) => a + g.credits, 0);
+    for (const credits of splitGenEdCredits(freeSlotCredits(t) - used)) {
+      auto.push({ id: `ge-auto-${seq + 1}`, label: `교양 ${letterLabel(seq)}`, credits, term: { ...t.term }, origin: "engine", status: "placeholder" });
+      seq++;
+    }
+  }
+  return { items: [...state.items, ...auto], nextSeq: seq };
+}
+
 /** 삭제. 다른 항목의 ID·라벨은 그대로 둔다. */
 export function removeGenEd(state: GenEdState, id: string): GenEdState {
   return { ...state, items: state.items.filter((g) => g.id !== id) };

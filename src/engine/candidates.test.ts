@@ -80,10 +80,14 @@ describe("generateCandidates", () => {
     expect(set.emptyReason?.changeableFields).toEqual(["progress.completedCourseCodes"]);
   });
 
-  it("결과가 같은 후보는 하나로 합치고 낮은 페이스를 대표로 남긴다", () => {
+  it("목표학점이 없어도 페이스마다 학기를 계획 한도까지 채워 결과가 따로 남는다", () => {
     const set = gen(sampleInputV2NoTarget);
-    expect(set.candidates.map((c) => c.id)).toEqual(["security|m-|p15"]);
-    expect(set.dedupedInto).toEqual({ "security|m-|p18": "security|m-|p15", "security|m-|p20": "security|m-|p15" });
+    expect(set.candidates.map((c) => c.id)).toEqual(["security|m-|p15", "security|m-|p18", "security|m-|p20"]);
+    expect(set.dedupedInto).toEqual({});
+    // 수강 학기 합계는 페이스 한도를 넘지 않는다(커리어개발 상한 제외 학점 빼고)
+    for (const c of set.candidates)
+      for (const t of c.result!.terms.filter((x) => x.status === "study"))
+        expect(t.plannedCredits - (t.capExemptCredits ?? 0)).toBeLessThanOrEqual(t.planLimitCredits ?? 99);
   });
 
   it("목표학점 미입력: 빠른 완료 지표를 비교에서 빼고 이유를 남긴다", () => {

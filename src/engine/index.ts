@@ -34,6 +34,8 @@ export {
   letterLabel,
   emptyGenEd,
   addGenEd,
+  fillGenEd,
+  splitGenEdCredits,
   removeGenEd,
   genEdCreditsIn,
   freeSlotCredits,

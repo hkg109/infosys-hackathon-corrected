@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fixtureDataset } from "@/data/fixtures";
-import { simulatePlan, staleGenEd } from "@/engine";
+import { fillGenEd, simulatePlan, staleGenEd } from "@/engine";
 import { demoGenEd } from "./evidence";
 import { candidatePlanInput, draftProblem } from "./plan";
 import { migrateDraftV3 } from "./storage";
@@ -41,9 +41,10 @@ describe("테스트 프로필", () => {
     expect(new Set(sec.map((t) => t.paceStyle))).toEqual(new Set(["balanced", "late_light"]));
     const t = sec.find((x) => x.militaryRole === "fallback")!;
     const result = simulatePlan(candidatePlanInput(t.candidate)!, fixtureDataset);
-    const ge = demoGenEd(result, d.demo);
-    expect(ge.items.map((g) => g.credits).sort()).toEqual([2, 3]);
-    expect(ge.items.every((g) => g.origin === "demo")).toBe(true);
+    // 남는 자리는 전공 채움 과목이 먼저 쓰고, 그래도 남는 학점은 교양 2·3학점 임시 자리로 채운다
+    const ge = fillGenEd(demoGenEd(result, d.demo), result.terms);
+    expect(ge.items.length).toBeGreaterThan(0);
+    expect(ge.items.every((g) => g.credits === 2 || g.credits === 3)).toBe(true);
     expect(staleGenEd(ge, result.terms)).toEqual([]);
   });
 

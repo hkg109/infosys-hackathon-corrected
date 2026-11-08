@@ -240,7 +240,10 @@ describe("simulatePlan 경계 상황", () => {
     // 목표학점을 빼서 학점 슬롯 때문에 생기는 SEARCH_LIMIT와 구분한다.
     const r = simulatePlan({ ...sampleInputNoBreak, creditCap: 2, targetCredits: null }, fixtureDataset);
     // 커리어개발(1학점, 상한 제외)은 상한 2에서도 배치된다
-    expect(codesOf(r).filter((c) => !isCapExempt(c))).toEqual(["ITE4088"]);
+    // 채움 과목(진로 추천 밖 전공)은 상한 2 안의 1학점 과목만 들어간다
+    const placed = r.terms.flatMap((t) => t.courses);
+    expect(placed.filter((c) => !c.filler && !isCapExempt(c.code)).map((c) => c.code)).toEqual(["ITE4088"]);
+    expect(placed.filter((c) => c.filler).every((c) => c.credits <= 2)).toBe(true);
     expect(r.unplaced.length).toBeGreaterThan(0);
     expect(r.unplaced.every((u) => u.reason.includes("상한"))).toBe(true);
     expect(r.warnings.map((w) => w.code)).not.toContain("SEARCH_LIMIT");
@@ -303,5 +306,19 @@ describe("사용자 요청: 학기별 학점 제한·과목 빼기·미루기", 
     const r = simulatePlan({ ...sampleInputNoBreak, courseRules: [{ code: first.code, action: "not_before", term: later }] }, fixtureDataset);
     const at = r.terms.find((t) => t.courses.some((c) => c.code === first.code));
     expect(at && termIndex(at.term) >= termIndex(later)).toBe(true);
+  });
+
+  it("진로 추천 과목을 넣고 남는 자리를 교육과정표의 다른 전공 과목으로 채운다(목표학점 미입력)", () => {
+    const r = simulatePlan({ ...sampleInputNoBreak, targetCredits: null }, fixtureDataset);
+    const placed = r.terms.flatMap((t) => t.courses);
+    const fillers = placed.filter((c) => c.filler);
+    expect(fillers.length).toBeGreaterThan(0);
+    // 채움 과목은 전공이고, 같은 과목을 두 번 넣지 않는다
+    for (const c of fillers) expect(fixtureDataset.courses.find((x) => x.code === c.code)?.category).toContain("전공");
+    expect(new Set(placed.map((c) => c.code)).size).toBe(placed.length);
+    expect(r.warnings.map((w) => w.code)).toContain("MAJOR_FILLED");
+    // 목표가 없으면 학기를 계획 한도까지 채운다(남는 학점은 교양 자리)
+    for (const t of r.terms.filter((x) => x.status === "study"))
+      expect(t.plannedCredits - (t.capExemptCredits ?? 0)).toBe(t.planLimitCredits);
   });
 });

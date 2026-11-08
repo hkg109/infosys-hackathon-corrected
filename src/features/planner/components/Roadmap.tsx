@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import type { BreakPeriod, CourseGroup, Dataset, PlanInput, PlannedTerm, PlanResult, Term } from "@/contracts/types";
-import { CAP_EXEMPT_NOTE, emptyGenEd, GEN_ED_NOTE, type GenEdState, isBlocked, isCapExempt, termBreakdown, termIndex } from "@/engine";
+import { CAP_EXEMPT_NOTE, emptyGenEd, fillGenEd, GEN_ED_NOTE, type GenEdState, isBlocked, isCapExempt, termBreakdown, termIndex } from "@/engine";
 import { gradeLabel, termMonths } from "../plan";
 import { GroupDot, groupLabel } from "./ui";
 
@@ -30,6 +30,8 @@ export function Roadmap({
   const years = [...new Set(result.terms.map((t) => t.term.year))];
   const completionIdx = result.expectedCompletion ? termIndex(result.expectedCompletion) : null;
   const category = (code: string) => dataset.courses.find((c) => c.code === code)?.category ?? null;
+  // 남은 미지정 학점은 교양 A·B… 임시 자리로 채워 보여 준다(저장하지 않음)
+  const shown = fillGenEd(genEd, result.terms);
 
   // 유효학기 순번: 마친 학기 + 이번 계획에서 다닌 학기
   const ordinal = new Map<number, number>();
@@ -73,7 +75,8 @@ export function Roadmap({
                   isCompletion={idx === completionIdx}
                   category={category}
                   dataset={dataset}
-                  genEd={genEd}
+                  genEd={shown}
+                  userGenEd={genEd}
                   onAdd={onAddGenEd}
                   onRemove={onRemoveGenEd}
                 />
@@ -100,6 +103,7 @@ function TermPage({
   category,
   dataset,
   genEd,
+  userGenEd,
   onAdd,
   onRemove,
 }: {
@@ -110,6 +114,8 @@ function TermPage({
   category: (code: string) => string | null;
   dataset: Dataset;
   genEd: GenEdState;
+  /** 사용자가 직접 넣은 교양 자리만(추가 버튼 가능 여부 계산용) */
+  userGenEd: GenEdState;
   onAdd?: (term: Term, credits: 2 | 3) => void;
   onRemove?: (id: string) => void;
 }) {
@@ -139,7 +145,8 @@ function TermPage({
     );
 
   const b = termBreakdown(t, genEd, dataset);
-  const left = b.unassigned;
+  // 임시 자리는 사용자가 넣으면 그만큼 줄어드니, 추가 가능 학점은 사용자 자리 기준으로 센다
+  const left = termBreakdown(t, userGenEd, dataset).unassigned;
   const reason = (c: 2 | 3) => (left <= 0 ? "이 학기에는 남은 미지정 학점이 없어요" : c > left ? `남은 미지정 학점이 ${left}학점이에요` : `교양 ${c}학점 자리 추가`);
 
   return (
@@ -150,6 +157,11 @@ function TermPage({
           <li key={c.code} className="flex h-[34px] items-center gap-2.5 text-[13.5px]">
             <GroupDot group={c.group} />
             <span className="min-w-0 truncate">{c.name}</span>
+            {c.filler && (
+              <span className="shrink-0 text-[11px] leading-none whitespace-nowrap text-muted" title="진로 추천 과목을 넣고 남는 자리를 교육과정표의 다른 전공 과목으로 채웠어요">
+                채움
+              </span>
+            )}
             {c.assumptions.length > 0 && (
               <span className="shrink-0 text-[11px] leading-none whitespace-nowrap text-red" title="개설 시기를 가정해 배치했어요">
                 가정
@@ -167,8 +179,8 @@ function TermPage({
             <span aria-hidden className="inline-block size-[9px] shrink-0 rounded-[2px] border border-dashed border-pen bg-pen/10" />
             <span className="min-w-0 truncate font-medium text-pen">{g.label}</span>
             {g.origin === "demo" && <span className="shrink-0 text-[10px] text-muted">시연</span>}
-            <span className="ml-auto shrink-0 text-[11px] text-muted">교양 자리</span>
-            {onRemove && (
+            <span className="ml-auto shrink-0 text-[11px] text-muted">{g.origin === "engine" ? "임시 교양" : "교양 자리"}</span>
+            {onRemove && g.origin !== "engine" && (
               <button type="button" onClick={() => onRemove(g.id)} className="-my-1 grid size-6 shrink-0 cursor-pointer place-items-center rounded text-muted hover:bg-paper-2 hover:text-red print:hidden" aria-label={`${g.label} 빼기`}>
                 <X size={13} aria-hidden />
               </button>
@@ -212,7 +224,7 @@ function TermPage({
           ))}
         </div>
       )}
-      {onAdd && left < 3 && (
+      {onAdd && left < 3 && b.placeholders.every((g) => g.origin !== "engine") && (
         <p role="note" className="mx-4 mt-1.5 rounded-[4px] bg-red-soft/40 px-2 py-1 text-[11.5px] text-red print:hidden">
           {left <= 0
             ? `이 학기 계획 ${t.plannedCredits}학점의 미지정 자리가 다 차서 교양을 더 넣을 수 없어요${t.capCredits !== undefined ? `(상한 ${t.capCredits}학점)` : ""}.`

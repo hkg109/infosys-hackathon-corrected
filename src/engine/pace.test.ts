@@ -180,9 +180,9 @@ describe("학년별 학교 상한(1·2학년 20, 3·4학년 18)과 커리어개�
     const r = simulatePlan(input, fixtureDataset);
     const majorPlaced = r.terms.flatMap((t) => t.courses).filter((c) => isCapExempt(c.code));
     expect(majorPlaced).toHaveLength(2);
-    // 커리어개발을 빼도 전공 계획 학점은 같다(전공으로 세지 않음)
-    const without = simulatePlan({ ...input, courseRules: [{ code: "GEN5029", action: "exclude" }, { code: "GEN5100", action: "exclude" }] }, fixtureDataset);
-    expect(r.majorProgress!.planned).toEqual(without.majorProgress!.planned);
+    // 전공 계획 학점에는 커리어개발이 들어가지 않는다(전공으로 세지 않음)
+    const majorOnly = r.terms.flatMap((t) => t.courses).filter((c) => !isCapExempt(c.code) && fixtureDataset.courses.find((x) => x.code === c.code)?.category?.includes("전공"));
+    expect(r.majorProgress!.planned.major).toBe(majorOnly.reduce((a, c) => a + c.credits, 0));
     // 학기 합계 = 배치 과목(커리어개발 포함) + 미지정 자리, 목표학점도 커리어개발 학점까지 세어 채운다
     for (const t of r.terms) expect(t.plannedCredits).toBe(t.courses.reduce((a, c) => a + c.credits, 0) + t.slotCredits);
     expect(input.earnedCredits + r.terms.reduce((a, t) => a + t.plannedCredits, 0)).toBeGreaterThanOrEqual(130);

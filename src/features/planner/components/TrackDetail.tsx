@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { type ReactNode, useMemo } from "react";
 import { CAREER_LABEL } from "@/contracts/careers";
 import type { DatasetV2 } from "@/contracts/types";
-import { emptyGenEd, formatTerm, matchCertificates, PACE_STYLE_LABEL, simulatePlan, termBreakdown, termIndex, termRange } from "@/engine";
+import { emptyGenEd, fillGenEd, formatTerm, matchCertificates, PACE_STYLE_LABEL, simulatePlan, termBreakdown, termIndex, termRange } from "@/engine";
 import { CAREER_INFO } from "../careerInfo";
 import { demoGenEd, evidenceFor } from "../evidence";
 import { usePlanner } from "../PlannerApp";
@@ -77,9 +77,10 @@ function Detail({ track, all, draft, dataset }: { track: Track; all: Track[]; dr
   const back = returnTerm(track);
 
   // 학점 구성(엔진 결과에서 읽기만)
+  const shownGenEd = fillGenEd(emptyGenEd(), res?.terms ?? []);
   const totals = (res?.terms ?? []).reduce(
     (acc, t) => {
-      const b = termBreakdown(t, emptyGenEd(), dataset);
+      const b = termBreakdown(t, shownGenEd, dataset);
       return { major: acc.major + b.major, majorSlot: acc.majorSlot + b.majorSlot, ge: acc.ge + b.generalEducation, slot: acc.slot + b.unassigned, total: acc.total + b.total };
     },
     { major: 0, majorSlot: 0, ge: 0, slot: 0, total: 0 },

@@ -11,7 +11,7 @@ import type {
   PlanWarning,
   UnplacedCourse,
 } from "@/contracts/types";
-import { estimateUpperEarned, hasMajorRequirement, majorShortfall, sumMajorLevels } from "./majorReq";
+import { courseLevel, estimateUpperEarned, hasMajorRequirement, isMajorCourse, majorShortfall, sumMajorLevels } from "./majorReq";
 import { isCapExempt, maxUserCap, schoolMinFor, termCapFor, usesServiceCap } from "./pace";
 import { formatTerm, isBlocked, isValidDate, nextTerm, termIndex } from "./terms";
 
@@ -158,8 +158,23 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
   const majorEarned = { major: input.earnedMajorCredits, lower: input.earnedMajorCredits - earnedUpper, upper: earnedUpper };
   const queueLevels = sumMajorLevels(queue);
   const need = req ? majorShortfall(req, majorEarned, queueLevels) : { major: 0, lower: 0, upper: 0 };
-  let majorLeft = need.major;
+  // 남은 전공 요건. 채움 과목은 전체·단위별 남은 학점을 함께 줄인다(major = max(전체, 400+100~300))
+  let totalLeft = need.major;
+  let lowerLeft = need.lower;
   let upperLeft = need.upper;
+  let majorLeft = need.major;
+  const recomputeMajorLeft = () => {
+    majorLeft = Math.max(totalLeft, upperLeft + lowerLeft);
+  };
+  let majorSlotTotal = 0;
+  let upperSlotTotal = 0;
+
+  // 채움 과목: 진로 추천에 없는 교육과정표 전공 과목. 진로 과목을 넣고 남는 자리에만 넣는다(학기를 늘리지 않는다)
+  const recommendedCodes = new Set(recommended.map((c) => c.code));
+  let fillers = dataset.courses
+    .filter((c) => isMajorCourse(c) && !recommendedCodes.has(c.code) && !isCapExempt(c.code) && !done.has(c.code) && !excluded.has(c.code))
+    .sort((a, b) => (a.recommendedYear ?? 99) - (b.recommendedYear ?? 99) || semesterOrder(a.semester) - semesterOrder(b.semester) || a.code.localeCompare(b.code));
+  let fillerCredits = 0;
 
   let activeTerms = 0;
   let finished = queue.length === 0 && (remaining === null || remaining === 0) && majorLeft === 0;
@@ -221,17 +236,50 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
     // 선수과목은 다음 학기부터 충족된 것으로 본다.
     placedCodes.forEach((code) => done.add(code));
 
+    // 이 학기에 채울 학점: 목표가 없으면 계획 한도까지, 있으면 남은 목표학점까지(전공 요건 자리는 한도 안에서 더 쓸 수 있다)
+    const want = remaining === null ? cap : Math.min(cap, Math.max(used, remaining - exemptUsed));
+    let fillRoom = Math.max(0, want - used, Math.min(cap - used, majorLeft));
+    const fillerPlaced = new Set<string>();
+    for (const c of fillers) {
+      if (fillRoom <= 0) break;
+      if (c.credits > fillRoom) continue;
+      if ((c.recommendedYear ?? 1) > studentYear) continue;
+      if ((c.semester === 1 || c.semester === 2) && c.semester !== term.season) continue;
+      if (!c.prerequisites.every((p) => done.has(p))) continue;
+      if ((notBefore.get(c.code) ?? -Infinity) > termIndex(term)) continue;
+      const assumptions: PlacedCourse["assumptions"] = [];
+      if (c.semester === null) assumptions.push("semester_unknown");
+      if (c.offeringEndYear !== null && term.year > c.offeringEndYear) assumptions.push("offering_after_end_year");
+      placed.push({ code: c.code, name: c.name, credits: c.credits, group: groupOf(c.code, dataset, input.track) ?? "common", assumptions, filler: true });
+      fillerPlaced.add(c.code);
+      used += c.credits;
+      fillRoom -= c.credits;
+      fillerCredits += c.credits;
+      totalLeft = Math.max(0, totalLeft - c.credits);
+      const lv = courseLevel(c.code);
+      if (lv === "upper") upperLeft = Math.max(0, upperLeft - c.credits);
+      else if (lv === "lower") lowerLeft = Math.max(0, lowerLeft - c.credits);
+      recomputeMajorLeft();
+    }
+    fillers = fillers.filter((c) => !fillerPlaced.has(c.code));
+    fillerPlaced.forEach((code) => done.add(code));
+
     // 남은 자리에 전공 선택 자리를 먼저 둔다. 400단위 자리는 3학년부터.
     const free = Math.max(0, cap - used);
     const upperSlot = studentYear >= 3 ? Math.min(free, upperLeft) : 0;
     const otherSlot = Math.min(free - upperSlot, majorLeft - upperLeft);
     const majorSlot = upperSlot + otherSlot;
     upperLeft -= upperSlot;
-    majorLeft -= majorSlot;
+    const lowerSlot = Math.min(lowerLeft, otherSlot);
+    lowerLeft -= lowerSlot;
+    totalLeft = Math.max(0, totalLeft - majorSlot);
+    recomputeMajorLeft();
+    majorSlotTotal += majorSlot;
+    upperSlotTotal += upperSlot;
 
     const fixed = used + majorSlot;
     // planned = 상한 제외 과목을 뺀 이 학기 학점. 남은 학점에서 커리어개발 학점은 먼저 뺀다
-    let planned = remaining === null ? fixed : Math.min(cap, Math.max(fixed, remaining - exemptUsed));
+    let planned = remaining === null ? Math.max(fixed, want) : Math.min(cap, Math.max(fixed, remaining - exemptUsed));
     // 학교 최소 신청학점(1~7번째 학기 10학점, S2 17~18쪽)보다 적으면 미지정 자리로 채운다. 학기 상한·사용자 학기 제한이 더 작으면 그 값까지만.
     const ordinal = input.completedTerms + activeTerms + 1;
     const minRule = schoolMinFor(dataset.creditCapRules, input.admissionYear, ordinal);
@@ -321,6 +369,11 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
       code: "SEARCH_LIMIT",
       message: `최대 ${MAX_FUTURE_TERMS}개 학기 안에 계획을 끝내지 못했습니다.`,
     });
+  if (fillerCredits > 0)
+    warnings.push({
+      code: "MAJOR_FILLED",
+      message: `진로 추천 과목을 넣고 남는 자리를 교육과정표의 다른 전공 과목 ${fillerCredits}학점으로 채웠어요. 원하는 과목으로 바꿔도 돼요.`,
+    });
   if (input.targetCredits === null)
     warnings.push({
       code: "TARGET_UNKNOWN",
@@ -335,12 +388,9 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
 
   let majorProgress: PlanResult["majorProgress"] = null;
   if (req) {
-    const placedAll = terms.flatMap((t) => t.courses).map((p) => recommended.find((c) => c.code === p.code)!).filter(Boolean);
+    const placedAll = terms.flatMap((t) => t.courses).map((p) => dataset.courses.find((c) => c.code === p.code)!).filter(Boolean);
     const planned = sumMajorLevels(placedAll);
-    const slotted = {
-      major: need.major - majorLeft,
-      upper: need.upper - upperLeft,
-    };
+    const slotted = { major: majorSlotTotal, upper: upperSlotTotal };
     const lowerSlotted = Math.min(need.lower, slotted.major - slotted.upper);
     majorProgress = {
       required: { major: req.majorCredits, lower: req.lowerLevelCredits, upper: req.upperLevelCredits },
@@ -349,10 +399,10 @@ export function simulatePlan(input: PlanInput, dataset: DatasetV2): PlanResult {
       extra: { major: slotted.major, lower: lowerSlotted, upper: slotted.upper },
       met: majorLeft === 0 && unplaced.length === 0,
     };
-    if (need.major > 0)
+    if (slotted.major > 0)
       warnings.push({
         code: "MAJOR_EXTRA",
-        message: `전공 요건까지 ${need.major}학점${need.upper > 0 ? `(400단위 ${need.upper}학점 포함)` : ""}이 이 진로 추천 과목만으로는 모자라 '전공 선택 자리'로 넣었어요. 수강신청 때 전공 과목을 직접 골라야 해요.`,
+        message: `전공 요건까지 ${slotted.major}학점${slotted.upper > 0 ? `(400단위 ${slotted.upper}학점 포함)` : ""}이 교육과정표 전공 과목으로도 모자라 '전공 선택 자리'로 넣었어요. 수강신청 때 전공 과목을 직접 골라야 해요.`,
       });
     if (upperGiven === null && req.upperLevelCredits !== null)
       warnings.push({

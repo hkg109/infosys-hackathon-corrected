@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { PlannedTerm } from "@/contracts/types";
 import { fixtureDataset } from "@/data/fixtures";
-import { addGenEd, emptyGenEd, type GenEdState, letterLabel, removeGenEd, staleGenEd, termBreakdown } from "./genEd";
+import { addGenEd, emptyGenEd, fillGenEd, type GenEdState, letterLabel, removeGenEd, splitGenEdCredits, staleGenEd, termBreakdown } from "./genEd";
 
 const term = (slot: number, planned = 18): PlannedTerm => ({
   term: { year: 2027, season: 1 },
@@ -76,5 +76,34 @@ describe("교양 자리", () => {
 
   it("교양 자리는 과목 자료(fixture)에 넣지 않는다", () => {
     expect(fixtureDataset.courses.some((c) => /^교양 [A-Z]+$/.test(c.name))).toBe(false);
+  });
+});
+
+describe("임시 교양 자리(fillGenEd)", () => {
+  it("남은 학점을 3·2학점 조각으로 나눈다(1학점은 남긴다)", () => {
+    expect(splitGenEdCredits(0)).toEqual([]);
+    expect(splitGenEdCredits(1)).toEqual([]);
+    expect(splitGenEdCredits(4)).toEqual([2, 2]);
+    expect(splitGenEdCredits(5)).toEqual([3, 2]);
+    expect(splitGenEdCredits(6)).toEqual([3, 3]);
+    expect(splitGenEdCredits(7)).toEqual([3, 2, 2]);
+  });
+
+  it("사용자 자리 다음 글자부터 학기 순서로 교양 A·B…를 붙이고, 원래 상태는 바꾸지 않는다", () => {
+    const t1 = term(5);
+    const t2: PlannedTerm = { ...term(4), term: { year: 2027, season: 2 } };
+    const user = addGenEd(emptyGenEd(), t1, 2);
+    if (!user.ok) throw new Error(user.reason);
+    const shown = fillGenEd(user.state, [t2, t1]);
+    expect(shown.items.map((g) => [g.label, g.credits, g.origin, g.term.season])).toEqual([
+      ["교양 A", 2, "user", 1],
+      ["교양 B", 3, "engine", 1],
+      ["교양 C", 2, "engine", 2],
+      ["교양 D", 2, "engine", 2],
+    ]);
+    expect(user.state.items).toHaveLength(1);
+    expect(staleGenEd(shown, [t1, t2])).toEqual([]);
+    // 학기 합계는 그대로, 미지정 학점만 교양 자리가 된다
+    expect(termBreakdown(t1, shown, fixtureDataset)).toMatchObject({ unassigned: 0, total: 18 });
   });
 });

@@ -199,6 +199,7 @@ export type WarningCode =
   | "SEARCH_LIMIT"
   | "USER_EXCLUDED"
   | "MAJOR_EXTRA"
+  | "MAJOR_FILLED"
   | "MAJOR_LEVEL_ESTIMATED"
   | "MIN_CREDITS_FILLED"
   | "CAP_RULE_ASSUMED"
@@ -218,6 +219,8 @@ export interface PlacedCourse {
   group: CourseGroup;
   /** 이 배치에 쓴 가정 */
   assumptions: Array<"offering_after_end_year" | "semester_unknown">;
+  /** 진로 추천 밖 교육과정표 전공 과목으로 남는 자리를 채운 경우 true */
+  filler?: true;
 }
 
 export interface PlannedTerm {
