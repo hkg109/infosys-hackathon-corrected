@@ -95,6 +95,12 @@ describe("buildMilitaryStrategies", () => {
     expect(r.strategies.find((s) => s.scenario === "katusa_parallel")!.concurrency!.relation).toBe("unknown");
   });
 
+  it("중복지원 규칙이 공고 전이면 허용·불허 어느 쪽이든 되는 순차지원을 먼저 추천", () => {
+    const r = run({ katusaPreference: "first_priority", itRolePriority: "high", katusaEvidence: { priorApplication: "none", hasLanguageScore: "yes" } });
+    expect(r.bestId).toMatch(/sequential/);
+    expect(r.strategies.find((s) => s.scenario === "katusa_parallel")!.warnings.join(" ")).toContain("순차지원");
+  });
+
   it("12. 공식 회차가 미발표면 날짜 없이 공고 확인 필요", () => {
     const c = nextCycle(militaryFixture, "katusa", "2026-11-08")!;
     expect(c.id).toBe("katusa-2027");

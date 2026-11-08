@@ -37,8 +37,6 @@ export interface StrategyContext {
   completedTerms: number | null;
 }
 
-type Scenario = MilitaryStrategyCandidate["scenario"];
-
 const STATUS_RANK: Record<MilitaryStrategyCandidate["status"], number> = { computable: 0, conditional: 1, conflict: 2, ineligible: 3 };
 
 /** 아직 끝나지 않은(또는 공고 미발표) 가장 이른 회차 */
@@ -340,7 +338,11 @@ export function buildMilitaryStrategies(input: MilitaryPlanningInput, catalog: M
     else if (c.scenario === "katusa_parallel" && c.concurrency?.relation === "forbidden") {
       status = "conflict";
       ws.push(`이 회차는 동시지원이 막혀 있어요: ${c.concurrency.note}`);
-    } else if (c.eligibility.some((e) => e.status !== "eligible") || c.concurrency?.relation === "unknown" || c.branches.some((b) => b.selectedProgramId && b.serviceMonths === null))
+    } else if (
+      c.eligibility.some((e) => e.status !== "eligible") ||
+      (c.scenario === "katusa_parallel" && c.concurrency?.relation === "unknown") ||
+      c.branches.some((b) => b.selectedProgramId && b.serviceMonths === null)
+    )
       status = "conditional";
     if (c.concurrency?.relation === "unknown" && c.scenario === "katusa_parallel") ws.push("동시지원 허용 여부가 공고 전이라 확정할 수 없어요. 불허되면 ‘순차지원’ 전략을 쓰세요.");
 
@@ -357,7 +359,8 @@ export function buildMilitaryStrategies(input: MilitaryPlanningInput, catalog: M
       (goal === "return_predictable" && worst !== null);
     const uncertainty =
       c.eligibility.filter((e) => e.status === "unknown").length +
-      (c.concurrency?.relation === "unknown" ? 1 : 0) +
+      // 동시지원 전략만 미발표 중복지원 규칙에 기대므로 그 불확실성을 센다(순차지원은 허용·불허와 무관)
+      (c.scenario === "katusa_parallel" && c.concurrency?.relation === "unknown" ? 1 : 0) +
       c.branches.filter((b) => b.selectedProgramId && b.serviceMonths === null).length +
       c.branches.filter((b) => b.label === "check_notice").length;
     const hasFallback = c.branches.some((b) => b.condition === "none_selected" && b.selectedProgramId !== null);
@@ -376,6 +379,8 @@ export function buildMilitaryStrategies(input: MilitaryPlanningInput, catalog: M
     (a, b) =>
       Number(b.metrics.goalMet) - Number(a.metrics.goalMet) ||
       STATUS_RANK[a.status] - STATUS_RANK[b.status] ||
+      // 공고 전 중복지원 규칙에 기대는 동시지원보다, 어느 쪽이든 쓸 수 있는 전략을 먼저
+      Number(dependsOnUnknownRule(a)) - Number(dependsOnUnknownRule(b)) ||
       Number(b.metrics.hasFallback) - Number(a.metrics.hasFallback) ||
       (itPref ? Number(b.metrics.itMatch) - Number(a.metrics.itMatch) : 0) ||
       (a.metrics.worstServiceMonths ?? 99) - (b.metrics.worstServiceMonths ?? 99) ||
@@ -386,6 +391,8 @@ export function buildMilitaryStrategies(input: MilitaryPlanningInput, catalog: M
   const followUpQuestion = best?.eligibility.find((e) => e.status === "unknown" && e.question)?.question ?? null;
   return { strategies: out, bestId: best?.id ?? null, followUpQuestion, catalogVersion: catalog.catalogVersion };
 }
+
+const dependsOnUnknownRule = (s: MilitaryStrategyCandidate) => s.scenario === "katusa_parallel" && s.concurrency?.relation === "unknown";
 
 export const GOAL_LABEL: Record<MilitaryPlanningInput["goal"], string> = {
   fast_stable: "빠르고 안정적인 입대",
