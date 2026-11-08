@@ -1,10 +1,10 @@
-import { CAREER_LABEL } from "@/contracts/careers";
-import type { BreakPeriod, DatasetV2, PlannedTerm, PlanResult } from "@/contracts/types";
+import type { BreakPeriod, CourseGroup, DatasetV2, PlannedTerm, PlanResult } from "@/contracts/types";
 import { courseLevel, formatTerm, isMajorCourse, termBreakdown, termIndex } from "@/engine";
 import type { ExchangeChoice } from "../plan";
 import { militarySummary } from "../plan";
 import type { PlanState } from "../storage";
 import { breakName } from "./Roadmap";
+import { GROUP_COLOR, groupLabel } from "./ui";
 
 /**
  * 인쇄·PDF 전용 "최종 학기별 수강 계획표"(docs/prompts/ah-matda-print-pdf-fix-prompt.md).
@@ -19,7 +19,7 @@ interface TermRow {
   label: string;
   study: boolean;
   breakLabel: string | null;
-  majorNames: string[];
+  majorEntries: Array<{ name: string; credits: number; category: string | null; assumed: boolean; group: CourseGroup }>;
   majorCourses: number;
   majorSlot: number;
   upperSlot: number;
@@ -73,7 +73,7 @@ export function PrintPlan({
         label: `${t.term.year}-${t.term.season}`,
         study: false,
         breakLabel: breakName(t, input.breaks as BreakPeriod[], plan.exchange),
-        majorNames: [],
+        majorEntries: [],
         majorCourses: 0,
         majorSlot: 0,
         upperSlot: 0,
@@ -98,7 +98,13 @@ export function PrintPlan({
       label,
       study: true,
       breakLabel: null,
-      majorNames: majors.map((c) => `${c.name}${c.assumptions.length > 0 ? "*" : ""}`),
+      majorEntries: majors.map((c) => ({
+        name: c.name,
+        credits: c.credits,
+        category: course(c.code)?.category ?? null,
+        assumed: c.assumptions.length > 0,
+        group: c.group,
+      })),
       majorCourses: majors.reduce((a, c) => a + c.credits, 0),
       majorSlot: b.majorSlot,
       upperSlot,
@@ -133,6 +139,8 @@ export function PrintPlan({
 
   const completion = exchangePending ? "교환 인정학점 확인 후" : result.expectedCompletion ? formatTerm(result.expectedCompletion) : target === null ? "목표학점 필요" : "확인 필요";
   const status = plan.confirmedAt ? `${plan.confirmedAt} 확정` : "확정 전 초안";
+  const years = [...new Set(rows.map((r) => r.t.term.year))];
+  const groups = [...new Set(rows.flatMap((r) => r.majorEntries.map((entry) => entry.group)))];
 
   // ── 학년·연도 계획 ──
   const yearItems: Array<{ k: string; v: string; at: number }> = [];
@@ -170,98 +178,104 @@ export function PrintPlan({
 
   return (
     <article className="print-doc" aria-hidden>
-      {/* 머리 */}
-      <header className="pd-top">
-        <div className="pd-title">
-          <h1>최종 학기별 수강 계획표</h1>
-          <p className="pd-pill">
-            {dataset.department} · {CAREER_LABEL[input.track]} · {name ? `${name}님` : "내 계획"}
-          </p>
-          <p className="pd-track">{plan.trackTitle}</p>
-          <p className="pd-meta">
-            {dataset.curriculum} 교육과정 · {status} · 생성 {today} · 계획·추정 결과이며 졸업 판정이 아니에요
-          </p>
+      {/* 화면의 속지·명조 제목·파란 펜·빨간 도장을 인쇄용 단색 요소로 다시 그린다. */}
+      <div className="pd-intro">
+        <p className="pd-eyebrow">03 다 · 학기별 로드맵</p>
+        <header className="pd-top">
+          <div className="pd-title">
+            <p className="pd-kicker">아 맞다, 인생! · 최종 학기별 수강 계획표</p>
+            <h1>{plan.trackTitle}</h1>
+            <p className="pd-meta">
+              {name ? `${name}님` : "내 계획"} · {dataset.department} {dataset.curriculum} 교육과정 · {status} · 생성 {today}
+            </p>
+            <p className="pd-disclaimer">계획·추정 결과이며 졸업 확정 판정이 아니에요.</p>
+          </div>
+          {plan.confirmedAt && <span className="pd-stamp">확 정</span>}
+        </header>
+
+        <dl className="pd-overview">
+          <div><dt>예상 계획 완료</dt><dd className="pd-emphasis">{completion}</dd></div>
+          <div><dt>계획 학기</dt><dd>{study.length}개 학기</dd></div>
+          <div><dt>계획 총학점</dt><dd>{plannedTotal}학점</dd></div>
+          <div><dt>목표 총학점</dt><dd>{target === null ? "확인 필요" : `${target}학점`}</dd></div>
+        </dl>
+        <div className="pd-milestones" aria-label="학년과 일정 요약">
+          {yearBox.map(([key, value]) => (
+            <span key={key}><b>{key}</b> {value}</span>
+          ))}
         </div>
-        <table className="pd-yearbox">
-          <thead>
-            <tr>
-              <th colSpan={2}>학년·연도 계획</th>
-            </tr>
-          </thead>
-          <tbody>
-            {yearBox.map(([k, v]) => (
-              <tr key={k}>
-                <th>{k}</th>
-                <td>{v}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </header>
+      </div>
 
       {/* ① 학기별 수강 계획 */}
       <section className="pd-sec">
         <h2>
           <span className="pd-no">1</span> 학기별 수강 계획
         </h2>
-        <table className="pd-grid pd-plan">
-          <colgroup>
-            <col style={{ width: "13%" }} />
-            <col style={{ width: "11%" }} />
-            <col />
-            <col style={{ width: "8%" }} />
-            <col style={{ width: "9%" }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th>학기</th>
-              <th>구분</th>
-              <th>과목</th>
-              <th>학점</th>
-              <th>총학점</th>
-            </tr>
-          </thead>
-          {rows.map((r) => {
-            if (!r.study)
-              return (
-                <tbody key={r.key} className="pd-term pd-off">
-                  <tr>
-                    <td className="pd-sem">{r.label}</td>
-                    <td colSpan={4} className="pd-offlabel">
-                      {r.breakLabel} — 쉬는 학기
-                    </td>
-                  </tr>
-                </tbody>
-              );
-            const lines: Array<{ kind: string; text: string; credits: number }> = [];
-            if (r.majorNames.length > 0) lines.push({ kind: "전공", text: r.majorNames.join(", "), credits: r.majorCourses });
-            if (r.majorSlot > 0) lines.push({ kind: "전공 선택", text: `전공 선택 과목${r.upperSlot > 0 ? ` (400단위 ${r.upperSlot}학점 포함)` : ""} — 수강신청 때 고르기`, credits: r.majorSlot });
-            if (r.general > 0) lines.push({ kind: "교양·선택", text: "교양·선택 과목 — 수강신청 때 고르기", credits: r.general });
-            if (lines.length === 0) lines.push({ kind: "—", text: "배치할 과목 없음", credits: 0 });
-            return (
-              <tbody key={r.key} className={`pd-term${r.completion ? " pd-final" : ""}`}>
-                {lines.map((l, i) => (
-                  <tr key={i}>
-                    {i === 0 && (
-                      <td rowSpan={lines.length} className="pd-sem">
-                        {r.label}
-                        {r.completion && <span className="pd-flag">계획 완료</span>}
-                      </td>
-                    )}
-                    <td className="pd-kind">{l.kind}</td>
-                    <td>{l.text}</td>
-                    <td className="pd-num">{l.credits}</td>
-                    {i === 0 && (
-                      <td rowSpan={lines.length} className="pd-num pd-total">
-                        {r.total}
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            );
-          })}
-        </table>
+        <div className="pd-legend">
+          {groups.map((group) => (
+            <span key={group}><i className="pd-legend-dot" style={{ backgroundColor: GROUP_COLOR[group] }} aria-hidden />{groupLabel(group)}</span>
+          ))}
+          <span><i className="pd-legend-dot pd-legend-outline" aria-hidden />교양·선택 자리(실제 과목 아님)</span>
+          <span><i className="pd-legend-dot pd-legend-break" aria-hidden />중단 학기</span>
+        </div>
+        <div className="pd-roadmap">
+          {years.map((year) => (
+            <div className="pd-year-row" key={year}>
+              <h3 className="pd-year-label">{year}</h3>
+              <div className="pd-year-cards">
+                {([1, 2] as const).map((season) => {
+                  const r = rows.find((item) => item.t.term.year === year && item.t.term.season === season);
+                  if (!r) return <div key={season} className="pd-sem-spacer" aria-hidden />;
+                  return (
+                    <section key={r.key} className={`pd-term pd-sem-card${r.completion ? " pd-sem-card-final" : ""}${r.study ? "" : " pd-sem-card-break"}`}>
+                      <header className="pd-sem-head">
+                        <span><b>{season}학기</b> <small>{season === 1 ? "3월 – 6월" : "9월 – 12월"}</small></span>
+                        <span className="pd-sem-ordinal">{r.study ? r.label : r.breakLabel}</span>
+                      </header>
+                      {r.study ? (
+                        <>
+                          <div className="pd-course-list">
+                            {r.majorEntries.map((entry, index) => (
+                              <div className="pd-course-line" key={`${r.key}-${index}`}>
+                                <span className="pd-course-dot" style={{ backgroundColor: GROUP_COLOR[entry.group] }} aria-hidden />
+                                <span className="pd-course-name">{entry.name}{entry.assumed && <em> 가정</em>}</span>
+                                <span className="pd-course-category">{entry.category}</span>
+                                <span className="pd-course-credit">{entry.credits}</span>
+                              </div>
+                            ))}
+                            {r.majorSlot > 0 && (
+                              <div className="pd-course-line">
+                                <span className="pd-course-dot pd-course-dot-outline" aria-hidden />
+                                <span className="pd-course-name">전공 선택 {r.majorSlot}학점{r.upperSlot > 0 ? ` (400단위 ${r.upperSlot}학점 포함)` : ""}</span>
+                                <span className="pd-course-category">직접 고르기</span>
+                                <span className="pd-course-credit">{r.majorSlot}</span>
+                              </div>
+                            )}
+                            {r.general > 0 && (
+                              <div className="pd-course-line pd-course-line-general">
+                                <span className="pd-course-dot pd-course-dot-general" aria-hidden />
+                                <span className="pd-course-name">교양·선택 {r.general}학점</span>
+                                <span className="pd-course-category">직접 고르기</span>
+                                <span className="pd-course-credit">{r.general}</span>
+                              </div>
+                            )}
+                            {r.majorEntries.length === 0 && r.majorSlot === 0 && r.general === 0 && <p className="pd-empty">배치할 과목 없음</p>}
+                          </div>
+                          <div className="pd-sem-foot">
+                            {r.completion && <span className="pd-finish">여기서 계획 완료!</span>}
+                            <span className="pd-sem-total">전공 {r.lower + r.upper} · 교양·기타 {r.general} · 합계 <b>{r.total}</b></span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="pd-break-body"><span className="pd-break-stamp">{r.breakLabel}</span></div>
+                      )}
+                    </section>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
         {hasAssumed && <p className="pd-foot-note">* 개설 시기를 가정해 배치한 과목이에요.</p>}
         {result.unplaced.length > 0 && <p className="pd-foot-note">아직 못 넣은 과목: {result.unplaced.map((u) => `${u.name}(${u.reason})`).join(", ")}</p>}
       </section>
