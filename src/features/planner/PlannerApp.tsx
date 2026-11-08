@@ -139,10 +139,10 @@ function Notebook({ children }: { children: ReactNode }) {
   const ds = catalog?.dataset;
 
   // 00 표지는 화면 전체를 채운다(노트 틀 없이).
-  if (path === "/") return <div className="min-h-dvh min-w-[1100px] bg-desk">{children}</div>;
+  if (path === "/") return <div className="min-h-dvh min-w-0 bg-desk">{children}</div>;
 
   return (
-    <div className="flex min-h-dvh min-w-[1100px] flex-col print:block print:min-w-0">
+    <div className="flex min-h-dvh min-w-0 flex-col print:block">
       <nav aria-label="플래너 목차" className="flex h-[46px] shrink-0 items-end gap-1.5 bg-desk pl-[72px] print:hidden">
         {TABS.map((t) => {
           const locked = mounted && ((t.needs === "tracks" && !tracks) || (t.needs === "plan" && !plan));

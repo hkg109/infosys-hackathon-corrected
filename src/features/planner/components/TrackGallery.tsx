@@ -84,7 +84,7 @@ export function TrackGallery() {
         </details>
       )}
 
-      <div className="grid gap-12">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-12">
         {tracks.rows.map((row) => (
           <Row key={row.id} row={row} tracks={row.trackIds.flatMap((id) => (byId.get(id) ? [byId.get(id)!] : []))} />
         ))}
