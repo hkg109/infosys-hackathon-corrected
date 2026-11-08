@@ -348,6 +348,8 @@ export interface DatasetV2 extends Dataset {
   reviewedAt?: ISODate;
   /** 군 복무 트랙·자격증 검토 자료. 없으면 군대 트랙 비교를 하지 않는다. */
   military?: MilitaryCatalog;
+  /** 교환학생 회차·파견교 검토 자료. 없으면 교환 후보를 만들지 않는다. */
+  exchange?: ExchangeCatalog;
 }
 
 // ── 군 복무 트랙·자격증(검토 자료) ───────────────────────

@@ -10,7 +10,7 @@ import militaryRaw from "./military-2026-11-08.json";
 export const militaryFixture = militaryRaw as MilitaryCatalog;
 
 /** 과목 자료 + 군 복무 트랙·자격증 검토 자료(병무청·발급기관 원문을 직접 확인한 날짜 포함) */
-export const fixtureDataset = { ...(raw as DatasetV2), military: militaryFixture } as DatasetV2;
+export const fixtureDataset = { ...(raw as DatasetV2), military: militaryFixture, exchange: exchangeRaw as ExchangeCatalog } as DatasetV2;
 
 /** 교환학생: 2027-1 본모집 공고·파견교 엑셀(서울)에서 옮긴 자료. 2027-1 회차 전용이며 이후 학기에는 이전 회차 자료로만 쓴다. */
 export const exchangeFixture = exchangeRaw as ExchangeCatalog;
