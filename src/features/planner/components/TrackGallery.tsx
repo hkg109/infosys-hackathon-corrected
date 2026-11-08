@@ -1,24 +1,14 @@
 "use client";
 
-import { ArrowRight, BarChart3, ChevronLeft, ChevronRight, Code2, Info, Landmark, ShieldCheck, Store, Workflow, type LucideIcon } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Info } from "lucide-react";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { CAREER_LABEL } from "@/contracts/careers";
-import type { CareerTrack } from "@/contracts/types";
 import { formatTerm, KATUSA_STATUS_LABEL, PACE_STYLE_LABEL, termIndex } from "@/engine";
 import { usePlanner } from "../PlannerApp";
 import { needsMilitary } from "../plan";
 import type { Track, TrackRow } from "../tracks";
 import { Empty, GROUP_COLOR, PageTitle, Tag } from "./ui";
-
-export const CAREER_ICON: Record<CareerTrack, LucideIcon> = {
-  software: Code2,
-  data: BarChart3,
-  security: ShieldCheck,
-  consulting: Workflow,
-  business: Store,
-  finance: Landmark,
-};
 
 const shortTerm = (t: { year: number; season: number } | null) => (t ? `'${String(t.year).slice(2)}-${t.season}` : null);
 const fmt = (n: number | null, d = 1) => (n === null ? "—" : Number.isInteger(n) ? String(n) : n.toFixed(d));
@@ -219,10 +209,9 @@ function Metric({ label, strong, children }: { label: string; strong?: boolean; 
   );
 }
 
-/** 트랙 썸네일: 진로 색 + 아이콘 + 학기 흐름 띠(수강·중단·교환) */
+/** 트랙 색 패널: 진로 색(단색) + 추천 순위 + 진로·핵심 조건 글자. 그림·무늬 없이 색과 글자로만 구별한다 */
 export function TrackThumb({ track, big = false, mini = false }: { track: Track; big?: boolean; mini?: boolean }) {
-  const Icon = CAREER_ICON[track.career];
-  const terms = track.candidate.result?.terms ?? [];
+  const color = GROUP_COLOR[track.career];
   const label = track.exchangeTerm
     ? `${shortTerm(track.exchangeTerm)} 교환`
     : track.militaryStart
@@ -234,32 +223,22 @@ export function TrackThumb({ track, big = false, mini = false }: { track: Track;
           : `${track.candidate.key.paceCredits}학점`;
   if (mini)
     return (
-      <div className="relative grid aspect-square place-items-center rounded-[6px]" style={{ background: GROUP_COLOR[track.career] }}>
-        <Icon className="text-paper" size={26} strokeWidth={1.8} aria-hidden />
-        <span className="absolute -top-1.5 -left-1.5 rounded-[3px] bg-ink px-1 text-[10px] font-bold text-paper tabular-nums">#{track.rank}</span>
+      <div className="grid aspect-square place-items-center rounded-[6px]" style={{ background: color }}>
+        <span className="font-serif text-[15px] font-bold text-paper tabular-nums">#{track.rank}</span>
       </div>
     );
   return (
     <div
-      className={`relative overflow-hidden rounded-[8px] border border-black/10 ${big ? "aspect-square" : "h-[132px]"}`}
-      style={{ background: GROUP_COLOR[track.career] }}
+      className={`flex flex-col justify-between rounded-[8px] border border-black/10 ${big ? "min-h-[180px] self-start p-4" : "h-[96px] p-2.5"}`}
+      style={{ background: color }}
     >
-      <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(rgba(255,255,255,0.9)_1px,transparent_1.4px)] [background-size:14px_14px]" aria-hidden />
-      <span className={`absolute top-2.5 left-2.5 rounded-[4px] bg-paper px-2 py-0.5 font-serif font-bold text-ink tabular-nums ${big ? "text-[18px]" : "text-[14px]"}`}>
+      <span className={`self-start rounded-[4px] bg-paper px-2 py-0.5 font-serif font-bold text-ink tabular-nums ${big ? "text-[18px]" : "text-[14px]"}`}>
         추천 #{track.rank}
       </span>
-      <Icon className={`absolute text-paper/90 ${big ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-[62%]" : "top-3 right-3"}`} size={big ? 120 : 40} strokeWidth={1.6} aria-hidden />
-      <p className={`absolute inset-x-0 text-center font-serif font-bold tracking-tight text-paper drop-shadow-[0_1px_0_rgba(0,0,0,0.25)] ${big ? "bottom-[34px] text-[34px]" : "bottom-[28px] text-[24px]"}`}>
-        {label}
-      </p>
-      <div className="absolute inset-x-2.5 bottom-2.5 flex h-[10px] gap-[2px]" aria-hidden>
-        {terms.map((t) => (
-          <span
-            key={termIndex(t.term)}
-            className={`flex-1 rounded-[2px] ${t.status === "study" ? "bg-paper/90" : t.status === "exchange" ? "bg-marker" : "bg-ink/55"}`}
-          />
-        ))}
-      </div>
+      <span className="min-w-0 text-paper">
+        <span className={`block font-semibold ${big ? "text-[14px]" : "text-[12px]"}`}>{CAREER_LABEL[track.career]}</span>
+        <span className={`block truncate font-serif font-bold tracking-tight ${big ? "text-[30px] leading-tight" : "text-[20px] leading-tight"}`}>{label}</span>
+      </span>
     </div>
   );
 }

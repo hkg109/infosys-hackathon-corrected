@@ -51,21 +51,40 @@ export function MatchResults() {
         <BestTrack track={best} all={tracks.tracks} draft={draft} dataset={dataset} strategies={strategies} />
         <PopularTop3 />
       </div>
-      <p className="mt-10 border-t border-dashed border-line pt-4 text-[14px] text-ink-soft">
-        {wantsExchange(draft) && (
-          <>
-            <Link href="/exchange" className="font-semibold text-pen underline-offset-4 hover:underline">
-              교환학생 전략(1순위·백업·준비 로드맵) 보기
-            </Link>
-            {draft.exchangeChoice ? ` — 고른 전략: ${draft.exchangeChoice.universityName} ${formatTerm(draft.exchangeChoice.term)}(학점 인정 미정)` : ""} ·{" "}
-          </>
-        )}
-        다른 진로·입대 시기 조합이 궁금하면{" "}
-        <Link href="/match/all" className="font-semibold text-pen underline-offset-4 hover:underline">
-          전체 트랙 {tracks.tracks.length}개 살펴보기
-        </Link>
-      </p>
+      <nav aria-label="다른 화면 보기" className="mt-12 border-t border-line pt-6">
+        <p className="mb-3 text-[14px] text-ink-soft">다른 전략·조합도 살펴볼 수 있어요.</p>
+        <div className="grid grid-cols-2 gap-3">
+          {wantsExchange(draft) && (
+            <NavCard
+              href="/exchange"
+              title="교환학생 전략 보기"
+              sub={
+                draft.exchangeChoice
+                  ? `고른 전략: ${draft.exchangeChoice.universityName} · ${formatTerm(draft.exchangeChoice.term)}(학점 인정 미정)`
+                  : "1순위 · 백업 · 준비 로드맵"
+              }
+            />
+          )}
+          <NavCard href="/match/all" title={`전체 트랙 보기 · ${tracks.tracks.length}개`} sub="다른 진로 · 입대 시기 · 교환 조합 비교" />
+        </div>
+      </nav>
     </div>
+  );
+}
+
+/** 보조 화면으로 가는 큰 링크(페이지 이동이라 링크로 둔다) */
+function NavCard({ href, title, sub }: { href: string; title: string; sub: string }) {
+  return (
+    <Link
+      href={href}
+      className="group flex min-h-[64px] items-center justify-between gap-4 rounded-[10px] border-[1.5px] border-ink/70 bg-paper px-5 py-3 transition-colors hover:border-ink hover:bg-paper-2"
+    >
+      <span className="min-w-0">
+        <span className="block font-serif text-[18px] font-bold text-ink group-hover:underline">{title}</span>
+        <span className="block text-[13px] text-ink-soft">{sub}</span>
+      </span>
+      <ArrowRight size={20} aria-hidden className="shrink-0 text-pen transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
+    </Link>
   );
 }
 
