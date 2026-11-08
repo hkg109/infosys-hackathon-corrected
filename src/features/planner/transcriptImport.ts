@@ -1,20 +1,20 @@
 import type { Course } from "@/contracts/types";
 
 /**
- * 성적표·졸업사정 가져오기(검토 전 단계). 순수 함수만 둔다 — DOM·OCR·저장 없음.
+ * 성적표·졸업사정 가져오기(검토 전 단계). 순수 함수만 둔다 — DOM·저장 없음.
  *
- * 흐름: 클립보드(HTML/TSV/텍스트) 또는 OCR 원문 → SourceRow[] → parseTranscriptRows → TranscriptImportDraft
+ * 흐름: 클립보드(HTML/TSV/텍스트) → SourceRow[] → parseTranscriptRows → TranscriptImportDraft
  *       → 사용자가 검토 화면에서 확인 → applyTranscriptImport로 한 번에 반영.
  *
  * 원칙
  * - 원문 행과 셀 위치를 유지한다. 여러 행을 한 줄로 합쳐 과목명을 찾지 않는다.
- * - OCR 글자 혼동(O/0, I/1, S/5)으로 찾은 과목은 자동 확정하지 않는다.
+ * - 글자 혼동(O/0, I/1, S/5)이 의심되는 과목은 자동 확정하지 않는다.
  * - 개별 과목 학점 합계를 공식 총 이수학점으로 쓰지 않는다. 포털 요약값을 사용자가 고른다.
  * - 전공학점은 총학점에 포함된다. 더하지 않는다.
  * - 이름·학번 등 개인정보 행은 계산에 쓰지 않고 결과에도 남기지 않는다.
  */
 
-export type TranscriptImportSource = "clipboard_html" | "clipboard_text" | "clipboard_image" | "image_file";
+export type TranscriptImportSource = "clipboard_html" | "clipboard_text";
 export type MatchKind = "exact_code" | "exact_name" | "normalized_name" | "ocr_suggestion" | "unmatched";
 export type CourseStatus = "completed" | "in_progress" | "failed" | "withdrawn" | "unknown";
 export type Confidence = "high" | "medium" | "low";
@@ -54,6 +54,8 @@ export interface DetectedCourseRow {
 
 export interface TranscriptImportDraft {
   source: TranscriptImportSource;
+  /** table = 행·셀 구조 그대로, vertical = 한 줄에 셀 하나씩이라 학수번호 기준으로 묶음 */
+  layout: "table" | "vertical";
   rowCount: number;
   /** 값 후보. 둘 이상이면 사용자가 고른다. 비어 있으면 찾지 못함 */
   earnedCredits: DetectedValue[];
@@ -79,7 +81,8 @@ export interface TranscriptImportDraft {
 
 /** 일반 텍스트·TSV를 행으로 나눈다. 탭이 있으면 탭, 없으면 2칸 이상 공백, 그것도 없으면 공백 하나로 나눈다. */
 export function rowsFromText(text: string): SourceRow[] {
-  const lines = text.replace(/\r\n?/g, "\n").split("\n");
+  // 전각 문자(Ａ１２)·호환 문자를 일반 문자로, 줄바꿈 없는 공백(nbsp)을 공백으로
+  const lines = text.normalize("NFKC").replace(/\u00a0/g, " ").replace(/\r\n?/g, "\n").split("\n");
   const rows: SourceRow[] = [];
   lines.forEach((line) => {
     const raw = line.trim();
@@ -95,7 +98,7 @@ export function rowsFromText(text: string): SourceRow[] {
 /** HTML 표에서 꺼낸 셀 배열을 행으로 만든다(DOM 파싱은 화면 쪽에서) */
 export function rowsFromTable(table: string[][]): SourceRow[] {
   return table
-    .map((cells) => cells.map((c) => c.replace(/\s+/g, " ").trim()))
+    .map((cells) => cells.map((c) => c.normalize("NFKC").replace(/\s+/g, " ").trim()))
     .filter((cells) => cells.some((c) => c !== ""))
     .map((cells, index) => ({ index, cells: cells.filter((c) => c !== ""), raw: cells.filter((c) => c !== "").join("\t") }));
 }
@@ -140,7 +143,9 @@ const UNKNOWN_GRADE = /^(I|IP|N|R|E|AU|T)$/i;
 const CATEGORY = /^(전공(기초|핵심|심화|필수|선택)?(\(필수\))?|교양(필수|선택|핵심)?|핵심교양|기초필수|일반선택|일반교양|타전공|복수전공|부전공|교직)$/;
 
 function statusOf(cells: string[]): { grade: string | null; status: CourseStatus } {
-  for (const c of cells) {
+  // "A+ / 4.5"처럼 한 셀에 성적과 다른 값이 같이 있으면 조각으로 나눠 본다
+  const tokens = cells.flatMap((c) => [c, ...c.split(/[\s/|()]+/)]).filter(Boolean);
+  for (const c of tokens) {
     const t = c.trim();
     if (IN_PROGRESS.test(t)) return { grade: t, status: "in_progress" };
     if (WITHDRAWN.test(t)) return { grade: t, status: "withdrawn" };
@@ -273,11 +278,69 @@ function creditsNear(cells: string[], from: number): number | null {
 const looksLikeCourseRow = (r: SourceRow) => r.cells.some((c) => CODE_LIKE.test(normalizeCode(c))) || r.cells.some((c) => PASS_GRADE.test(c) || FAIL_GRADE.test(c) || WITHDRAWN.test(c));
 const isTermHeader = (raw: string) => /^\d{4}\s*(학년도|년)?\s*[-.]?\s*(1|2|여름|겨울|하계|동계)\s*(학기|계절)?/.test(raw.trim()) && raw.trim().length < 30;
 
-export function parseTranscriptRows(rows: SourceRow[], courses: Course[], source: TranscriptImportSource): TranscriptImportDraft {
+/**
+ * 한 줄에 셀 하나씩 붙어 나온 경우(포털 표가 div 격자라 Ctrl+A 복사 시 셀마다 줄바꿈)
+ * 학수번호처럼 보이는 줄에서 새 행을 시작해 다음 학수번호 줄 전까지 묶는다.
+ * 학수번호 줄이 거의 없으면 원래 행을 그대로 쓴다.
+ */
+export function regroupVertical(rows: SourceRow[]): { rows: SourceRow[]; layout: "table" | "vertical" } {
+  if (rows.length < 6) return { rows, layout: "table" };
+  // 한 줄에 셀 하나(공백이 든 과목명·레이블은 공백 하나로 나뉘어도 탭·2칸 공백이 없으면 한 셀로 본다)
+  const single = rows.filter((r) => r.cells.length <= 1 || !/\t|\s{2,}/.test(r.raw)).length;
+  const isCode = (r: SourceRow) => r.cells.length === 1 && CODE_LIKE.test(normalizeCode(r.cells[0]));
+  const codes = rows.filter(isCode).length;
+  if (single / rows.length < 0.7 || codes < 2) return { rows, layout: "table" };
+  // 학점 요약 레이블 줄 + 다음 숫자 줄은 한 행으로 붙이고, 과목 묶음에 섞이지 않게 한다
+  const paired: SourceRow[] = [];
+  const summary = new Set<SourceRow>();
+  const isLabel = (t: string) => TOTAL_EARNED.test(t) || MAJOR_EARNED.test(t) || GRAD_TOTAL.test(t) || NOT_CREDIT.test(t) || COLUMN_WORDS.test(t);
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const n = rows[i + 1];
+    const label = r.raw.trim();
+    if (label.length <= 20 && /(학점|평점|GPA|졸업)/i.test(label) && isLabel(label) && n && isNum(n.raw)) {
+      const row = { index: r.index, cells: [label, n.raw.trim()], raw: `${r.raw}\t${n.raw}` };
+      summary.add(row);
+      paired.push(row);
+      i++;
+    } else paired.push(r);
+  }
+  const out: SourceRow[] = [];
+  let cur: SourceRow | null = null;
+  const MAX_CELLS = 10;
+  for (const r of paired) {
+    if (summary.has(r)) {
+      if (cur) out.push(cur);
+      cur = null;
+      out.push(r);
+      continue;
+    }
+    if (isCode(r)) {
+      if (cur) out.push(cur);
+      // 바로 앞 줄이 연도·학기면 같은 행으로 본다
+      cur = { index: r.index, cells: [...r.cells], raw: r.raw };
+      continue;
+    }
+    if (cur && cur.cells.length < MAX_CELLS && !PERSONAL.test(r.raw)) {
+      cur.cells.push(...r.cells);
+      cur.raw += "\t" + r.raw;
+    } else {
+      if (cur) {
+        out.push(cur);
+        cur = null;
+      }
+      out.push(r);
+    }
+  }
+  if (cur) out.push(cur);
+  return { rows: out.map((r, i) => ({ ...r, index: i })), layout: "vertical" };
+}
+
+export function parseTranscriptRows(rawRows: SourceRow[], courses: Course[], source: TranscriptImportSource): TranscriptImportDraft {
+  const { rows, layout } = regroupVertical(rawRows);
   const byCode = new Map(courses.map((c) => [normalizeCode(c.code), c]));
   const byName = new Map(courses.map((c) => [squash(c.name), c]));
   const byLoose = new Map(courses.map((c) => [looseName(c.name), c]));
-  const isOcr = source === "clipboard_image" || source === "image_file";
 
   let personal = 0;
   const safeRows = rows.filter((r) => {
@@ -333,7 +396,7 @@ export function parseTranscriptRows(rows: SourceRow[], courses: Course[], source
 
     // 학수번호처럼 보이지만 자료에 없음 → OCR 혼동이면 후보만 제안
     if (code) {
-      const variants = isOcr || /[0OIl15S]/.test(code.code) ? ocrVariants(code.code).filter((v) => byCode.has(v)) : [];
+      const variants = /[0OIl15S]/.test(code.code) ? ocrVariants(code.code).filter((v) => byCode.has(v)) : [];
       if (variants.length > 0) {
         detected.push({
           ...base,
@@ -401,7 +464,8 @@ export function parseTranscriptRows(rows: SourceRow[], courses: Course[], source
 
   return {
     source,
-    rowCount: rows.length,
+    layout,
+    rowCount: rawRows.length,
     earnedCredits: summary.earned,
     earnedMajorCredits: summary.major,
     targetCredits: summary.target,

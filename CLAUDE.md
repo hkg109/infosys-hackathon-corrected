@@ -19,9 +19,9 @@ Next.js(App Router) + TypeScript + Tailwind v4 + Supabase. 별도 백엔드 서�
 | `src/contracts/mock-plan.ts` | 샘플 입력(정상·목표 미입력·입력 오류) |
 | `src/engine/**` | 순수 계산: `simulatePlan`, `diffPlans`. React·fetch·DB 금지 |
 | `src/features/planner/**` | 화면. `PlannerApp`(루트 레이아웃의 상태·노트 틀) + `components/*Screen` |
-| `src/app/**` 화면 경로 | `/` 00 표지 → `/input`, `/input/[step]` 01 아(질문형 입력, 이수 현황은 `transcript` 단계에서 붙여넣기·스크린샷 가져오기) · `/info/{military,exchange}` 정보 → `/match` 02 맞(결과 두 영역: 나에게 딱 맞는 트랙 + 인기 TOP 3) · `/match/all` 전체 트랙 · `/match/[trackId]` 트랙 상세(군 전략 비교) → `/output` 03 다(로드맵 옆 피드백 채팅 `FeedbackChat`, `/output/feedback`도 채팅 연 상태로 열림. 응답은 `feedbackAgent.ts` 미구현) |
+| `src/app/**` 화면 경로 | `/` 00 표지 → `/input`, `/input/[step]` 01 아(질문형 입력, 이수 현황은 `transcript` 단계에서 성적표 붙여넣기) · `/info/{military,exchange}` 정보 → `/match` 02 맞(결과 두 영역: 나에게 딱 맞는 트랙 + 인기 TOP 3) · `/match/all` 전체 트랙 · `/match/[trackId]` 트랙 상세(군 전략 비교) → `/output` 03 다(로드맵 옆 피드백 채팅 `FeedbackChat`, `/output/feedback`도 채팅 연 상태로 열림. 응답은 `feedbackAgent.ts` 미구현) |
 | `src/features/planner/tracks.ts` | 트랙 = 진로 × 입대 시기 × 교환학생. 엔진 후보를 묶고 추천 순위를 매긴다 |
-| `src/features/planner/transcriptImport.ts` | 성적표 붙여넣기·OCR 원문 → 검토용 초안(순수). OCR·클립보드는 `importSources.ts`(브라우저, 외부 전송 없음) |
+| `src/features/planner/transcriptImport.ts` | 성적표 붙여넣기 원문 → 검토용 초안(순수). 클립보드 읽기는 `importSources.ts`(브라우저, 외부 전송 없음) |
 | `src/engine/militaryStrategy.ts` | 군 복무 최소 입력 → 분기형 전략(회차별 중복지원 규칙, fallback). 화면 쪽 연결은 `features/planner/militaryPrefs.ts` |
 | `src/features/guidance/**` | `buildGuidance` — 결과를 준비사항으로 변환. 학점·날짜 재계산 금지 |
 | `src/client/catalog.ts` | 화면이 자료를 받는 유일한 경로 `getCatalog()` |
@@ -45,6 +45,5 @@ Next.js(App Router) + TypeScript + Tailwind v4 + Supabase. 별도 백엔드 서�
 - localStorage는 `useEffect` 안에서만 읽는다.
 - 의존성 추가 시 package-lock.json 포함해 커밋.
 - `.env.local`, 서비스 키는 커밋하지 않는다.
-- OCR 자산(`public/ocr/`)은 `predev`/`prebuild`가 node_modules에서 복사한다. 커밋하지 않는다.
 - 군 모집 규칙은 적용 회차(`appliesToCycleIds`)가 있는 것만 쓴다. 지난 회차 규칙을 다음 연도에 일반화하지 않는다.
 - 인기 순위는 실제 집계가 있을 때만(`src/client/popularity.ts`). 개인화 점수를 인기로 쓰지 않는다.
