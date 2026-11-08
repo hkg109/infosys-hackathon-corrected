@@ -1,30 +1,30 @@
 "use client";
 
-import { ClipboardPaste, PencilLine, X } from "lucide-react";
+import { ImageUp, PencilLine, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { Course, DatasetV2 } from "@/contracts/types";
-import { readClipboard } from "../importSources";
+import type { Course, DatasetV2, TranscriptImageReply } from "@/contracts/types";
+import { imageProblem, imagesFromClipboard, MAX_IMAGES, toJpegBase64 } from "../importSources";
+import { readTranscriptImage } from "@/client/transcriptImage";
 import type { Draft } from "../plan";
 import {
   applyTranscriptImport,
-  isPersonalRow,
   type CourseStatus,
   type DetectedCourseRow,
   type DetectedValue,
   importProblem,
   importSummary,
   parseTranscriptRows,
-  rowsFromText,
+  rowsFromVision,
   type SourceRow,
   type TranscriptImportDraft,
   type TranscriptImportSource,
 } from "../transcriptImport";
 import { Button } from "./ui";
 
-type Mode = "paste" | null;
+type Mode = "image" | null;
 
 /**
- * 01 아 — 이수 현황 가져오기. 붙여넣기 → 인식 → 검토 → 확인하면 한 번에 반영.
+ * 01 아 — 이수 현황 가져오기. 스크린샷(Claude 이미지 인식, 동의 후 전송) → 검토 → 확인하면 한 번에 반영.
  * 검토에서 확인하기 전에는 입력값을 바꾸지 않는다(브라우저 저장도 확인 뒤에만).
  */
 export function TranscriptImport({
@@ -62,12 +62,12 @@ export function TranscriptImport({
         </div>
       )}
       <div role="radiogroup" aria-label="이수 현황 가져오기 방법" className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
-        <BigOption icon={<ClipboardPaste size={22} />} selected={mode === "paste"} onClick={() => setMode("paste")} title="복사한 성적표 붙여넣기" desc="포털 성적·졸업사정 화면에서 Ctrl+A → Ctrl+C" />
+        <BigOption icon={<ImageUp size={22} />} selected={mode === "image"} onClick={() => setMode("image")} title="스크린샷으로 가져오기" desc="포털 성적 조회 화면을 학기별로 캡처해 붙여넣기" />
         <BigOption icon={<PencilLine size={22} />} selected={false} onClick={onManual} title="직접 수정하기" desc="학점·과목을 하나씩 고치기" />
       </div>
-      <p className="mt-3 text-[13px] text-muted">이 브라우저 안에서만 읽어요. 성적표 원문은 저장하거나 어디로도 보내지 않고, 확인한 숫자와 과목만 저장해요.</p>
+      <p className="mt-3 text-[13px] text-muted">캡처는 동의한 뒤에만 Claude로 보내 읽고, 저장하지 않아요. 읽은 결과는 확인 창에서 확인한 뒤에만 반영돼요.</p>
 
-      {mode === "paste" && <PastePanel onRows={analyze} />}
+      {mode === "image" && <ImagePanel onRows={analyze} />}
 
       {review && (
         <ReviewDialog
@@ -109,58 +109,142 @@ function BigOption({ icon, title, desc, selected, onClick }: { icon: ReactNode; 
 
 // ── 붙여넣기 ─────────────────────────────────────────────
 
-function PastePanel({ onRows }: { onRows: (rows: SourceRow[], s: TranscriptImportSource) => void }) {
-  const [text, setText] = useState("");
-  const [pastes, setPastes] = useState(0);
-  const [note, setNote] = useState<string | null>(null);
-  // 붙여넣을 때마다 아래에 이어 붙인다(학기마다 따로 복사해 여러 번 붙여넣기). 확인 창은 버튼을 눌러야 열린다.
-  const append = (chunk: string, label: string) => {
-    if (!chunk.trim()) return;
-    setText((t) => (t.trim() ? `${t.replace(/\s+$/, "")}\n${chunk}` : chunk));
-    setPastes((n) => n + 1);
-    setNote(label);
+function ImagePanel({ onRows }: { onRows: (rows: SourceRow[], s: TranscriptImportSource) => void }) {
+  const [files, setFiles] = useState<Array<{ id: number; file: File; url: string }>>([]);
+  const [consent, setConsent] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+  const nextId = useRef(1);
+  const zone = useRef<HTMLDivElement>(null);
+  const filesRef = useRef(files);
+  filesRef.current = files;
+  // 미리보기 URL은 화면을 떠날 때 해제한다
+  useEffect(() => () => filesRef.current.forEach((f) => URL.revokeObjectURL(f.url)), []);
+  useEffect(() => zone.current?.focus(), []);
+
+  const add = (list: File[]) => {
+    setProblem(null);
+    const ok: typeof files = [];
+    for (const f of list) {
+      const p = imageProblem(f);
+      if (p) {
+        setProblem(p);
+        continue;
+      }
+      ok.push({ id: nextId.current++, file: f, url: URL.createObjectURL(f) });
+    }
+    setFiles((cur) => [...cur, ...ok].slice(0, MAX_IMAGES));
   };
+  const remove = (id: number) =>
+    setFiles((cur) => {
+      const f = cur.find((x) => x.id === id);
+      if (f) URL.revokeObjectURL(f.url);
+      return cur.filter((x) => x.id !== id);
+    });
+
+  const read = async () => {
+    setProblem(null);
+    const replies: TranscriptImageReply[] = [];
+    for (let i = 0; i < files.length; i++) {
+      setBusy(`${i + 1} / ${files.length}장 읽는 중…`);
+      const img = await toJpegBase64(files[i].file).catch(() => null);
+      if (!img) {
+        setProblem(`${i + 1}번째 이미지를 열지 못했어요.`);
+        continue;
+      }
+      const r = await readTranscriptImage({ mediaType: img.mediaType, data: img.data });
+      if (!r.ok) {
+        setBusy(null);
+        setProblem(
+          r.reason === "no_key"
+            ? "스크린샷 읽기가 아직 켜져 있지 않아요(서버 설정 필요). ‘직접 수정하기’로 입력해 주세요."
+            : r.reason === "rate_limited"
+              ? "잠시 요청이 많아요. 1분 뒤 다시 시도해 주세요."
+              : `${i + 1}번째 이미지를 읽지 못했어요. 다시 시도하거나 ‘직접 수정하기’로 입력해 주세요.`,
+        );
+        return;
+      }
+      if (r.reply.unreadable) setProblem(`${i + 1}번째 이미지는 성적 화면으로 읽히지 않았어요. 더 선명하게 캡처해 주세요.`);
+      replies.push(r.reply);
+    }
+    setBusy(null);
+    const rows = rowsFromVision(replies);
+    if (rows.length === 0) {
+      setProblem("읽은 과목이 없어요. 성적 조회 표가 잘 보이게 다시 캡처해 주세요.");
+      return;
+    }
+    onRows(rows, "image_ai");
+  };
+
   return (
-    <div className="mt-6 max-w-[860px]">
-      <textarea
-        autoFocus
-        value={text}
-        rows={9}
-        aria-label="성적표 붙여넣기"
-        placeholder={"포털 성적 조회 화면에서 한 학기씩 Ctrl+A → Ctrl+C 한 뒤, 여기에 Ctrl+V 하세요.\n여러 학기는 붙여넣기를 반복하면 아래로 이어 붙어요. 다 붙였으면 ‘읽어서 확인하기’를 누르세요."}
-        onChange={(e) => setText(e.target.value)}
+    <div className="mt-6 max-w-[980px]">
+      <div
+        ref={zone}
+        tabIndex={0}
+        aria-label="스크린샷 붙여넣기 영역"
         onPaste={(e) => {
-          const c = readClipboard(e.clipboardData);
-          e.preventDefault();
-          if (c.kind === "image") {
-            setNote("이미지는 읽지 않아요. 포털 화면에서 Ctrl+A → Ctrl+C로 글자를 복사해 붙여넣어 주세요.");
-            return;
-          }
-          // 이름·학번 같은 개인정보 행은 입력칸에 펼치지 않는다. 표는 셀을 탭으로 이어 행 구조를 유지한다
-          const rows = c.rows.filter((r) => !isPersonalRow(r));
-          append(rows.map((r) => r.cells.join("\t")).join("\n"), `${pastes + 1}번째 붙여넣기 — ${rows.length}줄을 더했어요. 더 붙이거나 ‘읽어서 확인하기’를 누르세요.`);
+          const imgs = imagesFromClipboard(e.clipboardData);
+          if (imgs.length > 0) {
+            e.preventDefault();
+            add(imgs);
+          } else setProblem("이미지가 아니에요. 캡처(스크린샷)를 복사해 붙여넣어 주세요.");
         }}
-        className="w-full resize-y font-mono !text-[13px]"
-      />
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <Button kind="ink" disabled={!text.trim()} onClick={() => onRows(rowsFromText(text), "clipboard_text")}>
-          읽어서 확인하기{pastes > 1 ? ` (${pastes}번 붙여넣음)` : ""}
-        </Button>
-        {text.trim() && (
-          <Button
-            kind="ghost"
-            onClick={() => {
-              setText("");
-              setPastes(0);
-              setNote(null);
-            }}
-          >
-            모두 지우기
-          </Button>
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          add([...e.dataTransfer.files]);
+        }}
+        className="rounded-[10px] border-2 border-dashed border-pen/50 bg-pen/[0.03] p-5 outline-none focus-visible:border-pen"
+      >
+        {files.length === 0 ? (
+          <div className="grid min-h-[160px] place-items-center text-center text-[14px] text-ink-soft">
+            <div>
+              <ImageUp size={28} className="mx-auto mb-2 text-pen" aria-hidden />
+              포털 성적 조회 화면을 학기별로 캡처해서 여기를 누르고 <b>Ctrl+V</b>로 붙여넣거나, 이미지 파일을 끌어다 놓으세요.
+              <br />
+              여러 장(최대 {MAX_IMAGES}장)을 한꺼번에 읽어요.
+            </div>
+          </div>
+        ) : (
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
+            {files.map((f, i) => (
+              <li key={f.id} className="relative min-w-0 rounded-[8px] border border-line bg-paper p-1.5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={f.url} alt={`성적표 캡처 ${i + 1}`} className="h-[110px] w-full rounded object-cover object-top" />
+                <span className="mt-1 block truncate text-[11px] text-muted">
+                  {i + 1}. {f.file.name || "붙여넣은 이미지"}
+                </span>
+                <button type="button" onClick={() => remove(f.id)} aria-label={`${i + 1}번째 이미지 빼기`} className="absolute top-1 right-1 cursor-pointer rounded-full bg-ink/70 p-1 text-paper hover:bg-ink">
+                  <X size={13} aria-hidden />
+                </button>
+              </li>
+            ))}
+            {files.length < MAX_IMAGES && <li className="grid min-h-[130px] place-items-center rounded-[8px] border border-dashed border-line text-center text-[12px] text-muted">Ctrl+V로 더 붙이기</li>}
+          </ul>
         )}
-        {note && (
-          <span role="status" className="text-[13px] text-ink-soft">
-            {note}
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-[14px]">
+        <label className="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-[6px] border-[1.5px] border-ink/70 px-4 py-2 font-medium focus-within:ring-2 focus-within:ring-pen hover:bg-paper-2">
+          <ImageUp size={16} aria-hidden /> 이미지 파일 고르기
+          <input type="file" multiple accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(e) => add([...(e.target.files ?? [])])} />
+        </label>
+        <span className="text-[12px] text-muted">이름·학번 부분은 잘라내거나 가려도 돼요.</span>
+      </div>
+
+      <label className="mt-5 flex max-w-[760px] cursor-pointer items-start gap-2 rounded-[8px] border border-line bg-paper-2/50 p-3 text-[13px]">
+        <input type="checkbox" className="mt-0.5" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+        <span>
+          캡처 이미지를 <b>Anthropic(Claude)</b>에 보내 글자를 읽는 데 동의해요. 이 서비스는 이미지와 읽은 원문을 저장하지 않고, 확인 창에서 내가 확인한 과목·학점만 이 브라우저에 저장해요.
+        </span>
+      </label>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Button kind="ink" disabled={files.length === 0 || !consent || busy !== null} onClick={read}>
+          {busy ?? `읽어서 확인하기${files.length > 0 ? ` (${files.length}장)` : ""}`}
+        </Button>
+        {problem && (
+          <span role="alert" className="text-[13px] text-red">
+            {problem}
           </span>
         )}
       </div>

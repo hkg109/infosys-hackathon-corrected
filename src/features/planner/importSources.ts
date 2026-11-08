@@ -1,38 +1,39 @@
 "use client";
 
-import { rowsFromTable, rowsFromText, type SourceRow } from "./transcriptImport";
-
 /**
- * 붙여넣기 원문 읽기(브라우저 전용). text/html의 표 → text/plain의 탭·행 → 일반 텍스트 순서.
- * 원문은 저장하지 않는다. 호출한 쪽이 검토 후 확인한 값만 저장한다. 이미지(스크린샷)는 읽지 않는다.
+ * 성적표 스크린샷 준비(브라우저 전용). 보내기 전에 크기를 줄여 JPEG base64로 만든다.
+ * 이미지 원본·결과 원문은 저장하지 않는다(검토 후 확인한 숫자·과목만 저장).
  */
 
-export interface ClipboardContent {
-  kind: "html" | "text" | "image" | "empty";
-  rows: SourceRow[];
+export const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
+export const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
+export const MAX_IMAGES = 8;
+/** 긴 변 최대 픽셀(글자는 읽히고 전송 크기는 작게) */
+const MAX_SIDE = 2000;
+
+export function imageProblem(file: File): string | null {
+  if (!IMAGE_TYPES.includes(file.type)) return "PNG·JPEG·WebP 이미지만 읽을 수 있어요.";
+  if (file.size > MAX_IMAGE_BYTES) return "이미지가 너무 커요(15MB 이하). 성적표 부분만 잘라 주세요.";
+  return null;
 }
 
-export function readClipboard(data: DataTransfer): ClipboardContent {
-  const html = data.getData("text/html");
-  if (html && /<table[\s>]/i.test(html)) {
-    const rows = rowsFromHtml(html);
-    // 표가 여러 개면 가장 많은 행을 가진 표 구조가 살아 있다. 행이 너무 적으면 텍스트 쪽이 나을 수 있다
-    if (rows.length >= 2) return { kind: "html", rows };
-  }
-  const text = data.getData("text/plain");
-  if (text.trim()) return { kind: "text", rows: rowsFromText(text) };
-  if ([...data.items].some((i) => i.kind === "file" && i.type.startsWith("image/"))) return { kind: "image", rows: [] };
-  return { kind: "empty", rows: [] };
+/** 붙여넣기 이벤트에서 이미지 파일만 꺼낸다 */
+export function imagesFromClipboard(data: DataTransfer): File[] {
+  return [...data.items].filter((i) => i.kind === "file" && IMAGE_TYPES.includes(i.type)).flatMap((i) => (i.getAsFile() ? [i.getAsFile()!] : []));
 }
 
-/** HTML 안의 표를 원래 행·셀 순서대로 꺼낸다(스크립트는 실행하지 않는다). 레이아웃용 바깥 표는 건너뛴다 */
-export function rowsFromHtml(html: string): SourceRow[] {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  const table: string[][] = [];
-  for (const t of doc.querySelectorAll("table")) {
-    if (t.querySelector("table")) continue;
-    for (const tr of t.querySelectorAll("tr")) table.push([...tr.querySelectorAll("th,td")].map((c) => (c as HTMLElement).innerText ?? c.textContent ?? ""));
-    table.push([]);
-  }
-  return rowsFromTable(table);
+export async function toJpegBase64(file: File): Promise<{ mediaType: "image/jpeg"; data: string; width: number; height: number }> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const size = { width: bitmap.width, height: bitmap.height };
+  bitmap.close();
+  const url = canvas.toDataURL("image/jpeg", 0.88);
+  return { mediaType: "image/jpeg", data: url.slice(url.indexOf(",") + 1), ...size };
 }
