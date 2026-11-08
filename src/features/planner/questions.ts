@@ -40,7 +40,10 @@ export function stepProblem(step: StepId, d: Draft): string | null {
     case "transcript":
       if (d.progressMode === "manual") return null;
       if (d.earnedCredits === null || d.earnedMajorCredits === null)
-        return "성적표를 가져와 총·전공 학점을 확인하거나 ‘직접 수정하기’를 골라 주세요.";
+        return d.progressMode === "import" && d.completedCourseCodes.length > 0
+          ? "과목은 가져왔어요. 총·전공 이수학점만 적어 주세요."
+          : "성적표를 가져와 총·전공 학점을 확인하거나 ‘직접 수정하기’를 골라 주세요.";
+      if (d.earnedCredits < 0 || d.earnedMajorCredits < 0) return "학점은 0 이상이어야 해요.";
       return d.earnedMajorCredits > d.earnedCredits ? "전공학점은 총 이수학점 안에 포함돼요. 총학점보다 클 수 없어요." : null;
     case "start":
       return d.startTerm === null ? "시작 학기를 골라 주세요." : null;
