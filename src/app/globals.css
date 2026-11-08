@@ -223,26 +223,435 @@ input[type="checkbox"]:focus-visible {
 }
 
 /* 인쇄·PDF: 책상·제본·탭·버튼은 숨기고 속지만 남긴다. */
+/*
+ * 인쇄·PDF(docs/prompts/ah-matda-print-pdf-fix-prompt.md)
+ * 화면 요소는 인쇄에서 숨기고 `.print-doc`(PrintPlan)만 종이용으로 보인다.
+ * 원인 정리: Safari는 mix-blend-mode(도장)·반복 그라디언트(빗금)·전체 print-color-adjust:exact 조합을
+ * 투명 그룹/패턴으로 그리며 검게 찍을 수 있다 → 인쇄 문서에서는 단색·불투명만 쓰고, exact는 필요한 곳에만.
+ */
 @page {
-  size: A4;
-  margin: 12mm;
+  size: A4 portrait;
+  margin: 14mm 12mm 16mm;
+}
+
+.print-doc {
+  display: none;
 }
 
 @media print {
   html,
   body {
-    background: #ffffff;
-    font-size: 11px;
+    background: #ffffff !important;
+    min-height: 0 !important;
   }
   .paper {
-    background: #ffffff;
+    background: #ffffff !important;
   }
-  * {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
+  /* 인쇄 트리에서 화면용 높이·고정·잘림을 해제 */
+  .min-h-dvh,
+  [class*="min-h-[calc"] {
+    min-height: 0 !important;
+  }
+  .sticky,
+  .fixed {
+    position: static !important;
+  }
+  .stamp {
+    mix-blend-mode: normal;
   }
   nextjs-portal {
-    display: none;
+    display: none !important;
+  }
+
+  .print-doc {
+    display: block;
+    color: #1a1f2b;
+    font-family: var(--font-sans);
+    font-size: 9pt;
+    line-height: 1.4;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+  .print-doc * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    mix-blend-mode: normal !important;
+    transform: none !important;
+    background-image: none !important;
+    opacity: 1 !important;
+  }
+  /* 색 칸만 배경을 살린다(전체 exact 금지) */
+  .print-doc .pd-pill,
+  .print-doc .pd-no,
+  .print-doc th,
+  .print-doc .pd-off td,
+  .print-doc .pd-final td,
+  .print-doc .pd-final-row td,
+  .print-doc .pd-big,
+  .print-doc .pd-box-sec,
+  .print-doc .pd-ok,
+  .print-doc .pd-bad,
+  .print-doc .pd-unknown,
+  .print-doc .pd-flag,
+  .print-doc .pd-muted td {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-doc b,
+  .print-doc .pd-b {
+    font-weight: 700;
+  }
+
+  /* 머리 */
+  .print-doc .pd-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12pt;
+    padding-bottom: 8pt;
+    margin-bottom: 10pt;
+    border-bottom: 2pt solid #2d4a85;
+    break-inside: avoid;
+  }
+  .print-doc .pd-title {
+    flex: 1;
+    min-width: 0;
+  }
+  .print-doc h1 {
+    font-size: 19pt;
+    font-weight: 800;
+    color: #1d3566;
+    line-height: 1.2;
+    margin: 0 0 5pt;
+  }
+  .print-doc .pd-pill {
+    display: inline-block;
+    background: #e3ecfa;
+    color: #1d3566;
+    border: 0.75pt solid #9db6e0;
+    border-radius: 10pt;
+    padding: 1.5pt 8pt;
+    font-size: 8.5pt;
+    font-weight: 600;
+    margin: 0 0 5pt;
+  }
+  .print-doc .pd-track {
+    font-size: 10.5pt;
+    font-weight: 700;
+    margin: 0 0 2pt;
+  }
+  .print-doc .pd-meta {
+    font-size: 7.5pt;
+    color: #5a6273;
+    margin: 0;
+  }
+  .print-doc .pd-yearbox {
+    width: auto;
+    min-width: 46mm;
+    font-size: 8.5pt;
+    border: 1pt solid #2d4a85;
+  }
+  .print-doc .pd-yearbox thead th {
+    background: #2d4a85;
+    color: #ffffff;
+    text-align: center;
+    padding: 2.5pt 6pt;
+    font-size: 8.5pt;
+  }
+  .print-doc .pd-yearbox tbody th {
+    background: #e3ecfa;
+    color: #1d3566;
+    text-align: left;
+    font-weight: 600;
+    padding: 1.5pt 6pt;
+    border-top: 0.5pt solid #c6d4ec;
+    white-space: nowrap;
+  }
+  .print-doc .pd-yearbox td {
+    padding: 1.5pt 6pt;
+    border-top: 0.5pt solid #c6d4ec;
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* 구역 제목 */
+  .print-doc .pd-sec {
+    margin-bottom: 10pt;
+  }
+  .print-doc h2 {
+    display: flex;
+    align-items: center;
+    gap: 5pt;
+    font-size: 11.5pt;
+    font-weight: 800;
+    color: #1d3566;
+    margin: 0 0 5pt;
+    break-after: avoid;
+  }
+  .print-doc .pd-no {
+    display: inline-block;
+    width: 13pt;
+    height: 13pt;
+    line-height: 13pt;
+    border-radius: 7pt;
+    background: #2d4a85;
+    color: #ffffff;
+    text-align: center;
+    font-size: 8pt;
+    font-weight: 700;
+    flex: none;
+  }
+  .print-doc .pd-no-s {
+    width: 11pt;
+    height: 11pt;
+    line-height: 11pt;
+    font-size: 7pt;
+    margin-right: 3pt;
+  }
+
+  /* 표 공통 */
+  .print-doc table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .print-doc thead {
+    display: table-header-group;
+  }
+  .print-doc tfoot {
+    display: table-row-group;
+  }
+  .print-doc tr {
+    break-inside: avoid;
+  }
+  .print-doc .pd-grid {
+    border: 1pt solid #8fa6cf;
+    font-size: 8.5pt;
+  }
+  .print-doc .pd-grid th,
+  .print-doc .pd-grid td {
+    border: 0.6pt solid #b9c7e2;
+    padding: 2.5pt 4pt;
+    vertical-align: middle;
+    text-align: left;
+  }
+  .print-doc .pd-grid thead th {
+    background: #2d4a85;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+    font-size: 8.5pt;
+  }
+  .print-doc .pd-grid tfoot th {
+    background: #e3ecfa;
+    color: #1d3566;
+    font-weight: 800;
+  }
+  .print-doc .pd-num {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .print-doc .pd-c {
+    text-align: center !important;
+  }
+
+  /* ① 학기별 수강 계획: 학기 묶음(tbody)은 쪼개지 않는다 */
+  .print-doc .pd-term {
+    break-inside: avoid;
+  }
+  .print-doc .pd-plan tbody.pd-term {
+    border-top: 1.2pt solid #8fa6cf;
+  }
+  .print-doc .pd-sem {
+    font-weight: 700;
+    color: #1d3566;
+    text-align: center !important;
+    white-space: nowrap;
+  }
+  .print-doc .pd-kind {
+    text-align: center !important;
+    font-weight: 600;
+    color: #2d4a85;
+    white-space: nowrap;
+  }
+  .print-doc .pd-total {
+    font-size: 10pt;
+    font-weight: 800;
+    text-align: center !important;
+    color: #1d3566;
+  }
+  .print-doc .pd-off td {
+    background: #f0f1f4;
+    color: #5a6273;
+  }
+  .print-doc .pd-offlabel {
+    font-weight: 600;
+  }
+  .print-doc .pd-final td {
+    background: #eef7ee;
+  }
+  .print-doc .pd-final-row td {
+    background: #eef7ee;
+    font-weight: 700;
+  }
+  .print-doc .pd-flag {
+    display: block;
+    margin-top: 1.5pt;
+    font-size: 7pt;
+    font-weight: 700;
+    color: #ffffff;
+    background: #2e7d32;
+    border-radius: 6pt;
+    padding: 0.5pt 3pt;
+  }
+  .print-doc .pd-muted td {
+    background: #f6f7f9;
+    color: #5a6273;
+  }
+  .print-doc .pd-foot-note {
+    font-size: 7.5pt;
+    color: #5a6273;
+    margin: 3pt 0 0;
+  }
+
+  /* ②·③ 나란히(인쇄 엔진 호환: inline-block) */
+  .print-doc .pd-two {
+    display: block;
+    font-size: 0;
+    break-inside: avoid;
+  }
+  .print-doc .pd-half {
+    display: inline-block;
+    vertical-align: top;
+    width: 52%;
+    font-size: 9pt;
+  }
+  .print-doc .pd-half + .pd-half {
+    width: 45%;
+    margin-left: 3%;
+  }
+  .print-doc .pd-sum {
+    font-size: 8pt;
+  }
+  .print-doc .pd-sum thead th {
+    font-size: 7.5pt;
+    padding: 2pt 2pt;
+  }
+  .print-doc .pd-big {
+    display: flex;
+    align-items: center;
+    gap: 8pt;
+    border: 1pt solid #8fa6cf;
+    border-radius: 4pt;
+    padding: 5pt 8pt;
+    margin-bottom: 5pt;
+    background: #f4f8fe;
+  }
+  .print-doc .pd-big-ok {
+    border-color: #2e7d32;
+    background: #eef7ee;
+  }
+  .print-doc .pd-big-bad {
+    border-color: #c62828;
+    background: #fdeeee;
+  }
+  .print-doc .pd-mark {
+    display: inline-block;
+    width: 20pt;
+    height: 20pt;
+    line-height: 20pt;
+    border-radius: 10pt;
+    text-align: center;
+    font-size: 12pt;
+    font-weight: 800;
+    color: #ffffff;
+    background: #5a6273;
+    flex: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-doc .pd-big-ok .pd-mark {
+    background: #2e7d32;
+  }
+  .print-doc .pd-big-bad .pd-mark {
+    background: #c62828;
+  }
+  .print-doc .pd-bignum {
+    font-size: 16pt;
+    font-weight: 800;
+    color: #1d3566;
+  }
+  .print-doc .pd-bigsub {
+    display: block;
+    font-size: 8pt;
+    color: #5a6273;
+  }
+  .print-doc .pd-ok {
+    color: #1b5e20;
+    background: #e3f2e4;
+    font-weight: 700;
+  }
+  .print-doc .pd-bad {
+    color: #b71c1c;
+    background: #fbe4e4;
+    font-weight: 700;
+  }
+  .print-doc .pd-unknown {
+    color: #5a6273;
+    background: #f0f1f4;
+    font-weight: 600;
+  }
+
+  /* ④ 최종 검토 · 3줄 요약 */
+  .print-doc .pd-box-sec {
+    border: 1pt solid #8fa6cf;
+    background: #f4f8fe;
+    border-radius: 4pt;
+    padding: 6pt 9pt;
+    break-inside: avoid;
+  }
+  .print-doc .pd-bullets {
+    margin: 0;
+    padding-left: 12pt;
+    list-style: disc;
+  }
+  .print-doc .pd-bullets li,
+  .print-doc .pd-three li {
+    padding: 1pt 0;
+    font-size: 8.5pt;
+    break-inside: avoid;
+  }
+  .print-doc .pd-three ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .print-doc .pd-checks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .print-doc .pd-checks li {
+    padding: 2pt 0;
+    border-bottom: 0.5pt solid #e0e4ec;
+    font-size: 8.5pt;
+    break-inside: avoid;
+  }
+  .print-doc .pd-boxmark {
+    font-size: 10pt;
+  }
+  .print-doc p,
+  .print-doc li {
+    orphans: 2;
+    widows: 2;
+  }
+  .print-doc .pd-foot {
+    margin-top: 8pt;
+    padding-top: 4pt;
+    border-top: 0.75pt solid #cfd6e4;
+    font-size: 7.5pt;
+    color: #5a6273;
   }
 }
 

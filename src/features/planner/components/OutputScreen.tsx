@@ -11,6 +11,7 @@ import { buildGuidance } from "@/features/guidance/buildGuidance";
 import { usePlanner } from "../PlannerApp";
 import { militarySummary } from "../plan";
 import type { PlanState } from "../storage";
+import { PrintPlan } from "./PrintPlan";
 import { Roadmap } from "./Roadmap";
 import { FeedbackChat } from "./FeedbackChat";
 import { Button, Empty, Hand, PageTitle } from "./ui";
@@ -98,14 +99,20 @@ function Output({ plan, dataset, initialChat }: { plan: PlanState; dataset: Data
 
   return (
     <div>
-      {/* 인쇄용 머리글 */}
-      <div className="mb-4 hidden border-b-2 border-ink pb-2 print:block">
-        <p className="font-serif text-[18px] font-bold">아 맞다, 인생! — {name ? `${name}님의 ` : ""}학기 로드맵</p>
-        <p className="text-[11px]">
-          {dataset.department} {dataset.curriculum} 교육과정 · {confirmed ? `${plan.confirmedAt} 확정` : "확정 전 초안"} · 계획·추정 결과이며 졸업 판정이 아닙니다.
-        </p>
-      </div>
-
+      {/* 인쇄·PDF는 종이용 문서로 따로 그린다. 화면 요소는 인쇄에서 모두 숨긴다 */}
+      <PrintPlan
+        plan={plan}
+        result={result}
+        dataset={dataset}
+        guidance={guidance.items}
+        checked={checked}
+        name={name}
+        today={today}
+        exchangePending={exchangePending}
+        exchangeChoice={draft?.exchangeChoice}
+        warnings={warnings}
+      />
+      <div className="print:hidden">
       <div className="relative print:hidden">
         <PageTitle
           step={confirmed ? "03 · 다 — 최종 트랙" : "03 · 다 — 기본 트랙"}
@@ -291,6 +298,7 @@ function Output({ plan, dataset, initialChat }: { plan: PlanState; dataset: Data
           </>
         )}
       </ActionBar>
+      </div>
     </div>
   );
 }

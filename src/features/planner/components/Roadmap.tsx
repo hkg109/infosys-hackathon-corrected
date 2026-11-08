@@ -86,7 +86,7 @@ export function Roadmap({
   );
 }
 
-function breakName(t: PlannedTerm, breaks: BreakPeriod[], exchange: { startDate: string; endDate: string } | null): string {
+export function breakName(t: PlannedTerm, breaks: BreakPeriod[], exchange: { startDate: string; endDate: string } | null): string {
   if (exchange && isBlocked(t.term, [{ kind: "leave", ...exchange }])) return "교환학생";
   const hit = breaks.filter((b) => isBlocked(t.term, [b]));
   return hit.some((b) => b.kind === "military") ? "군 복무" : "휴학";
